@@ -1,5 +1,17 @@
 # COMP47360_Team9
 
+## Git Branching Model
+
+We use a simple Git branching strategy based on `main`, `develop`, and `feature/*`.
+
+- `main`: Stable and deployable version.
+- `develop`: Integration branch for all features.
+- `feature/*`: One branch per feature (created from `develop`, merged back into `develop`).
+- `hotfix/*`: For urgent fixes (from `main`, merged into `main` and `develop`).
+
+> See `docs/git_workflow.md` for full explanation and diagram.
+
+
 
 
 ## Getting started
