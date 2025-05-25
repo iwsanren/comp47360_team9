@@ -1,0 +1,47 @@
+## Git Branching Strategy
+
+To ensure smooth collaboration, clean integration, and stable releases, we adopt the following Git branching strategy:
+
+**1. `main` branch**
+- This branch always contains the **stable, deployable version** of the project.  
+- It is used for **weekly MVP demonstrations**, presentations, and final deployment.  
+- Only merge into `main` via **merge requests (MRs)** that have been **reviewed and approved**.
+
+**2. `develop` branch**
+- This is the **integration branch** for all features under active development.  
+- It may contain small bugs but must remain generally **runnable**.  
+- All feature branches should be merged into `develop` via **merge requests**.
+
+**3. `feature/*` branches**
+- Each feature or module (e.g., `feature/heatmap`, `feature/route-planner`) should be developed in a separate branch.  
+- These are created from `develop`, and merged back into `develop` once completed and reviewed.
+
+**4. `hotfix/*` branches**
+- For urgent fixes (e.g., a crash in production), create a `hotfix/bug-name` branch from `main`.  
+- After resolving the issue, merge the fix into both `main` and `develop`.
+
+## Git Branching Strategy graph:
+
+```mermaid
+gitGraph
+   commit id: "initial commit"
+   branch dev
+   commit id: "setup backend flask"
+   branch feature/heatmap
+   commit id: "heatmap predictor"
+   checkout dev
+   merge feature/heatmap
+   branch feature/green-score
+   commit id: "green zone score"
+   checkout dev
+   merge feature/green-score
+   checkout main
+   merge dev
+```
+## Summary of Workflow
+- Clone the repo and always pull the latest `develop` branch.    
+- Create a new branch from `develop` before starting a task.    
+- Commit regularly with meaningful messages.    
+- Open a **merge request (MR)** to merge back into `develop` (or into `main`, if it’s a hotfix).    
+- All MRs must be **reviewed by at least one team member** before merging.
+
