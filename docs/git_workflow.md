@@ -20,6 +20,12 @@ To ensure smooth collaboration, clean integration, and stable releases, we adopt
 - For urgent fixes (e.g., a crash in production), create a `hotfix/bug-name` branch from `main`.  
 - After resolving the issue, merge the fix into both `main` and `develop`.
 
+### summary
+- `main`: Stable and deployable version. No direct push allowed.
+- `develop`: Integration branch. Feature branches should merge here.
+- `feature/*`: For each new feature, create a separate branch from `develop`.
+- `hotfix/*`: For urgent fixes, create a `hotfix/bug-name` branch from `main`. 
+
 ## Workflow
 0. Clone the Repo
 Once added to the project:
@@ -34,19 +40,41 @@ git clone https://csgitlab.ucd.ie/ZhaofangHe/comp47360_team9.git
    ```
 
 2. Create a new feature branch:
+   Before starting any task, create your own feature branch from develop:
    ```
    git checkout -b feature/your-feature-name
    ```
 
 3. Make your changes and commit:
+   After coding:
    ```
    git add .
    git commit -m "feat: your message"
    ```
 
-4. Push and open a merge request:
+4. Push your branch:
    ```
    git push origin feature/your-feature-name
+   ```
+
+5. Open a Merge Request (MR)
+- Go to GitLab: comp47360_team9 → Merge Requests
+- Click "New Merge Request"
+- Set:
+   - Source: your feature/xxx branch
+   - Target: develop
+- Add title & description
+- Submit and wait for code review 
+
+6. After MR is Merged(optional)
+You can delete your local branch:
+   ```
+   git branch -d feature/your-feature-name
+   ```
+And pull the updated develop branch again:
+   ```
+   git checkout develop
+   git pull origin develop
    ```
 
 ### Summary
@@ -62,23 +90,29 @@ git clone https://csgitlab.ucd.ie/ZhaofangHe/comp47360_team9.git
 ```mermaid
 gitGraph
    commit id: "initial commit"
-   branch dev
+   branch develop
    commit id: "setup backend flask"
+
    branch feature/heatmap
-   commit id: "heatmap predictor"
-   checkout dev
+   commit id: "feat: add heatmap predictor"
+   checkout develop
    merge feature/heatmap
+
    branch feature/green-score
-   commit id: "green zone score"
-   checkout dev
+   commit id: "feat: add green zone score"
+   checkout develop
    merge feature/green-score
+
    checkout main
-   merge dev
+   merge develop
+
+   branch hotfix/fix-deploy-crash
+   commit id: "fix: urgent production issue"
+   checkout main
+   merge hotfix/fix-deploy-crash
+   checkout develop
+   merge hotfix/fix-deploy-crash
+
 ```
-## Summary of Workflow
-- Clone the repo and always pull the latest `develop` branch.    
-- Create a new branch from `develop` before starting a task.    
-- Commit regularly with meaningful messages.    
-- Open a **merge request (MR)** to merge back into `develop` (or into `main`, if it’s a hotfix).    
-- All MRs must be **reviewed by at least one team member** before merging.
+
 
