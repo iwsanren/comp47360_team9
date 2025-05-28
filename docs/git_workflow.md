@@ -40,19 +40,41 @@ git clone https://csgitlab.ucd.ie/ZhaofangHe/comp47360_team9.git
    ```
 
 2. Create a new feature branch:
+   Before starting any task, create your own feature branch from develop:
    ```
    git checkout -b feature/your-feature-name
    ```
 
 3. Make your changes and commit:
+   After coding:
    ```
    git add .
    git commit -m "feat: your message"
    ```
 
-4. Push and open a merge request:
+4. Push your branch:
    ```
    git push origin feature/your-feature-name
+   ```
+
+5. Open a Merge Request (MR)
+- Go to GitLab: comp47360_team9 → Merge Requests
+- Click "New Merge Request"
+- Set:
+   - Source: your feature/xxx branch
+   - Target: develop
+- Add title & description
+- Submit and wait for code review 
+
+6. After MR is Merged(optional)
+You can delete your local branch:
+   ```
+   git branch -d feature/your-feature-name
+   ```
+And pull the updated develop branch again:
+   ```
+   git checkout develop
+   git pull origin develop
    ```
 
 ### Summary
@@ -68,18 +90,29 @@ git clone https://csgitlab.ucd.ie/ZhaofangHe/comp47360_team9.git
 ```mermaid
 gitGraph
    commit id: "initial commit"
-   branch dev
+   branch develop
    commit id: "setup backend flask"
+
    branch feature/heatmap
-   commit id: "heatmap predictor"
-   checkout dev
+   commit id: "feat: add heatmap predictor"
+   checkout develop
    merge feature/heatmap
+
    branch feature/green-score
-   commit id: "green zone score"
-   checkout dev
+   commit id: "feat: add green zone score"
+   checkout develop
    merge feature/green-score
+
    checkout main
-   merge dev
+   merge develop
+
+   branch hotfix/fix-deploy-crash
+   commit id: "fix: urgent production issue"
+   checkout main
+   merge hotfix/fix-deploy-crash
+   checkout develop
+   merge hotfix/fix-deploy-crash
+
 ```
 
 
