@@ -20,6 +20,43 @@ To ensure smooth collaboration, clean integration, and stable releases, we adopt
 - For urgent fixes (e.g., a crash in production), create a `hotfix/bug-name` branch from `main`.  
 - After resolving the issue, merge the fix into both `main` and `develop`.
 
+## Workflow
+0. Clone the Repo
+Once added to the project:
+```
+git clone https://csgitlab.ucd.ie/ZhaofangHe/comp47360_team9.git
+```
+
+1. Pull the latest `develop`:
+   ```
+   git checkout develop
+   git pull origin develop
+   ```
+
+2. Create a new feature branch:
+   ```
+   git checkout -b feature/your-feature-name
+   ```
+
+3. Make your changes and commit:
+   ```
+   git add .
+   git commit -m "feat: your message"
+   ```
+
+4. Push and open a merge request:
+   ```
+   git push origin feature/your-feature-name
+   ```
+
+### Summary
+- Clone the repo and always pull the latest `develop` branch.    
+- Create a new branch from `develop` before starting a task.    
+- Commit regularly with meaningful messages.    
+- Open a **merge request (MR)** to merge back into `develop` (or into `main`, if it’s a hotfix).    
+- All MRs must be **reviewed by at least one team member** before merging.
+
+
 ## Git Branching Strategy graph:
 
 ```mermaid
