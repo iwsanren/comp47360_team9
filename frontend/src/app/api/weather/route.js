@@ -18,7 +18,6 @@ export async function POST(res) {
 
     return Response.json(weatherData, { status: 200 });
 
-    console.log(weatherData)
   } catch (error) {
     console.error('Weather API error:', error);
     return Response.json({ error: 'Failed to fetch weather data' }, { status: 500 });
