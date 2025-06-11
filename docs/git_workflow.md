@@ -115,20 +115,4 @@ gitGraph
 
 ```
 
-## Commit Message Guide
 
-Please follow the format:
-`<type>: <description>`
-
-Example: `feat: implement station busyness predictor`
-
-
-### Common commit types:
-
-| Type   | Description                                      |
-|--------|--------------------------------------------------|
-| `feat` | Add a new feature (e.g., `feat: add Leaflet map to homepage`) |
-| `fix`  | Fix a bug (e.g., `fix: resolve null error in route handler`) |
-| `docs` | Documentation only (e.g., `docs: update git workflow section`) |
-| `style`| Code style changes (no logic changes, e.g., spacing) |
-| `chore`| Project chores (e.g., `chore: add .env to .gitignore`) |
