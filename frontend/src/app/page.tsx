@@ -5,6 +5,7 @@ import manhattan from '@/assets/images/manhattan.jpg'
 import Link from 'next/link'
 
 export default function Home() {
+
   return (
     <main className="relative h-screen w-full font-roboto">
       {/* Background image */}
