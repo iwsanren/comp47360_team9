@@ -11,7 +11,7 @@ export async function POST() {
     );
 
     const hourlyData = await fetch(
-      `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=imperial`
+      `https://api.openweathermap.org/data/2.5/forecast/hourly?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=imperial`
     );
 
     if (hourlyData.status !== 200 || currentData.status !== 200) {
