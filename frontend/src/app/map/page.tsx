@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 
+import { WEATHER_CONDITION_ICONS } from '@/constants/icons'
+import Icon from '@/components/Icon'
+
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
 export default function Home() {
@@ -108,11 +111,8 @@ export default function Home() {
             <div className="flex items-center gap-2">
               {current ? (
                 <>
-                  <img
-                    src={`https://openweathermap.org/img/wn/${current.weather[0].icon}@2x.png`}
-                    alt="weather icon"
-                    className="w-10 h-10"
-                  />
+                  {/* Because I haven't seen the setting for colors, I didn't implement the right color here. Once if you set the colors, I'll add */}
+                  <Icon size="3.75rem" icon={WEATHER_CONDITION_ICONS[current.weather[0].icon]} />
                   <span className="text-3xl font-bold">
                     {current.main.temp.toFixed(1)}°F
                   </span>
@@ -155,11 +155,7 @@ export default function Home() {
 
           {current && (
             <div className="flex items-center gap-4 mb-4">
-              <img
-                src={`https://openweathermap.org/img/wn/${current.weather[0].icon}@2x.png`}
-                alt="weather"
-                className="w-14 h-14"
-              />
+              <Icon size="3.75rem" icon={WEATHER_CONDITION_ICONS[current.weather[0].icon]} />
               <h1 className="text-4xl font-bold">
                 {current.main.temp.toFixed(1)}°F
               </h1>
@@ -180,11 +176,7 @@ export default function Home() {
                 key={idx}
                 className="bg-white rounded-lg p-2 shadow-md text-center"
               >
-                <img
-                  src={`https://openweathermap.org/img/wn/${hour.weather[0].icon}.png`}
-                  alt="icon"
-                  className="w-8 h-8 mx-auto"
-                />
+                <Icon className="mx-auto" size="2.5rem" icon={WEATHER_CONDITION_ICONS[hour.weather[0].icon]} />
                 <p className="font-semibold">
                   {hour.main.temp.toFixed(1)}°F
                 </p>

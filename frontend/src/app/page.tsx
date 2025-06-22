@@ -25,7 +25,7 @@ export default function Home() {
       {/* Navbar */}
       <nav className="absolute top-0 left-0 w-full bg-[#00b386] flex justify-between items-center px-6 py-3 z-10" style={{ zIndex: 99 }}>
         <div className="text-white font-bold text-lg">🌐 LUNA</div>
-        <Link href="/mapPage" className="text-white font-semibold relative z-30">
+        <Link href="/map" className="text-white font-semibold relative z-30">
           Map
         </Link>
       </nav>
@@ -39,7 +39,7 @@ export default function Home() {
           Smarter routes. Greener choices. Manhattan, your way.
         </h3>
         <Link
-          href="/mapPage"
+          href="/map"
           className="mt-4 bg-[#00b386] hover:bg-[#009c73] text-white font-semibold px-6 py-3 rounded shadow-md transition flex items-center gap-2"
         >
           Explore Manhattan →
