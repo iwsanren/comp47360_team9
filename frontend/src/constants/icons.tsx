@@ -6,7 +6,7 @@ import {
   FaCloudSunRain,
   FaCloudMoonRain,
   FaSnowflake,
-} from 'react-icons/fa';
+} from 'react-icons/fa6';
 import { IoCloudSharp, IoThunderstorm } from 'react-icons/io5';
 import { BsCloudsFill, BsCloudRainHeavyFill } from 'react-icons/bs';
 import { RiMistFill } from 'react-icons/ri';

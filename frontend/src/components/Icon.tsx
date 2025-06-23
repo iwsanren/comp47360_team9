@@ -9,6 +9,6 @@ interface IconProps {
 
 export default function Icon({ icon: IconComp, className = '', ...props }: IconProps) {
   return (
-    <IconComp className={className} {...props} />
+    <IconComp className={`${className} fill-green-700`} {...props} />
   );
 }

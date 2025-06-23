@@ -8,7 +8,7 @@ import Icon from '@/components/Icon'
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
-export default function Home() {
+export default function Map() {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const [weatherData, setWeatherData] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
