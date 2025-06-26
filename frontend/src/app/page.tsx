@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import manhattan from '@/assets/images/manhattan.jpg'
 import Link from 'next/link'
+import Heading from '@/components/Heading'
 
 export default function Home() {
 
@@ -32,6 +33,7 @@ export default function Home() {
 
       {/* Centered Content */}
       <div className="relative z-10 flex flex-col items-start justify-center h-full px-[100px] space-y-6">
+        <Heading>Manhattan My Way</Heading>
         <h1 className="text-white font-bold text-[60px] leading-[90px]">
           Manhattan My Way
         </h1>
