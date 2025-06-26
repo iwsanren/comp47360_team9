@@ -22,9 +22,11 @@ export default function Home() {
       </div>
 
       {/* Navbar */}
-      <nav className="absolute top-0 left-0 w-full bg-[#00674C] flex justify-between items-center px-6 py-3 z-10" style={{ zIndex: 99 }}>
+      <nav
+        className="absolute top-0 left-0 w-full bg-[#00674C] flex justify-between items-center px-6 py-3"
+        style={{ zIndex: 99 }}
+      >
         <div className="text-white font-bold text-lg flex items-center relative">
-          {/* Icon */}
           <Image
             src={g6Icon}
             alt="LUNA Icon"
@@ -41,17 +43,60 @@ export default function Home() {
       </nav>
 
       {/* Centered Content */}
-      <div className="relative z-10 flex flex-col items-start justify-center h-full px-[100px] space-y-6">
-        <Heading>Manhattan My Way</Heading> {/* a sample for import comp */}
-        <h1 className="text-white font-bold text-[60px] leading-[90px]">
+      <div className="relative z-10 h-full">
+        {/* Heading component */}
+        <Heading>Manhattan My Way</Heading>
+
+        {/* Manhattan My Way - h1 */}
+        <h1
+          className="text-white font-bold text-[60px] leading-[90px]"
+          style={{
+            position: 'absolute',
+            top: '214px',
+            left: '100px',
+            width: '517px',
+            height: '90px',
+            letterSpacing: '0%',
+          }}
+        >
           Manhattan My Way
         </h1>
-        <h3 className="text-white font-bold text-[30px] leading-[45px] max-w-[880px]">
-          Smarter routes. Greener choices. Manhattan, your way.
+
+        {/* Subheading */}
+        <h3
+          className="text-white font-bold text-[30px] leading-[45px]"
+          style={{
+            position: 'absolute',
+            top: '304px',
+            left: '100px',
+            width: '742px',
+            height: '45px',
+            letterSpacing: '0%',
+          }}
+        >
+          Greener choices. Smarter routes. Manhattan, your way.
         </h3>
+
+        {/* Description */}
+        <p
+          className="text-white font-bold italic text-[18px] leading-[27px]"
+          style={{
+            position: 'absolute',
+            top: '360px',
+            left: '100px',
+          }}
+        >
+          Discover your most efficient and sustainable route.
+        </p>
+
+        {/* CTA Button */}
         <Link
           href="/map"
-          className="mt-4 bg-[#0FD892] text-white font-semibold px-6 py-3 rounded shadow-md transition flex items-center gap-2"
+          className="absolute text-white font-semibold bg-[#0FD892] px-6 py-3 rounded shadow-md transition flex items-center gap-2"
+          style={{
+            top: '410px',
+            left: '100px',
+          }}
         >
           Explore Manhattan →
         </Link>
