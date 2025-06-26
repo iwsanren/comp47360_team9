@@ -92,7 +92,7 @@ export default function Map() {
                 />
                 <span className="pl-8">LUNA</span>
               </div>
-              <Link href="/mapPage" className="text-white font-semibold relative z-30">
+              <Link href="/map" className="text-white font-semibold relative z-30">
                 Map
               </Link>
             </nav>
