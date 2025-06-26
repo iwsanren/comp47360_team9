@@ -42,7 +42,7 @@ export default function Home() {
 
       {/* Centered Content */}
       <div className="relative z-10 flex flex-col items-start justify-center h-full px-[100px] space-y-6">
-        <Heading>Manhattan My Way</Heading>
+        <Heading>Manhattan My Way</Heading> {/* a sample for import comp */}
         <h1 className="text-white font-bold text-[60px] leading-[90px]">
           Manhattan My Way
         </h1>
