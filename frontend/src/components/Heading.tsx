@@ -9,7 +9,7 @@ type HeadingProps = {
 };
 
 const baseStyles = {
-  1: "font-bold", // fontSize can aa here and below. 
+  1: "font-bold", // fontSize css can add here and below. 
   2: "font-bold",
   3: "font-bold",
   4: "font-bold",
