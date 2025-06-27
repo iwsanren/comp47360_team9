@@ -20,17 +20,56 @@ export default function Map() {
   const [manhattanTime, setManhattanTime] = useState<string>("");
 
   useEffect(() => {
-    if (!mapRef.current) return;
+  if (!mapRef.current) return;
 
-    const map = new mapboxgl.Map({
-      container: mapRef.current,
-      style: "mapbox://styles/mapbox/streets-v11",
-      center: [-73.994167, 40.728333],
-      zoom: 12,
-    });
+  const map = new mapboxgl.Map({
+    container: mapRef.current,
+    style: "mapbox://styles/mapbox/streets-v11",
+    center: [-73.994167, 40.728333],
+    zoom: 12,
+  });
 
-    return () => map.remove();
-  }, []);
+  map.on("load", () => {
+  // Roads
+  map.setPaintProperty("road-motorway-trunk", "line-color", "#ccd5ae");
+  map.setPaintProperty("road-primary", "line-color", "#5a9367");
+  map.setPaintProperty("road-secondary-tertiary", "line-color", "#99c49a");
+  map.setPaintProperty("road-street", "line-color", "#99c49a");
+  map.setPaintProperty("road-minor", "line-color", "#99c49a");
+
+  // Buildings
+  map.setPaintProperty("building", "fill-color", "#b5e48c");
+  map.setPaintProperty("building", "fill-opacity", 1);
+  map.setPaintProperty("building-outline", "line-color", "#76c893");
+
+  // Place Labels with conditional color based on selection
+map.setPaintProperty("settlement-label", "text-color", [
+  "case",
+  ["boolean", ["feature-state", "selected"], false],
+  "#40916c", // Selected color
+  "#2b9348"  // Highlight color (default)
+]);
+
+map.setPaintProperty("state-label", "text-color", [
+  "case",
+  ["boolean", ["feature-state", "selected"], false],
+  "#40916c",
+  "#2b9348"
+]);
+
+map.setPaintProperty("country-label", "text-color", [
+  "case",
+  ["boolean", ["feature-state", "selected"], false],
+  "#40916c",
+  "#2b9348"
+]);
+
+});
+
+
+  return () => map.remove();
+}, []);
+
 
   useEffect(() => {
     const fetchWeather = async () => {
@@ -100,7 +139,7 @@ export default function Map() {
       {/* Side Panel */}
       <div
         className="absolute z-10 bg-white rounded-lg shadow-lg p-4"
-        style={{ width: 474, height: 550, top: 55, left: 16 }}
+        style={{ width: 474, height: 650, top: 62, left: 16, paddingTop:12, paddingBottom:12 }}
       >
         <h2 className="mb-4 font-bold text-[18px] leading-[27px] text-[#00674C]">Get Directions</h2>
 
@@ -164,7 +203,7 @@ export default function Map() {
         style={{
           width: 474,
           height: 118,
-          top: 570,
+          top: 620,
           left: 16,
         }}
       >
