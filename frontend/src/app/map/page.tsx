@@ -7,9 +7,9 @@ import Image from "next/image";
 import g6Icon from "@/assets/images/g6.png";
 import startEndIcon from "@/assets/images/start_end_icon.png";
 import switchStartEndIcon from "@/assets/images/switch_start_end_icon.png";
-
-import { WEATHER_CONDITION_ICONS } from '@/constants/icons'
-import Icon from '@/components/Icon'
+import { WEATHER_CONDITION_ICONS } from '@/constants/icons';
+import Icon from '@/components/Icon';
+import Header from "@/components/Header";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
@@ -20,56 +20,53 @@ export default function Map() {
   const [manhattanTime, setManhattanTime] = useState<string>("");
 
   useEffect(() => {
-  if (!mapRef.current) return;
+    if (!mapRef.current) return;
 
-  const map = new mapboxgl.Map({
-    container: mapRef.current,
-    style: "mapbox://styles/mapbox/streets-v11",
-    center: [-73.994167, 40.728333],
-    zoom: 12,
-  });
+    const map = new mapboxgl.Map({
+      container: mapRef.current,
+      style: "mapbox://styles/mapbox/streets-v11",
+      center: [-73.994167, 40.728333],
+      zoom: 12,
+    });
 
-  map.on("load", () => {
-  // Roads
-  map.setPaintProperty("road-motorway-trunk", "line-color", "#ccd5ae");
-  map.setPaintProperty("road-primary", "line-color", "#5a9367");
-  map.setPaintProperty("road-secondary-tertiary", "line-color", "#99c49a");
-  map.setPaintProperty("road-street", "line-color", "#99c49a");
-  map.setPaintProperty("road-minor", "line-color", "#99c49a");
+    map.on("load", () => {
+      // Roads
+      map.setPaintProperty("road-motorway-trunk", "line-color", "#ccd5ae");
+      map.setPaintProperty("road-primary", "line-color", "#5a9367");
+      map.setPaintProperty("road-secondary-tertiary", "line-color", "#99c49a");
+      map.setPaintProperty("road-street", "line-color", "#99c49a");
+      map.setPaintProperty("road-minor", "line-color", "#99c49a");
 
-  // Buildings
-  map.setPaintProperty("building", "fill-color", "#b5e48c");
-  map.setPaintProperty("building", "fill-opacity", 1);
-  map.setPaintProperty("building-outline", "line-color", "#76c893");
+      // Buildings
+      map.setPaintProperty("building", "fill-color", "#b5e48c");
+      map.setPaintProperty("building", "fill-opacity", 1);
+      map.setPaintProperty("building-outline", "line-color", "#76c893");
 
-  // Place Labels with conditional color based on selection
-map.setPaintProperty("settlement-label", "text-color", [
-  "case",
-  ["boolean", ["feature-state", "selected"], false],
-  "#40916c", // Selected color
-  "#2b9348"  // Highlight color (default)
-]);
+      // Place Labels with conditional color based on selection
+      map.setPaintProperty("settlement-label", "text-color", [
+        "case",
+        ["boolean", ["feature-state", "selected"], false],
+        "#40916c", // Selected color
+        "#2b9348"  // Highlight color (default)
+      ]);
 
-map.setPaintProperty("state-label", "text-color", [
-  "case",
-  ["boolean", ["feature-state", "selected"], false],
-  "#40916c",
-  "#2b9348"
-]);
+      map.setPaintProperty("state-label", "text-color", [
+        "case",
+        ["boolean", ["feature-state", "selected"], false],
+        "#40916c",
+        "#2b9348"
+      ]);
 
-map.setPaintProperty("country-label", "text-color", [
-  "case",
-  ["boolean", ["feature-state", "selected"], false],
-  "#40916c",
-  "#2b9348"
-]);
+      map.setPaintProperty("country-label", "text-color", [
+        "case",
+        ["boolean", ["feature-state", "selected"], false],
+        "#40916c",
+        "#2b9348"
+      ]);
+    });
 
-});
-
-
-  return () => map.remove();
-}, []);
-
+    return () => map.remove();
+  }, []);
 
   useEffect(() => {
     const fetchWeather = async () => {
@@ -118,23 +115,7 @@ map.setPaintProperty("country-label", "text-color", [
       <div ref={mapRef} className="absolute inset-0 z-0" />
 
       {/* Header */}
-      <nav className="absolute top-0 left-0 w-full bg-[#00674C] flex justify-between items-center px-6 py-3 z-10" style={{ zIndex: 99 }}>
-              <div className="text-white font-bold text-lg flex items-center relative">
-                {/* Icon */}
-                <Image
-                  src={g6Icon}
-                  alt="LUNA Icon"
-                  width={21}
-                  height={27}
-                  className="absolute"
-                  style={{ top: '1px', left: '1px' }}
-                />
-                <span className="pl-8">LUNA</span>
-              </div>
-              <Link href="/map" className="text-white font-semibold relative z-30">
-                Map
-              </Link>
-            </nav>
+      <Header />
 
       {/* Side Panel */}
       <div
@@ -197,6 +178,7 @@ map.setPaintProperty("country-label", "text-color", [
           Get Directions
         </button>
       </div>
+
       {/* Weather Card */}
       <div
         className="absolute bg-green-50 rounded p-5 z-10"
