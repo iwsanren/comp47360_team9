@@ -7,9 +7,9 @@ import Image from "next/image";
 import g6Icon from "@/assets/images/g6.png";
 import startEndIcon from "@/assets/images/start_end_icon.png";
 import switchStartEndIcon from "@/assets/images/switch_start_end_icon.png";
-
-import { WEATHER_CONDITION_ICONS } from '@/constants/icons'
-import Icon from '@/components/Icon'
+import { WEATHER_CONDITION_ICONS } from '@/constants/icons';
+import Icon from '@/components/Icon';
+import Header from "@/components/Header";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
@@ -32,6 +32,42 @@ export default function Map() {
       style: "mapbox://styles/mapbox/streets-v11",
       center: [-73.994167, 40.728333],
       zoom: 12,
+    });
+
+    map.on("load", () => {
+      // Roads
+      map.setPaintProperty("road-motorway-trunk", "line-color", "#ccd5ae");
+      map.setPaintProperty("road-primary", "line-color", "#5a9367");
+      map.setPaintProperty("road-secondary-tertiary", "line-color", "#99c49a");
+      map.setPaintProperty("road-street", "line-color", "#99c49a");
+      map.setPaintProperty("road-minor", "line-color", "#99c49a");
+
+      // Buildings
+      map.setPaintProperty("building", "fill-color", "#b5e48c");
+      map.setPaintProperty("building", "fill-opacity", 1);
+      map.setPaintProperty("building-outline", "line-color", "#76c893");
+
+      // Place Labels with conditional color based on selection
+      map.setPaintProperty("settlement-label", "text-color", [
+        "case",
+        ["boolean", ["feature-state", "selected"], false],
+        "#40916c", // Selected color
+        "#2b9348"  // Highlight color (default)
+      ]);
+
+      map.setPaintProperty("state-label", "text-color", [
+        "case",
+        ["boolean", ["feature-state", "selected"], false],
+        "#40916c",
+        "#2b9348"
+      ]);
+
+      map.setPaintProperty("country-label", "text-color", [
+        "case",
+        ["boolean", ["feature-state", "selected"], false],
+        "#40916c",
+        "#2b9348"
+      ]);
     });
 
     return () => map.remove();
@@ -84,30 +120,14 @@ export default function Map() {
       <div ref={mapRef} className="absolute inset-0 z-0" />
 
       {/* Header */}
-      <nav className="absolute top-0 left-0 w-full bg-[#00674C] flex justify-between items-center px-6 py-3 z-10" style={{ zIndex: 99 }}>
-              <div className="text-white font-bold text-lg flex items-center relative">
-                {/* Icon */}
-                <Image
-                  src={g6Icon}
-                  alt="LUNA Icon"
-                  width={21}
-                  height={27}
-                  className="absolute"
-                  style={{ top: '1px', left: '1px' }}
-                />
-                <span className="pl-8">LUNA</span>
-              </div>
-              <Link href="/mapPage" className="text-white font-semibold relative z-30">
-                Map
-              </Link>
-            </nav>
+      <Header />
 
       {/* Side Panel */}
       <div
         className="absolute z-10 bg-white rounded-lg shadow-lg p-4"
-        style={{ width: 474, height: 550, top: 55, left: 16 }}
+        style={{ width: 474, height: 650, top: 62, left: 16, paddingTop:12, paddingBottom:12 }}
       >
-        <h2 className="mb-4 font-bold text-[18px] leading-[27px] text-[#00674C]">Get Directions</h2>
+        <h2 className="mb-4 font-bold text-[26px] leading-[28px] text-[#00674C]">Get Directions</h2>
 
         <div className="flex gap-2 relative">
           <div className="flex flex-col items-center pt-3">
@@ -163,13 +183,14 @@ export default function Map() {
           Get Directions
         </button>
       </div>
+
       {/* Weather Card */}
       <div
         className="absolute bg-green-50 rounded p-5 z-10"
         style={{
           width: 474,
           height: 118,
-          top: 570,
+          top: 620,
           left: 16,
         }}
       >
