@@ -1,23 +1,24 @@
-export async function GET(request) {
-  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+export async function POST(req) {
+  const API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 
-  const origin = 'Times Square,New York,NY';
-  const destination = 'Museum of the City,New York,NY';
+  const { origin, destination } = await req.json();
 
-  const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&mode=transit&key=${apiKey}`;
+  const modes = ['driving', 'walking', 'bicycling', 'transit']; 
 
   try {
-    const response = await fetch(url);
-    const data = await response.json();
+    const promises = modes.map(async (mode) => {
+      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin?.lat},${origin?.lng}&destination=${destination?.lat},${destination?.lng}&mode=${mode}&alternatives=true&key=${API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      return { mode, data };
+    });
 
-    if (data.status !== 'OK') {
-      return new Response(
-        JSON.stringify({ error: data.status, message: data.error_message }),
-        { status: 500 }
-      );
-    }
+    const resultsArray = await Promise.all(promises);
+    const results = Object.fromEntries(resultsArray.map(r => [r.mode, r.data]));
 
-    return new Response(JSON.stringify(data), {
+    console.log(results)
+
+    return new Response(JSON.stringify(results), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',

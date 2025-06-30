@@ -19,6 +19,11 @@ export default function Map() {
   const [showModal, setShowModal] = useState(false);
   const [manhattanTime, setManhattanTime] = useState<string>("");
 
+  // sent start and end point data like below
+  // const origin = { lat: 40.7580, lng: -73.9855 } 
+  // const destination = { lat: 40.785091, lng: -73.968285 } 
+  // should put them in body and sent it to backend 
+
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -46,29 +51,29 @@ export default function Map() {
     fetchWeather();
   }, []);
 
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      const formatted = `${now.toLocaleDateString("en-US", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-        weekday: "long",
-        timeZone: "America/New_York",
-      })} ${now.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: true,
-        timeZone: "America/New_York",
-      })}`;
-      setManhattanTime(formatted);
-    };
+  // useEffect(() => {
+  //   const updateTime = () => {
+  //     const now = new Date();
+  //     const formatted = `${now.toLocaleDateString("en-US", {
+  //       day: "numeric",
+  //       month: "long",
+  //       year: "numeric",
+  //       weekday: "long",
+  //       timeZone: "America/New_York",
+  //     })} ${now.toLocaleTimeString("en-US", {
+  //       hour: "2-digit",
+  //       minute: "2-digit",
+  //       second: "2-digit",
+  //       hour12: true,
+  //       timeZone: "America/New_York",
+  //     })}`;
+  //     setManhattanTime(formatted);
+  //   };
 
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  //   updateTime();
+  //   const interval = setInterval(updateTime, 1000);
+  //   return () => clearInterval(interval);
+  // }, []);
 
   const current = weatherData?.current;
   const hourly = weatherData?.hourly?.list || [];

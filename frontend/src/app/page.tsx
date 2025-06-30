@@ -6,6 +6,9 @@ import g6Icon from '@/assets/images/g6.png'
 import Link from 'next/link'
 import Heading from '@/components/Heading'
 
+// https://overpass-api.de/api/interpreter?data=%5Bout%3Ajson%5D%3B%0Aarea%5B%22name%22%3D%22New%20York%22%5D%5B%22boundary%22%3D%22administrative%22%5D-%3E.a%3B%0A%28%0A%20%20node%5B%22amenity%22%3D%22charging_station%22%5D%28area.a%29%3B%0A%20%20way%5B%22amenity%22%3D%22charging_station%22%5D%28area.a%29%3B%0A%20%20relation%5B%22amenity%22%3D%22charging_station%22%5D%28area.a%29%3B%0A%29%3B%0Aout%20body%3B%0A%3E%3B%0Aout%20skel%20qt%3B
+// https://overpass-api.de/api/interpreter?data=%5Bout%3Ajson%5D%3B%0Aarea%5Bname%3D%22Manhattan%22%5D%5Bboundary%3Dadministrative%5D-%3E.a%3B%0A%28%0A%20%20way%5B%22leisure%22%3D%22park%22%5D%28area.a%29%3B%0A%20%20relation%5B%22leisure%22%3D%22park%22%5D%28area.a%29%3B%0A%29%3B%0Aout%20body%3B%0A%3E%3B%0Aout%20skel%20qt%3B
+
 export default function Home() {
   return (
     <main className="relative h-screen w-full font-roboto">
