@@ -10,6 +10,7 @@ import switchStartEndIcon from "@/assets/images/switch_start_end_icon.png";
 import { WEATHER_CONDITION_ICONS } from '@/constants/icons';
 import Icon from '@/components/Icon';
 import Header from "@/components/Header";
+// import useFetchData from "@/hooks/useFetchData";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
@@ -18,6 +19,8 @@ export default function Map() {
   const [weatherData, setWeatherData] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
   const [manhattanTime, setManhattanTime] = useState<string>("");
+
+  // console.log(parks)
 
   // sent start and end point data like below
   // const origin = { lat: 40.7580, lng: -73.9855 } 
@@ -87,29 +90,29 @@ export default function Map() {
     fetchWeather();
   }, []);
 
-  // useEffect(() => {
-  //   const updateTime = () => {
-  //     const now = new Date();
-  //     const formatted = `${now.toLocaleDateString("en-US", {
-  //       day: "numeric",
-  //       month: "long",
-  //       year: "numeric",
-  //       weekday: "long",
-  //       timeZone: "America/New_York",
-  //     })} ${now.toLocaleTimeString("en-US", {
-  //       hour: "2-digit",
-  //       minute: "2-digit",
-  //       second: "2-digit",
-  //       hour12: true,
-  //       timeZone: "America/New_York",
-  //     })}`;
-  //     setManhattanTime(formatted);
-  //   };
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const formatted = `${now.toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        weekday: "long",
+        timeZone: "America/New_York",
+      })} ${now.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+        timeZone: "America/New_York",
+      })}`;
+      setManhattanTime(formatted);
+    };
 
-  //   updateTime();
-  //   const interval = setInterval(updateTime, 1000);
-  //   return () => clearInterval(interval);
-  // }, []);
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const current = weatherData?.current;
   const hourly = weatherData?.hourly?.list || [];
