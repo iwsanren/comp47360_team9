@@ -122,7 +122,7 @@ export default function Map() {
         className="absolute z-10 bg-white rounded-lg shadow-lg p-4"
         style={{ width: 474, height: 650, top: 62, left: 16, paddingTop:12, paddingBottom:12 }}
       >
-        <h2 className="mb-4 font-bold text-[18px] leading-[27px] text-[#00674C]">Get Directions</h2>
+        <h2 className="mb-4 font-bold text-[26px] leading-[28px] text-[#00674C]">Get Directions</h2>
 
         <div className="flex gap-2 relative">
           <div className="flex flex-col items-center pt-3">
