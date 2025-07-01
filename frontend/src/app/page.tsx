@@ -3,10 +3,8 @@
 import Image from 'next/image'
 import Link from "next/link";
 import manhattan from '@/assets/images/manhattan.jpg'
+import arrow from '@/assets/images/Vector.png'
 import Header from '@/components/Header'
-
-// https://overpass-api.de/api/interpreter?data=%5Bout%3Ajson%5D%3B%0Aarea%5B%22name%22%3D%22New%20York%22%5D%5B%22boundary%22%3D%22administrative%22%5D-%3E.a%3B%0A%28%0A%20%20node%5B%22amenity%22%3D%22charging_station%22%5D%28area.a%29%3B%0A%20%20way%5B%22amenity%22%3D%22charging_station%22%5D%28area.a%29%3B%0A%20%20relation%5B%22amenity%22%3D%22charging_station%22%5D%28area.a%29%3B%0A%29%3B%0Aout%20body%3B%0A%3E%3B%0Aout%20skel%20qt%3B
-// https://overpass-api.de/api/interpreter?data=%5Bout%3Ajson%5D%3B%0Aarea%5Bname%3D%22Manhattan%22%5D%5Bboundary%3Dadministrative%5D-%3E.a%3B%0A%28%0A%20%20way%5B%22leisure%22%3D%22park%22%5D%28area.a%29%3B%0A%20%20relation%5B%22leisure%22%3D%22park%22%5D%28area.a%29%3B%0A%29%3B%0Aout%20body%3B%0A%3E%3B%0Aout%20skel%20qt%3B
 
 export default function Home() {
   return (
@@ -73,13 +71,40 @@ export default function Home() {
         {/* CTA Button */}
         <Link
           href="/map"
-          className="absolute text-white font-semibold bg-[#0FD892] px-6 py-3 rounded shadow-md transition flex items-center gap-2"
+          className="absolute text-white font-semibold bg-[#0FD892] hover:bg-[#0AAC82] px-6 py-2 rounded-sm shadow-md transition flex items-center gap-2"
           style={{
-            top: '410px',
+            top: '400px',
             left: '100px',
+            width: '225px',
+            height: '43px',
+            padding: '8px 24px',
           }}
         >
-          Explore Manhattan →
+          <span
+            style={{
+              width: '153px',
+              height: '27px',
+              fontWeight: 700,
+              fontSize: '18px',
+              lineHeight: '27px',
+              letterSpacing: '0%',
+              color: '#FFFFFF',
+            }}
+          >
+            Explore Manhattan
+          </span>
+          <Image
+            src={arrow}
+            alt="Arrow Icon"
+            width={14.000893592834473}
+            height={9.001262664794922}
+            style={{
+              position: 'relative',
+              top: '1px',
+              left: '1px',
+              objectFit: 'contain',
+            }}
+          />
         </Link>
       </div>
     </main>
