@@ -34,3 +34,6 @@ logs
 # System
 .DS_Store
 Thumbs.db
+
+# test file
+frontend/src/app/mapTest
