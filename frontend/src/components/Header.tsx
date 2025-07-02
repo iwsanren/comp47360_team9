@@ -5,17 +5,19 @@ import g6Icon from "@/assets/images/g6.png";
 export default function Header() {
   return (
     <nav className="absolute top-0 left-0 w-full bg-[#00674C] flex justify-between items-center px-6 py-3 z-10" style={{ zIndex: 99 }}>
-      <div className="text-white font-bold text-lg flex items-center relative">
-        <Image
-          src={g6Icon}
-          alt="LUNA Icon"
-          width={21}
-          height={27}
-          className="absolute"
-          style={{ top: '1px', left: '1px' }}
-        />
-        <span className="pl-8">LUNA</span>
-      </div>
+      <Link href="/">
+        <div className="text-white font-bold text-lg flex items-center relative">
+          <Image
+            src={g6Icon}
+            alt="LUNA Icon"
+            width={21}
+            height={27}
+            className="absolute"
+            style={{ top: '1px', left: '1px' }}
+          />
+          <span className="pl-8">LUNA</span>
+        </div>
+      </Link>
       <Link href="/map" className="text-white font-semibold relative z-30">
         Map
       </Link>
