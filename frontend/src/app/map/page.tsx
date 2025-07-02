@@ -39,40 +39,13 @@ export default function Map() {
 
     const map = new mapboxgl.Map({
       container: mapRef.current,
-      style: "mapbox://styles/mapbox/streets-v11",
+      style: "mapbox://styles/prakhardayal/cmclwuguo003s01sbhx3le5c4",
       center: [-73.994167, 40.728333],
       zoom: 12,
     });
 
     map.on("load", () => {
-      map.setPaintProperty("road-motorway-trunk", "line-color", "#ccd5ae");
-      map.setPaintProperty("road-primary", "line-color", "#5a9367");
-      map.setPaintProperty("road-secondary-tertiary", "line-color", "#99c49a");
-      map.setPaintProperty("road-street", "line-color", "#99c49a");
-      map.setPaintProperty("road-minor", "line-color", "#99c49a");
-
-      map.setPaintProperty("building", "fill-color", "#b5e48c");
-      map.setPaintProperty("building", "fill-opacity", 1);
-      map.setPaintProperty("building-outline", "line-color", "#76c893");
-
-      map.setPaintProperty("settlement-label", "text-color", [
-        "case",
-        ["boolean", ["feature-state", "selected"], false],
-        "#40916c",
-        "#2b9348"
-      ]);
-      map.setPaintProperty("state-label", "text-color", [
-        "case",
-        ["boolean", ["feature-state", "selected"], false],
-        "#40916c",
-        "#2b9348"
-      ]);
-      map.setPaintProperty("country-label", "text-color", [
-        "case",
-        ["boolean", ["feature-state", "selected"], false],
-        "#40916c",
-        "#2b9348"
-      ]);
+      
     });
 
     return () => map.remove();
