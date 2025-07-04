@@ -4,7 +4,6 @@ import Image from 'next/image'
 import Link from "next/link";
 import manhattan from '@/assets/images/manhattan.jpg'
 import arrow from '@/assets/images/Vector.png'
-import Header from '@/components/Header'
 
 export default function Home() {
   return (
@@ -20,9 +19,6 @@ export default function Home() {
         />
         <div className="absolute inset-0 bg-black opacity-30 pointer-events-auto" />
       </div>
-
-      {/* Header */}
-      <Header />
 
       {/* Centered Content */}
       <div className="relative z-10 h-full">
