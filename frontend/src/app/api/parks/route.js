@@ -2,19 +2,16 @@ import convertToGeoJSON from "../../../utils/convertToGeoJSON";
 
 export async function POST() {
   try {
-    const areaName = "Manhattan"
 
     // Overpass QL query: parks in the specified area
     const overpassQuery = `
-      [out:json][timeout:25];
-      area[name="${areaName}"][boundary="administrative"]->.a;
-      (
+        [out:json];
+        area[name="Manhattan"][boundary=administrative]->.a;
+        (
         way["leisure"="park"](area.a);
         relation["leisure"="park"](area.a);
-      );
-      out body;
-      >;
-      out skel qt;
+        );
+        out geom;
     `;
 
     const encodedQuery = encodeURIComponent(overpassQuery);

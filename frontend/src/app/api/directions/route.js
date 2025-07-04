@@ -16,8 +16,6 @@ export async function POST(req) {
     const resultsArray = await Promise.all(promises);
     const results = Object.fromEntries(resultsArray.map(r => [r.mode, r.data]));
 
-    console.log(results)
-
     return new Response(JSON.stringify(results), {
       status: 200,
       headers: {

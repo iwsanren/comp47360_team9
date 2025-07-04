@@ -2,7 +2,7 @@ import convertToGeoJSON from "../../../utils/convertToGeoJSON";
 
 export async function POST() {
   try {
-    const areaName = "New York"
+    const areaName = "Manhattan"
     // 2. Overpass API query
     const overpassQuery = `
       [out:json][timeout:25];

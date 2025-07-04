@@ -39,9 +39,10 @@ export default function Map() {
 
     const map = new mapboxgl.Map({
       container: mapRef.current,
-      style: "mapbox://styles/prakhardayal/cmclwuguo003s01sbhx3le5c4",
-      center: [-73.994167, 40.728333],
+      style: "mapbox://styles/peja16/cmbc6m2js002601sd9hea9w4l",
+      center: [-73.968285, 40.785091],
       zoom: 12,
+      attributionControl: false,
     });
 
     map.on("load", () => {

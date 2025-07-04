@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const useFetchData = (url, body) => {
+const useFetchData = (url, body, method) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -12,7 +12,7 @@ const useFetchData = (url, body) => {
       try {
         setLoading(true);
         const res = await fetch(url, {
-            method: 'POST',
+            method: method || 'POST',
             headers: {
                 'Content-Type': 'application/json', // to call sever the body is in JSON format.
             },
