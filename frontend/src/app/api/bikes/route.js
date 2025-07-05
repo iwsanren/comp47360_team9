@@ -14,10 +14,6 @@ const getData = async () => {
 
       (
         node["amenity"="bicycle_rental"](area.a);      // Bike rental stations
-        // way["highway"="cycleway"](area.a);             // Dedicated cycleways
-        // way["cycleway"](area.a);                       // Roads with cycleway tags
-        // relation["highway"="cycleway"](area.a);        // Cycleway relations (if any)
-        // relation["cycleway"](area.a);                  // Other relations with cycleway tags
       );
       out body;
       >;

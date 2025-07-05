@@ -10,7 +10,7 @@ import Icon from '@/components/Icon';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import ShowWeatherModal from "./ShowWeatherModal";
 
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_PRAKHAR_MAPBOX_API_KEY || process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
 interface Toggles {
   parks: boolean;
