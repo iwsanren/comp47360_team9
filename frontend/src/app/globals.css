@@ -35,7 +35,7 @@ body {
 
 .container {
   margin: auto;
-  padding: 2em 2.5em;
+  padding: 2em 2.5em 3em 2.5em;
   max-width: 80em;
 }
 
@@ -67,17 +67,26 @@ body {
 }
 
 .info-item {
-    margin-top: 20px;
-    display: flex;
-    align-items: flex-start;
+  margin-top: 20px;
+  display: flex;
+  align-items: flex-start;
 }
 
 .team-member-photo {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 1em;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 1em;
+}
+
+.form {
+  border: 1px solid;
+  border-color: #00674c;
+  border-radius: 4px;
+  width: 100%;
+  padding: .5em;
+  background: white;
 }
 
 @media (max-width: 768px) {
@@ -88,6 +97,6 @@ body {
     padding: 0 1em;
   }
   .container {
-    padding: 0 1em;
+    padding: 2em 1em;
   }
 }

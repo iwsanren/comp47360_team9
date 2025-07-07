@@ -1,22 +1,25 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import Image from "next/image";
 import Icon from '@/components/Icon';
+import Heading from "@/components/Heading";
 
 import { CiLocationOn, CiPhone, CiTimer } from "react-icons/ci";
 import { RiTeamLine } from "react-icons/ri";
 
 import tan from "@/assets/images/tan.png";
-import Heading from "@/components/Heading";
+import prakhar from "@/assets/images/prakhar.jpeg";
+import martynas from "@/assets/images/martynas.jpeg";
+import billie from "@/assets/images/billie.jpeg";
 
 const team = [
-  { 'name': 'Martynas', 'pic': tan, title: 'Coordination lead', 'email': "martynas.kapocius@ucdconnect.ie" }, 
+  { 'name': 'Martynas', 'pic': martynas, title: 'Coordination lead', 'email': "martynas.kapocius@ucdconnect.ie" }, 
   { 'name': 'Neasa', 'pic': tan, title: 'Data lead', 'email': "neasa.nifhatharta2@ucdconnect.ie" },
-  { 'name': 'Billie', 'pic': tan, title: 'Maintenance', 'email': "zhaofang.he@ucdconnect.ie" },
-  { 'name': 'Tan', 'pic': tan, title: 'Backend lead', 'email': "hsuan-yu.tan@ucdconnect.ie" },
-  { 'name': 'Prakhar', 'pic': tan, title: 'Frontend lead', 'email': "prakhar.dayal@ucdconnect.ie" },
+  { 'name': 'Zhaofang He', 'pic': billie, title: 'Maintenance', 'email': "zhaofang.he@ucdconnect.ie" },
+  { 'name': 'Hsuan-Yu Tan', 'pic': tan, title: 'Backend lead', 'email': "hsuan-yu.tan@ucdconnect.ie" },
+  { 'name': 'Prakhar', 'pic': prakhar, title: 'Frontend lead', 'email': "prakhar.dayal@ucdconnect.ie" },
 ] 
 
 const contactInfo = [
@@ -26,11 +29,62 @@ const contactInfo = [
   { title: 'Team', icon: RiTeamLine, team},
 ]
 
+const forms = [
+  { label: 'Full Name', key: 'name' },
+  { label: 'Email', key: 'email', placeholder: "example3345678@xmail.com" },
+  { label: 'Phone', key: 'phone' },
+  { label: 'Message', tag: 'textarea', key: 'message' },
+]
+
+const emailPattern = /^[\w-\.]+@([\w-]+\.)+[\w-]/
+const phonePattern = /^(?:\+?\d{1,4})?[ -.]?(?:\(?\d{2,4}\)?)[ -.]?\d{3,4}[ -.]?\d{3,4}$/
+
+type InfoType = {
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+  [key: string]: string;
+}
+
+const infoObj = {
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+  }
+
 const ContactPage = () => {
   const [isCompleted, setComplete] = useState<boolean>(false);
-  const [isDisabled, setDisabled] = useState<boolean>(true);
-  const [info, setInfo] = useState<any>(false);
-  useEffect(() => {}, []);
+  const [isFailed, setFailed] = useState<boolean>(false);
+  const [isError, setError] = useState<boolean>(false);
+  const [isLoading, setLoading] = useState<boolean>(false);
+  const [info, setInfo] = useState<InfoType>(infoObj);
+  const error = useMemo(() => {
+    if (Object.values(info).some(d => Boolean(d))) {
+      if (!info.name) {
+        setError(true)
+        return 'Name is required'
+      } else if (!info.email) {
+        setError(true)
+        return 'Email is required'
+      } else if (!info.message) {
+        setError(true)
+        return 'Message is required'
+      }
+      if (!emailPattern.test(info.email)) {
+        setError(true)
+        return 'Invalid email'
+      }
+      if (info.phone && !phonePattern.test(info.phone)) {
+        setError(true)
+        return 'Invalid phone number'
+      }
+      setError(false)
+      return false
+    }
+  }, [info])
+  // console.log(isError)
   return (
     <div className="flex-1 flex flex-col justify-center relative bg-green-300 pt-[5em]">
       <Heading className="text-center">Contact Us</Heading>
@@ -66,52 +120,89 @@ const ContactPage = () => {
             </div>
           ))}
       </div>
-        <div className="flex-1 min-w-200px bg-white rounded-lg">
-          <div className="label">
-            <p>Full Name</p>
-            <input name="name" />
-          </div>
-          <div className="label">
-            <p>Email</p>
-            <input
-              name="email"
-              type="email"
-              placeholder="example3345678@xmail.com"
-            />
-          </div>
-          <div className="label">
-            <p>Phone</p>
-            <input name="phone" type="phone" />
-          </div>
-          <div className="label">
-            <p>Message</p>
-            <textarea
-              name="message"
-              placeholder="Enter your message"
-            ></textarea>
-          </div>
-          <p id="errorMessage"></p>
+        <div className="flex flex-col gap-4 flex-1 min-w-200px">
+          {forms.map(({ label, tag, placeholder, key }) => {
+            return (
+            <div key={label}>
+              <p className="mb-2 text-2xl font-bold">{label}</p>
+              {tag ? (
+                <textarea 
+                  name={key}
+                  value={info?.[key]}
+                  disabled={isLoading}
+                  className={`form outline-none ${isLoading && 'cursor-not-allowed'}`}
+                  onChange={(e) => {
+                    setInfo(prev => ({
+                      ...prev,
+                      [key]: e.target.value
+                    }))
+                  }} 
+                />
+              ) : (
+                <input 
+                  disabled={isLoading}
+                  name={key}
+                  value={info?.[key]}
+                  className={`form outline-none ${isLoading && 'cursor-not-allowed'}`}
+                  placeholder={placeholder}
+                  onChange={(e) => {
+                    setInfo(prev => ({
+                      ...prev,
+                      [key]: e.target.value
+                    }))
+                  }} 
+                />
+              )}
+            </div>
+          )})}
+          {isError && <p className="text-sm text-red-500">{error}</p>}
           <div className="label">
             <button
+              onClick={async () => {
+                setLoading(true)
+                const formData = new FormData()
+                Object.keys(info).forEach(key => {
+                  formData.append(key, info[key])
+                });
+                formData.append('time', new Date().toLocaleString())
+                const res = await fetch('/api/contact', { method: 'POST', body: formData })
+                const d = await res.json();
+                if (d.status == "success") {
+                  setComplete(true)
+                  setLoading(false)
+                  setTimeout(() => setComplete(false), 3000)
+                  setInfo(infoObj)
+                } else {
+                  setFailed(true)
+                  setLoading(false)
+                  setTimeout(() => {
+                    setComplete(false)
+                    setFailed(false)
+                  }, 2250)
+                  setInfo(infoObj)
+                }
+              }}
               type="submit"
-              disabled={isDisabled}
+              disabled={isLoading || Boolean(error)}
               className={`px-4 py-2 rounded text-white font-semibold 
                 ${
-                  isDisabled
+                  (isError || isLoading)
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-green-600 hover:bg-green-700 cursor-pointer"
                 }
               `}
             >
-              Submit
+              {isLoading ? 'Loding...' : 'Submit'}
             </button>
           </div>
         </div>
       </div>
-      <div className={`absolute center pop-up ${isCompleted ? 'opacity-100' : 'opacity-0'}`}>
-        Submission Completed
-        <br />
-        {"We'll inform you by email."}
+      <div className={`absolute center pop-up whitespace-pre-wrap trasition-opacity duration-250ms ${isCompleted ? 'opacity-100' : 'opacity-0'}`}>
+        {isFailed ? (
+          "Sorry, failed to submit.\nPlease directly send a email to a team member"
+        ) : (
+          "Submission Completed\nWe'll inform you by email."
+        )}
       </div>
     </div>
   );
