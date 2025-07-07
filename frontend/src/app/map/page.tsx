@@ -278,12 +278,8 @@ export default function Map() {
       <div ref={mapRef} className="min-h-[750px] h-[100dvh]" />
 
       {/* Toggle Container */}
-      <div
-        className="absolute flex items-center top-[50%] transform translate-y-[-50%] transition-transform duration-300"
-        style={{
-          right: isToggleOpen ? 0 : '-200px', // Slide out to the right when closed
-        }}
-      >
+      <div className="absolute flex items-center top-[50%] transform translate-y-[-50%] right-0">
+        {/* Arrow Button */}
         <div
           onClick={handleToggleSlide}
           className="cursor-pointer"
@@ -291,7 +287,7 @@ export default function Map() {
             borderTopLeftRadius: 4,
             borderBottomLeftRadius: 4,
             backgroundColor: "#00674CBF",
-            padding: '1.125rem 0.125em',
+            padding: '1.125rem 0.125rem',
             color: 'white',
           }}
         >
@@ -303,79 +299,83 @@ export default function Map() {
             size=".75rem"
           />
         </div>
-        <div
-          style={{
-            padding: 8,
-            borderRadius: 4,
-            backgroundColor: "#00674CBF",
-            display: "flex",
-            flexDirection: "column",
-            gap: 4,
-          }}
-        >
-          {toggleNames.map(({ key, label }) => (
-            <div key={key} className="flex gap-1 items-center text-white text-sm px-2">
-              <span
-                style={{
-                  fontWeight: 700,
-                  fontStyle: "normal",
-                  fontSize: "12px",
-                  lineHeight: "18px",
-                  letterSpacing: "0%",
-                  textAlign: 'right',
-                  flex: 1,
-                }}
-              >
-                {label}
-              </span>
-              <div className="relative flex items-center">
-                <div
-                  onClick={() => setToggles(prev => ({ ...prev, [key]: !prev[key] }))}
-                  className="relative cursor-pointer"
+
+        {/* Toggle Box */}
+        {isToggleOpen && (
+          <div
+            style={{
+              padding: 8,
+              borderRadius: 0,
+              backgroundColor: "#00674CBF",
+              display: "flex",
+              flexDirection: "column",
+              gap: 4,
+            }}
+          >
+            {toggleNames.map(({ key, label }) => (
+              <div key={key} className="flex gap-1 items-center text-white text-sm px-2">
+                <span
                   style={{
-                    width: 52,
-                    height: 28,
-                    borderRadius: 24,
-                    backgroundColor: toggles[key] ? "#0FD892" : "#F0F0F0",
-                    transition: "background-color 0.3s",
+                    fontWeight: 700,
+                    fontStyle: "normal",
+                    fontSize: "12px",
+                    lineHeight: "18px",
+                    letterSpacing: "0%",
+                    textAlign: 'right',
+                    flex: 1,
                   }}
                 >
+                  {label}
+                </span>
+                <div className="relative flex items-center">
                   <div
+                    onClick={() => setToggles(prev => ({ ...prev, [key]: !prev[key] }))}
+                    className="relative cursor-pointer"
                     style={{
-                      position: "absolute",
-                      top: 2,
-                      left: toggles[key] ? 26 : 2,
-                      width: 24,
-                      height: 24,
-                      borderRadius: "50%",
-                      backgroundColor: toggles[key] ? "#FFFFFF" : "#D9D9D9",
-                      transition: "left 0.3s",
-                    }}
-                  />
-                  <span
-                    style={{
-                      position: "absolute",
-                      top: 8,
-                      left: toggles[key] ? 7 : 28,
-                      width: toggles[key] ? 17 : 22,
-                      height: 12,
-                      fontSize: 12,
-                      fontWeight: 700,
-                      fontStyle: "normal",
-                      lineHeight: "12px",
-                      letterSpacing: "0%",
-                      color: toggles[key] ? "#FFFFFF" : "#A6A6A6",
-                      opacity: 1,
-                      transform: "rotate(0deg)",
+                      width: 52,
+                      height: 28,
+                      borderRadius: 24,
+                      backgroundColor: toggles[key] ? "#0FD892" : "#F0F0F0",
+                      transition: "background-color 0.3s",
                     }}
                   >
-                    {toggles[key] ? "ON" : "OFF"}
-                  </span>
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 2,
+                        left: toggles[key] ? 26 : 2,
+                        width: 24,
+                        height: 24,
+                        borderRadius: "50%",
+                        backgroundColor: toggles[key] ? "#FFFFFF" : "#D9D9D9",
+                        transition: "left 0.3s",
+                      }}
+                    />
+                    <span
+                      style={{
+                        position: "absolute",
+                        top: 8,
+                        left: toggles[key] ? 7 : 28,
+                        width: toggles[key] ? 17 : 22,
+                        height: 12,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        fontStyle: "normal",
+                        lineHeight: "12px",
+                        letterSpacing: "0%",
+                        color: toggles[key] ? "#FFFFFF" : "#A6A6A6",
+                        opacity: 1,
+                        transform: "rotate(0deg)",
+                      }}
+                    >
+                      {toggles[key] ? "ON" : "OFF"}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Side Panel */}
