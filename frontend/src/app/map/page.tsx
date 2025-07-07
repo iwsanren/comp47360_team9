@@ -7,7 +7,8 @@ import Image from "next/image";
 
 import startEndIcon from "@/assets/images/start_end_icon.png";
 import switchStartEndIcon from "@/assets/images/switch_start_end_icon.png";
-
+import bikeIcon from "@/assets/images/bike_icon.png";
+import evIcon from "@/assets/images/ev_icon.png";
 import { WEATHER_CONDITION_ICONS } from '@/constants/icons';
 
 import Icon from '@/components/Icon';
@@ -41,6 +42,9 @@ export default function Map() {
   const [startLocation, setStartLocation] = useState<string>("");
   const [destination, setDestination] = useState<string>("");
   const [parksData, setParksData] = useState<any>(null); // Store parks GeoJSON
+  const [bikesData, setBikesData] = useState<any>(null); // Store bikes GeoJSON
+  const [evData, setEvData] = useState<any>(null); // Store EV stations GeoJSON
+
   // Initialize Mapbox
   useEffect(() => {
     if (!mapRef.current) return;
@@ -50,6 +54,28 @@ export default function Map() {
       style: "mapbox://styles/prakhardayal/cmclwuguo003s01sbhx3le5c4",
       center: [-73.968285, 40.785091],
       zoom: 12,
+    });
+
+    // Load bike icon image
+    map.loadImage(bikeIcon.src, (error, image) => {
+      if (error) {
+        console.error("Failed to load bike icon:", error);
+        return;
+      }
+      if (image) {
+        map.addImage("bike-icon", image);
+      }
+    });
+
+    // Load EV icon image
+    map.loadImage(evIcon.src, (error, image) => {
+      if (error) {
+        console.error("Failed to load EV icon:", error);
+        return;
+      }
+      if (image) {
+        map.addImage("ev-icon", image);
+      }
     });
 
     mapInstanceRef.current = map;
@@ -64,14 +90,13 @@ export default function Map() {
     const map = mapInstanceRef.current;
 
     if (toggles.parks) {
-      // Fetch parks data if not already fetched
       if (!parksData) {
         const fetchParks = async () => {
           try {
             const res = await fetch("/api/parks", { method: "POST" });
             const geojson = await res.json();
             if (geojson.features) {
-              setParksData(geojson); // Store data in state
+              setParksData(geojson);
             } else {
               console.error("Invalid parks GeoJSON data");
             }
@@ -82,7 +107,6 @@ export default function Map() {
         fetchParks();
       }
 
-      // Add parks source and layer if data exists
       if (parksData && !map.getSource("parks")) {
         map.addSource("parks", {
           type: "geojson",
@@ -94,9 +118,9 @@ export default function Map() {
           type: "fill",
           source: "parks",
           paint: {
-            "fill-color": "#00674C", // Green fill for parks
+            "fill-color": "#00674C",
             "fill-opacity": 0.5,
-            "fill-outline-color": "#006400", // Darker outline
+            "fill-outline-color": "#006400",
           },
           layout: {
             visibility: "visible",
@@ -104,7 +128,6 @@ export default function Map() {
         });
       }
     } else {
-      // Remove parks layer and source when toggle is off
       if (map.getLayer("parks-layer")) {
         map.removeLayer("parks-layer");
       }
@@ -113,6 +136,113 @@ export default function Map() {
       }
     }
   }, [toggles.parks, parksData]);
+
+  // Handle bikes toggle
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+
+    const map = mapInstanceRef.current;
+
+    if (toggles.bikes) {
+      if (!bikesData) {
+        const fetchBikes = async () => {
+          try {
+            const res = await fetch("/api/bikes", { method: "POST" });
+            const geojson = await res.json();
+            if (geojson.features) {
+              setBikesData(geojson);
+            } else {
+              console.error("Invalid bikes GeoJSON data");
+            }
+          } catch (error) {
+            console.error("Failed to fetch bikes data:", error);
+          }
+        };
+        fetchBikes();
+      }
+
+      if (bikesData && !map.getSource("bikes")) {
+        map.addSource("bikes", {
+          type: "geojson",
+          data: bikesData,
+        });
+
+        map.addLayer({
+          id: "bikes-layer",
+          type: "symbol",
+          source: "bikes",
+          layout: {
+            "icon-image": "bike-icon",
+            "icon-size": 1,
+            "icon-allow-overlap": true,
+            visibility: "visible",
+          },
+        });
+      }
+    } else {
+      if (map.getLayer("bikes-layer")) {
+        map.removeLayer("bikes-layer");
+      }
+      if (map.getSource("bikes")) {
+        map.removeSource("bikes");
+      }
+    }
+  }, [toggles.bikes, bikesData]);
+
+  // Handle EV stations toggle
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+
+    const map = mapInstanceRef.current;
+
+    if (toggles.ev) {
+      // Fetch EV stations data if not already fetched
+      if (!evData) {
+        const fetchEVStations = async () => {
+          try {
+            const res = await fetch("/api/EV-charging", { method: "POST" });
+            const geojson = await res.json();
+            if (geojson.features) {
+              setEvData(geojson); // Store data in state
+            } else {
+              console.error("Invalid EV stations GeoJSON data");
+            }
+          } catch (error) {
+            console.error("Failed to fetch EV stations data:", error);
+          }
+        };
+        fetchEVStations();
+      }
+
+      // Add EV stations source and layer if data exists
+      if (evData && !map.getSource("ev-stations")) {
+        map.addSource("ev-stations", {
+          type: "geojson",
+          data: evData,
+        });
+
+        map.addLayer({
+          id: "ev-stations-layer",
+          type: "symbol",
+          source: "ev-stations",
+          layout: {
+            "icon-image": "ev-icon",
+            "icon-size": 1, // Adjust size as needed
+            "icon-allow-overlap": true,
+            visibility: "visible",
+          },
+        });
+      }
+    } else {
+      // Remove EV stations layer and source when toggle is off
+      if (map.getLayer("ev-stations-layer")) {
+        map.removeLayer("ev-stations-layer");
+      }
+      if (map.getSource("ev-stations")) {
+        map.removeSource("ev-stations");
+      }
+    }
+  }, [toggles.ev, evData]);
 
   // Weather fetch
   useEffect(() => {
@@ -134,7 +264,7 @@ export default function Map() {
 
   const toggleNames = [
     { key: "parks", label: "Parks" },
-    { key: "ev", label: "EV Charging" },
+    { key: "ev", label: "EV Stations" },
     { key: "bikes", label: "Bike Stations" },
     { key: "busyness", label: "Busyness" },
     { key: "air", label: "Air Quality" },
@@ -158,7 +288,15 @@ export default function Map() {
       >
         {toggleNames.map(({ key, label }) => (
           <div key={key} className="flex items-center justify-between text-white text-sm px-2">
-            <span>{label}</span>
+            <span
+              style={{
+                fontWeight: 700,
+                fontStyle: "normal",
+                fontSize: "12px",
+                lineHeight: "18px",
+                letterSpacing: "0%",
+              }}
+            >{label}</span>
             <div
               onClick={() => setToggles(prev => ({ ...prev, [key]: !prev[key] }))}
               className="relative cursor-pointer"
@@ -186,10 +324,17 @@ export default function Map() {
                 style={{
                   position: "absolute",
                   top: 8,
-                  left: toggles[key] ? 8 : 28,
-                  fontSize: toggles[key] ? 12 : 12,
-                  color: toggles[key] ? "#0FD892" : "#A6A6A6",
-                  fontWeight: "bold",
+                  left: toggles[key] ? 7 : 28,
+                  width: toggles[key] ? 17 : 22,
+                  height: 12,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  fontStyle: "normal",
+                  lineHeight: "12px",
+                  letterSpacing: "0%",
+                  color: toggles[key] ? "#FFFFFF" : "#A6A6A6",
+                  opacity: 1,
+                  transform: "rotate(0deg)",
                 }}
               >
                 {toggles[key] ? "ON" : "OFF"}
@@ -316,7 +461,7 @@ export default function Map() {
 
       {/* Forecast Modal */}
       {showModal && (
-        <ShowWeatherModal current={current} hourly={hourly} setShowModal={setShowModal}  />
+        <ShowWeatherModal current={current} hourly={hourly} setShowModal={setShowModal} />
       )}
     </div>
   );
