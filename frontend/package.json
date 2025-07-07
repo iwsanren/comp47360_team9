@@ -11,26 +11,33 @@
   "dependencies": {
     "@fontsource/roboto": "^5.2.6",
     "@mapbox/polyline": "^1.2.1",
+    "@radix-ui/react-slot": "^1.2.3",
     "@turf/buffer": "^7.2.0",
     "@turf/helpers": "^7.2.0",
     "@turf/turf": "^7.2.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "fs": "^0.0.1-security",
+    "lucide-react": "^0.525.0",
     "mapbox-gl": "^3.12.0",
     "next": "15.3.3",
     "postcss": "^8.5.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-icons": "^5.5.0"
+    "react-icons": "^5.5.0",
+    "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/mapbox__polyline": "^1.0.5",
     "@types/node": "^20",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
-    "tailwindcss": "^4",
+    "tailwindcss": "^4.1.11",
+    "tw-animate-css": "^1.3.5",
     "typescript": "^5.8.3"
   }
 }

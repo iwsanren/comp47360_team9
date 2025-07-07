@@ -1,13 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
 import mapboxgl from "mapbox-gl";
 import Image from "next/image";
+
 import startEndIcon from "@/assets/images/start_end_icon.png";
 import switchStartEndIcon from "@/assets/images/switch_start_end_icon.png";
+
 import { WEATHER_CONDITION_ICONS } from '@/constants/icons';
+
 import Icon from '@/components/Icon';
+
 import 'mapbox-gl/dist/mapbox-gl.css';
+
 import ShowWeatherModal from "./ShowWeatherModal";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_PRAKHAR_MAPBOX_API_KEY || process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
@@ -42,7 +48,7 @@ export default function Map() {
     const map = new mapboxgl.Map({
       container: mapRef.current,
       style: "mapbox://styles/prakhardayal/cmclwuguo003s01sbhx3le5c4",
-      center: [-73.994167, 40.728333],
+      center: [-73.968285, 40.785091],
       zoom: 12,
     });
 
@@ -288,12 +294,12 @@ export default function Map() {
             </div>
             <div className="relative group inline-block">
               <button
+                className="py-1 px-6"
                 onClick={() => setShowModal(true)}
                 style={{
                   width: 119,
                   height: 43,
                   borderRadius: "4px",
-                  padding: "8px 24px",
                   backgroundColor: "#0FD892",
                   color: "white",
                 }}
