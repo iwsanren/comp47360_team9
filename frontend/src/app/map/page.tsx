@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
+import { BiSolidLeftArrow } from "react-icons/bi";
 import mapboxgl from "mapbox-gl";
 import Image from "next/image";
 
@@ -44,6 +44,7 @@ export default function Map() {
   const [parksData, setParksData] = useState<any>(null); // Store parks GeoJSON
   const [bikesData, setBikesData] = useState<any>(null); // Store bikes GeoJSON
   const [evData, setEvData] = useState<any>(null); // Store EV stations GeoJSON
+  const [isToggleOpen, setIsToggleOpen] = useState<boolean>(true); // New state for toggle visibility
 
   // Initialize Mapbox
   useEffect(() => {
@@ -196,14 +197,13 @@ export default function Map() {
     const map = mapInstanceRef.current;
 
     if (toggles.ev) {
-      // Fetch EV stations data if not already fetched
       if (!evData) {
         const fetchEVStations = async () => {
           try {
             const res = await fetch("/api/EV-charging", { method: "POST" });
             const geojson = await res.json();
             if (geojson.features) {
-              setEvData(geojson); // Store data in state
+              setEvData(geojson);
             } else {
               console.error("Invalid EV stations GeoJSON data");
             }
@@ -214,7 +214,6 @@ export default function Map() {
         fetchEVStations();
       }
 
-      // Add EV stations source and layer if data exists
       if (evData && !map.getSource("ev-stations")) {
         map.addSource("ev-stations", {
           type: "geojson",
@@ -234,7 +233,6 @@ export default function Map() {
         });
       }
     } else {
-      // Remove EV stations layer and source when toggle is off
       if (map.getLayer("ev-stations-layer")) {
         map.removeLayer("ev-stations-layer");
       }
@@ -264,84 +262,120 @@ export default function Map() {
 
   const toggleNames = [
     { key: "parks", label: "Parks" },
-    { key: "ev", label: "EV Stations" },
+    { key: "ev", label: "EV charging Stations" },
     { key: "bikes", label: "Bike Stations" },
     { key: "busyness", label: "Busyness" },
     { key: "air", label: "Air Quality" },
   ] as const;
+
+  // Handle toggle container slide
+  const handleToggleSlide = () => {
+    setIsToggleOpen(!isToggleOpen);
+  };
 
   return (
     <div className="relative">
       <div ref={mapRef} className="min-h-[750px] h-[100dvh]" />
 
       {/* Toggle Container */}
-      <div
-        className="absolute right-0 top-[50%] transform-[translateY(-50%)] shadow-md"
-        style={{
-          padding: 8,
-          borderRadius: 4,
-          backgroundColor: "#00674CBF",
-          display: "flex",
-          flexDirection: "column",
-          gap: 4,
-        }}
-      >
-        {toggleNames.map(({ key, label }) => (
-          <div key={key} className="flex items-center justify-between text-white text-sm px-2">
-            <span
-              style={{
-                fontWeight: 700,
-                fontStyle: "normal",
-                fontSize: "12px",
-                lineHeight: "18px",
-                letterSpacing: "0%",
-              }}
-            >{label}</span>
-            <div
-              onClick={() => setToggles(prev => ({ ...prev, [key]: !prev[key] }))}
-              className="relative cursor-pointer"
-              style={{
-                width: 52,
-                height: 28,
-                borderRadius: 24,
-                backgroundColor: toggles[key] ? "#0FD892" : "#F0F0F0",
-                transition: "background-color 0.3s",
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  top: 2,
-                  left: toggles[key] ? 26 : 2,
-                  width: 24,
-                  height: 24,
-                  borderRadius: "50%",
-                  backgroundColor: toggles[key] ? "#FFFFFF" : "#D9D9D9",
-                  transition: "left 0.3s",
-                }}
-              />
-              <span
-                style={{
-                  position: "absolute",
-                  top: 8,
-                  left: toggles[key] ? 7 : 28,
-                  width: toggles[key] ? 17 : 22,
-                  height: 12,
-                  fontSize: 12,
-                  fontWeight: 700,
-                  fontStyle: "normal",
-                  lineHeight: "12px",
-                  letterSpacing: "0%",
-                  color: toggles[key] ? "#FFFFFF" : "#A6A6A6",
-                  opacity: 1,
-                  transform: "rotate(0deg)",
-                }}
-              >
-                {toggles[key] ? "ON" : "OFF"}
-              </span>
-            </div>
+      <div className="absolute flex items-center top-[50%] transform translate-y-[-50%] right-0">
+        {/* Arrow Button */}
+        <div
+          onClick={handleToggleSlide}
+          className="cursor-pointer"
+          style={{
+            borderTopLeftRadius: 4,
+            borderBottomLeftRadius: 4,
+            backgroundColor: "#00674CBF",
+            padding: '1.125rem 0.125rem',
+            color: 'white',
+          }}
+        >
+          <BiSolidLeftArrow
+            style={{
+              transform: isToggleOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.3s',
+            }}
+            size=".75rem"
+          />
+        </div>
+
+        {/* Toggle Box */}
+        {isToggleOpen && (
+          <div
+            style={{
+              padding: 8,
+              borderRadius: 0,
+              backgroundColor: "#00674CBF",
+              display: "flex",
+              flexDirection: "column",
+              gap: 4,
+            }}
+          >
+            {toggleNames.map(({ key, label }) => (
+              <div key={key} className="flex gap-1 items-center text-white text-sm px-2">
+                <span
+                  style={{
+                    fontWeight: 700,
+                    fontStyle: "normal",
+                    fontSize: "12px",
+                    lineHeight: "18px",
+                    letterSpacing: "0%",
+                    textAlign: 'right',
+                    flex: 1,
+                  }}
+                >
+                  {label}
+                </span>
+                <div className="relative flex items-center">
+                  <div
+                    onClick={() => setToggles(prev => ({ ...prev, [key]: !prev[key] }))}
+                    className="relative cursor-pointer"
+                    style={{
+                      width: 52,
+                      height: 28,
+                      borderRadius: 24,
+                      backgroundColor: toggles[key] ? "#0FD892" : "#F0F0F0",
+                      transition: "background-color 0.3s",
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 2,
+                        left: toggles[key] ? 26 : 2,
+                        width: 24,
+                        height: 24,
+                        borderRadius: "50%",
+                        backgroundColor: toggles[key] ? "#FFFFFF" : "#D9D9D9",
+                        transition: "left 0.3s",
+                      }}
+                    />
+                    <span
+                      style={{
+                        position: "absolute",
+                        top: 8,
+                        left: toggles[key] ? 7 : 28,
+                        width: toggles[key] ? 17 : 22,
+                        height: 12,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        fontStyle: "normal",
+                        lineHeight: "12px",
+                        letterSpacing: "0%",
+                        color: toggles[key] ? "#FFFFFF" : "#A6A6A6",
+                        opacity: 1,
+                        transform: "rotate(0deg)",
+                      }}
+                    >
+                      {toggles[key] ? "ON" : "OFF"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
 
       {/* Side Panel */}
@@ -427,7 +461,7 @@ export default function Map() {
         >
           <p className="font-bold text-[18px] leading-[27px] text-[#00674C]">Current Weather</p>
           <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gapSonyaSoftech gap-2">
               {current ? (
                 <>
                   <Icon size="3.75rem" icon={WEATHER_CONDITION_ICONS[current.weather[0].icon]} />
