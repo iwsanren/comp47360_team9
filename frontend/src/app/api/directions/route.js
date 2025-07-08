@@ -16,15 +16,11 @@ export async function POST(req) {
     const resultsArray = await Promise.all(promises);
     const results = Object.fromEntries(resultsArray.map(r => [r.mode, r.data]));
 
-    return new Response(JSON.stringify(results), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    return Response.json(results);
   } catch (error) {
-    return new Response(
-      JSON.stringify({ error: error.message || 'Fetch failed' }),
+    console.error(error);
+    return Response.json(
+      { error: "Failed to fetch routing data." },
       { status: 500 }
     );
   }

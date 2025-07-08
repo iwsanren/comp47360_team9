@@ -19,7 +19,7 @@ export async function POST() {
     const encodedQuery = encodeURIComponent(overpassQuery);
 
     // 4. Overpass API URL
-    const url = `https://overpass-api.de/api/interpreter?data=${encodedQuery}`;
+    const url = `https://lz4.overpass-api.de/api/interpreter?data=${encodedQuery}`;
 
     // 5. call Overpass API
     const response = await fetch(url);
@@ -28,6 +28,7 @@ export async function POST() {
     // 6. convert Overpass output to GeoJSON FeatureCollection
     const geojson = convertToGeoJSON(data.elements)
 
+    // console.log(data)
     // 7. return GeoJSON
     return Response.json(geojson);
 

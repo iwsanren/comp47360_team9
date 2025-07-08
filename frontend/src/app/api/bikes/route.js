@@ -21,11 +21,13 @@ const getData = async () => {
     `;
 
     const encodedQuery = encodeURIComponent(overpassQuery);
-    const url = `https://overpass-api.de/api/interpreter?data=${encodedQuery}`;
+    const url = `https://lz4.overpass-api.de/api/interpreter?data=${encodedQuery}`;
 
     // Fetch data from Overpass API
     const response = await fetch(url);
     const data = await response.json();
+
+    // console.log(data)
 
     const geojson = convertToGeoJSON(data.elements)
     // Return raw Overpass JSON response
@@ -35,7 +37,7 @@ const getData = async () => {
   } catch (error) {
     console.error(error);
     return Response.json(
-      { error: "Failed to fetch bike station and bike lane data." },
+      { error: "Failed to fetch bike station data." },
       { status: 500 }
     );
   } 
