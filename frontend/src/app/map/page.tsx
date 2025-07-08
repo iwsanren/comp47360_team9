@@ -44,6 +44,7 @@ export default function Map() {
   const [parksData, setParksData] = useState<any>(null); // Store parks GeoJSON
   const [bikesData, setBikesData] = useState<any>(null); // Store bikes GeoJSON
   const [evData, setEvData] = useState<any>(null); // Store EV stations GeoJSON
+  const [airQualityData, setAirQualityData] = useState<any>(null); 
   const [isToggleOpen, setIsToggleOpen] = useState<boolean>(true); // New state for toggle visibility
 
   // Initialize Mapbox
@@ -241,6 +242,94 @@ export default function Map() {
       }
     }
   }, [toggles.ev, evData]);
+
+  // Handle air quality toggle
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+
+    const map = mapInstanceRef.current;
+
+    if (toggles.air) {
+      if (!airQualityData) {
+        const fetchAirQuality = async () => {
+          try {
+            const res = await fetch("/api/airquality", { method: "POST" });
+            const geojson = await res.json();
+            if (geojson.features) {
+              setAirQualityData(geojson);
+            } else {
+              console.error("Invalid air quality GeoJSON data");
+            }
+          } catch (error) {
+            console.error("Failed to fetch air quality data:", error);
+          }
+        };
+        fetchAirQuality();
+      }
+
+      if (airQualityData && !map.getSource("air-quality")) {
+        map.addSource("air-quality", {
+          type: "geojson",
+          data: airQualityData,
+        });
+
+        map.addLayer({
+          id: "air-quality-heatmap",
+          type: "heatmap",
+          source: "air-quality",
+          paint: {
+            // Weight based on AQI value (0 to 5)
+            "heatmap-weight": [
+              "interpolate",
+              ["linear"],
+              ["get", "value"],
+              0, 0,
+              5, 1
+            ],
+            // Color ramp
+            "heatmap-color": [
+              "interpolate",
+              ["linear"],
+              ["heatmap-density"],
+              0, "rgba(0, 0, 255, 0)",
+              0.3, "rgb(0, 0, 255)",
+              0.5, "rgb(0, 255, 0)",
+              0.75, "rgb(255, 255, 0)",
+              1, "rgb(255, 0, 0)"
+            ],
+            // Radius by zoom level
+            "heatmap-radius": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              0, 1,
+              3, 25,
+              9, 50,
+              12, 75,
+              15, 100
+            ],
+            // Intensity by zoom level
+            "heatmap-intensity": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              0, 1,
+              15, 3
+            ],
+            // Opacity
+            "heatmap-opacity": 0.8
+          }
+        });
+      }
+    } else {
+      if (map.getLayer("air-quality-heatmap")) {
+        map.removeLayer("air-quality-heatmap");
+      }
+      if (map.getSource("air-quality")) {
+        map.removeSource("air-quality");
+      }
+    }
+  }, [toggles.air, airQualityData]);
 
   // Weather fetch
   useEffect(() => {
