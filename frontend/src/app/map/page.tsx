@@ -392,14 +392,13 @@ export default function Map() {
             <input
               type="text"
               placeholder="Start Location"
-              className="rounded-sm"
+              className="rounded-sm leading-[24px] lg:leading-[27px]"
               style={{
                 width: '100%',
                 backgroundColor: "#F1F5F7",
                 padding: "16px 24px",
                 border: "none",
                 outline: "none",
-                lineHeight: 1.5,
               }}
               value={startLocation}
               onChange={(e) => setStartLocation(e.target.value)}
@@ -407,7 +406,7 @@ export default function Map() {
             <input
               type="text"
               placeholder="Enter Your Destination"
-              className="rounded-sm"
+              className="rounded-sm leading-[24px] lg:leading-[27px]"
               style={{
                 width: '100%',
                 backgroundColor: "#F1F5F7",
