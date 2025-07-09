@@ -36,4 +36,4 @@ logs
 Thumbs.db
 
 # test file
-frontend/src/app/mapTest
+webapp/src/app/mapTest
