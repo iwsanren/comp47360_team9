@@ -1,53 +1,64 @@
-# 🎉 GitLab CI/CD 配置完成总结
+# 🎉 GitLab CI/CD Pipeline Configuration Summary
 
-## ✅ 已完成的配置
+## ✅ Completed Configuration
 
-### 1. 项目结构
+### 1. Fixed CI/CD Pipeline Issues
+- **Environment Variables**: Fixed `.env` file handling in CI/CD pipeline
+- **Docker Compose**: Removed problematic volume mounts from production config
+- **Deployment Directory**: Pipeline now creates `.env` file in deployment directory
+- **Multi-Environment**: Separate staging and production deployments
+
+### 2. Project Structure
 ```
 d:\School\Program\comp47360_team9\
-├── webapp/                   # Next.js 前端应用
-│   ├── Dockerfile           # ✅ 已创建
-│   ├── package.json         # ✅ 已存在
-│   └── src/                 # 应用源码
+├── webapp/                   # Next.js frontend application
+│   ├── Dockerfile           # ✅ Configured
+│   ├── package.json         # ✅ Exists
+│   └── src/                 # Application source code
 ├── ml/                      # Python ML API
-│   ├── app.py              # ✅ 已存在
-│   ├── Dockerfile          # ✅ 已创建
-│   ├── requirements.txt    # ✅ 已创建
-│   └── .dockerignore       # ✅ 已创建
-├── docker-compose.yml       # ✅ 已配置
-├── docker-compose.prod.yml  # ✅ 已配置
-├── .gitlab-ci.yml          # ✅ 简化配置
-├── .env                    # ✅ 环境变量模板
+│   ├── app.py              # ✅ Exists
+│   ├── Dockerfile          # ✅ Fixed COPY commands
+│   ├── requirements.txt    # ✅ Configured
+│   └── .dockerignore       # ✅ Configured
+├── docker-compose.yml       # ✅ Fixed env_file configuration
+├── docker-compose.prod.yml  # ✅ Removed volumes, added env_file
+├── .gitlab-ci.yml          # ✅ Fixed .env handling
+├── .env                    # ✅ Contains API keys (in .gitignore)
+├── backup/ci-configs/      # ✅ Archived old CI configs
 └── scripts/
-    ├── setup-server.sh     # ✅ 服务器自动部署脚本
-    └── test-config.sh      # ✅ 配置测试脚本
+    ├── test-docker-setup.sh     # ✅ Local testing script
+    ├── test-docker-setup.bat    # ✅ Windows testing script
+    ├── setup-server.sh          # ✅ Server deployment script
+    └── test-config.sh           # ✅ Configuration test script
 ```
 
-### 2. CI/CD 配置
-- ✅ **简化 CI/CD** - 无需 GitLab Runner
-- ✅ **自动部署** - develop 分支推送自动部署到 staging
-- ✅ **手动生产** - main 分支手动部署到 production
-- ✅ **环境隔离** - staging (端口 3030) 和 production (端口 8080)
-- ✅ **故障恢复** - 自动选择可用的部署目录
+### 3. CI/CD Pipeline Configuration
+- ✅ **Staging Deployment** - develop branch → staging environment (port 3030)
+- ✅ **Production Deployment** - main branch → production environment (port 8080)
+- ✅ **Environment Variables** - Automated .env file creation during deployment
+- ✅ **Container Management** - Automatic stop/start of containers
+- ✅ **Health Checks** - Container status monitoring
 
-### 3. Docker 配置
-- ✅ **多服务架构** - webapp + ml-api
-- ✅ **环境变量** - 支持 .env 文件
-- ✅ **网络配置** - 服务间通信
-- ✅ **端口映射** - 外部访问配置
+### 4. Docker Configuration
+- ✅ **Multi-service Architecture** - webapp + ml-api
+- ✅ **Environment Variables** - Proper env_file support
+- ✅ **Network Configuration** - Service interconnection
+- ✅ **Port Mapping** - External access configuration
+- ✅ **No Volume Mounts** - Simplified container configuration
 
-## 🔑 关键特性
+## 🔑 Key Features
 
-### 无需 GitLab Runner
-- 传统方式需要注册和配置 GitLab Runner
-- 我们的简化方式直接 SSH 到服务器构建
-- 更简单，更可靠，更容易调试
+### Environment Variable Handling
+The pipeline now properly handles environment variables by:
+1. Reading GitLab CI/CD variables
+2. Creating `.env` file in deployment directory
+3. Docker Compose uses `env_file: .env` configuration
 
-### 智能目录选择
-```bash
-# 自动选择可用目录
-/opt/team9-deploy          # 首选
-$HOME/team9-deploy         # 备选
+### Fixed Issues
+- **Volume Mounts**: Removed problematic volume mounts that caused deployment failures
+- **Missing .env**: Pipeline now creates .env file from CI/CD variables
+- **Multi-file COPY**: Fixed Dockerfile COPY commands for multiple files
+- **Environment Isolation**: Separate staging and production environments
 /tmp/team9-deploy          # 临时
 $(pwd)/team9-deploy        # 当前目录
 ```

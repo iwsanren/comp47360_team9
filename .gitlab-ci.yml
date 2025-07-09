@@ -28,6 +28,14 @@ deploy_staging:
     - mkdir -p /tmp/team9-deploy/staging
     - cp -r . /tmp/team9-deploy/staging/
     - cd /tmp/team9-deploy/staging
+    - echo "Creating .env file with environment variables..."
+    - echo "OPENWEATHER_API_KEY=$OPENWEATHER_API_KEY" > .env
+    - echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> .env
+    - echo "NEXT_PUBLIC_MAPBOX_API_KEY=$NEXT_PUBLIC_MAPBOX_API_KEY" >> .env
+    - echo "NODE_ENV=development" >> .env
+    - echo "FLASK_ENV=production" >> .env
+    - echo ".env file created:"
+    - cat .env
     - echo "Stopping any existing containers..."
     - docker-compose down || true
     - echo "Building containers..."
@@ -64,6 +72,20 @@ deploy_production:
     - export NEXT_PUBLIC_MAPBOX_API_KEY="$NEXT_PUBLIC_MAPBOX_API_KEY"
     - export WEBAPP_PORT=8080
     - export ML_API_PORT=5001
+    - echo "Creating deployment directory..."
+    - mkdir -p /tmp/team9-deploy/production
+    - cp -r . /tmp/team9-deploy/production/
+    - cd /tmp/team9-deploy/production
+    - echo "Creating .env file with environment variables..."
+    - echo "OPENWEATHER_API_KEY=$OPENWEATHER_API_KEY" > .env
+    - echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> .env
+    - echo "NEXT_PUBLIC_MAPBOX_API_KEY=$NEXT_PUBLIC_MAPBOX_API_KEY" >> .env
+    - echo "NODE_ENV=production" >> .env
+    - echo "FLASK_ENV=production" >> .env
+    - echo "WEBAPP_PORT=8080" >> .env
+    - echo "ML_API_PORT=5001" >> .env
+    - echo ".env file created:"
+    - cat .env
     - echo "Stopping any existing containers..."
     - docker-compose -f docker-compose.prod.yml down || true
     - echo "Building containers..."
