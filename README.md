@@ -14,8 +14,7 @@ This is a full-stack web application designed to help New Yorkers make smarter, 
 
 ## Tech Stack
 
-- **Frontend**: Next.js (React framework), Leaflet / Mapbox
-- **Backend**: Node.js
+- **webapp**: Next.js (React framework), Leaflet / Mapbox, Node.js
 - **Machine Learning**: scikit-learn, XGBoost (Python microservice)
 - **Routing Engine**: OSRM
 - **Deployment**: Render

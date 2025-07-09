@@ -1,13 +1,13 @@
 version: '3.8'
 
 services:
-  frontend:
+  webapp:
     build:
-      context: ./frontend
+      context: ./webapp
     ports:
       - "3030:3000"
     volumes:
-      - ./frontend:/app
+      - ./webapp:/app
       - /app/node_modules
     environment:
       - NODE_ENV=development
