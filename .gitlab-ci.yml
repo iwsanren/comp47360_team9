@@ -5,63 +5,29 @@ default:
 stages:
   - deploy
 
-variables:
-  DOCKER_DRIVER: overlay2
-  DOCKER_TLS_CERTDIR: ""
-  DOCKER_HOST: unix:///var/run/docker.sock
-
 deploy_staging:
   stage: deploy
-  image: docker:24.0.5
   tags:
-    - docker
+    - shell
   before_script:
-    - apk add --no-cache docker-compose git curl
-    - docker info
+    - docker --version
+    - docker-compose --version
   script:
     - echo "Building and deploying to staging..."
-    - echo "Current directory is $(pwd)"
-    - echo "Files in directory:"
-    - ls -la
-    - docker-compose --version
-    - echo "Setting up environment variables..."
-    - export OPENWEATHER_API_KEY="$OPENWEATHER_API_KEY"
-    - export GOOGLE_MAPS_API_KEY="$GOOGLE_MAPS_API_KEY"
-    - export NEXT_PUBLIC_MAPBOX_API_KEY="$NEXT_PUBLIC_MAPBOX_API_KEY"
-    - echo "Creating deployment directory..."
     - mkdir -p /tmp/team9-deploy/staging
     - cp -r . /tmp/team9-deploy/staging/
     - cd /tmp/team9-deploy/staging
-    - echo "Creating .env file with environment variables..."
+    - echo "Creating .env file..."
     - echo "OPENWEATHER_API_KEY=$OPENWEATHER_API_KEY" > .env
     - echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> .env
     - echo "NEXT_PUBLIC_MAPBOX_API_KEY=$NEXT_PUBLIC_MAPBOX_API_KEY" >> .env
     - echo "NODE_ENV=development" >> .env
     - echo "FLASK_ENV=production" >> .env
-    - echo ".env file created:"
-    - cat .env
-    - echo "Stopping any existing containers..."
     - docker-compose down || true
-    - echo "Building containers..."
     - docker-compose build
-    - echo "Starting containers..."
     - docker-compose up -d
-    - echo "Waiting for containers to start..."
-    - sleep 15
-    - echo "Container status:"
     - docker-compose ps
-    - echo "Checking container logs..."
-    - docker-compose logs --tail=20 webapp || echo "Cannot get webapp logs"
-    - docker-compose logs --tail=20 ml-api || echo "Cannot get ml-api logs"
-    - echo "Testing webapp connectivity..."
-    - curl -f http://localhost:3030 || echo "Webapp not responding"
-    - echo "Testing ML API connectivity..."
-    - curl -f http://localhost:5000 || echo "ML API not responding"
-    - echo "Checking port bindings..."
-    - netstat -tlnp | grep :3030 || echo "Port 3030 not bound"
-    - netstat -tlnp | grep :5000 || echo "Port 5000 not bound"
-    - echo "Staging deployment completed!"
-    - echo "Access at http://137.43.49.26:3030"
+    - docker-compose logs --tail=20
   environment:
     name: staging
     url: http://137.43.49.26:3030
