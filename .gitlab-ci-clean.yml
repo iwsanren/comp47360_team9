@@ -4,11 +4,12 @@ stages:
 variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
-  DOCKER_HOST: unix:///var/run/docker.sock
 
 deploy_staging:
   stage: deploy
   image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
   tags:
     - docker
   before_script:
@@ -24,18 +25,14 @@ deploy_staging:
     - export OPENWEATHER_API_KEY="$OPENWEATHER_API_KEY"
     - export GOOGLE_MAPS_API_KEY="$GOOGLE_MAPS_API_KEY"
     - export NEXT_PUBLIC_MAPBOX_API_KEY="$NEXT_PUBLIC_MAPBOX_API_KEY"
-    - echo "Creating deployment directory..."
-    - mkdir -p /tmp/team9-deploy/staging
-    - cp -r . /tmp/team9-deploy/staging/
-    - cd /tmp/team9-deploy/staging
     - echo "Stopping any existing containers..."
-    - docker-compose down || true
+    - docker-compose -f docker-compose.yml down || true
     - echo "Building containers..."
-    - docker-compose build
+    - docker-compose -f docker-compose.yml build
     - echo "Starting containers..."
-    - docker-compose up -d
+    - docker-compose -f docker-compose.yml up -d
     - echo "Container status:"
-    - docker-compose ps
+    - docker-compose -f docker-compose.yml ps
     - echo "Staging deployment completed!"
     - echo "Access at http://137.43.49.26:3030"
   environment:
@@ -47,6 +44,8 @@ deploy_staging:
 deploy_production:
   stage: deploy
   image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
   tags:
     - docker
   before_script:
