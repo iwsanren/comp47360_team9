@@ -20,7 +20,8 @@ deploy_staging:
     - ssh-keyscan -H $DEPLOY_SERVER >> ~/.ssh/known_hosts
   script:
     - echo "Deploying to staging server via direct build..."
-    - ssh $DEPLOY_USER@$DEPLOY_SERVER "
+    - |
+      ssh $DEPLOY_USER@$DEPLOY_SERVER "
         set -e
         
         # Find deployment directory
@@ -96,7 +97,8 @@ deploy_production:
     - ssh-keyscan -H $DEPLOY_SERVER >> ~/.ssh/known_hosts
   script:
     - echo "Deploying to production server..."
-    - ssh $DEPLOY_USER@$DEPLOY_SERVER "
+    - |
+      ssh $DEPLOY_USER@$DEPLOY_SERVER "
         set -e
         
         # Find deployment directory
