@@ -15,7 +15,7 @@ deploy_staging:
   script:
     - echo "Building and deploying to staging..."
     - mkdir -p /tmp/team9-deploy/staging
-    - cp -r . /tmp/team9-deploy/staging/
+    - rsync -av --exclude='.git' --exclude='.gitlab' ./ /tmp/team9-deploy/staging/
     - cd /tmp/team9-deploy/staging
     - echo "Creating .env file..."
     - echo "OPENWEATHER_API_KEY=$OPENWEATHER_API_KEY" > .env
