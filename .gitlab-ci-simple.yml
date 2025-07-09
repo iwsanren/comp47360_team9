@@ -83,12 +83,12 @@ deploy_staging:
   only:
     - develop
 
-# Deploy to production (main branch)
+# Deploy to production (main branch) - Manual deployment
 deploy_production:
   stage: deploy
   image: alpine:latest
   before_script:
-    - apk add --no-cache openssh-client
+    - apk add --no-cache openssh-client git
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
@@ -99,7 +99,7 @@ deploy_production:
     - ssh $DEPLOY_USER@$DEPLOY_SERVER "
         set -e
         
-        # Find deployment directory
+        # Find deployment directory  
         find_deploy_dir() {
           if [ -d '/opt/team9-deploy' ] && [ -w '/opt/team9-deploy' ]; then
             echo '/opt/team9-deploy'
@@ -119,37 +119,32 @@ deploy_production:
         mkdir -p \$DEPLOY_BASE/production
         mkdir -p \$DEPLOY_BASE/repo
         
-        # Clone or update repository
-        if [ ! -d \"\$DEPLOY_BASE/repo/.git\" ]; then
-          echo \"Cloning repository...\"
-          git clone https://csgitlab.ucd.ie/ZhaofangHe/comp47360_team9.git \$DEPLOY_BASE/repo
-        else
-          echo \"Updating repository...\"
-          cd \$DEPLOY_BASE/repo
-          git fetch origin
-          git reset --hard origin/main
-        fi
-        
-        # Copy project files to production
+        # Update repository to main branch
         cd \$DEPLOY_BASE/repo
+        git fetch origin
+        git reset --hard origin/main
+        
+        # Copy to production
         cp -r . \$DEPLOY_BASE/production/
         cd \$DEPLOY_BASE/production
         
-        # Set environment variables
+        # Set environment variables for production
         export OPENWEATHER_API_KEY='$OPENWEATHER_API_KEY'
-        export GOOGLE_MAPS_API_KEY='$GOOGLE_MAPS_API_KEY' 
+        export GOOGLE_MAPS_API_KEY='$GOOGLE_MAPS_API_KEY'
         export NEXT_PUBLIC_MAPBOX_API_KEY='$NEXT_PUBLIC_MAPBOX_API_KEY'
+        export WEBAPP_PORT=8080
+        export ML_API_PORT=5001
         
-        # Stop existing containers
-        docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
+        # Update docker-compose for production ports
+        sed -i 's/3030:3000/8080:3000/g' docker-compose.yml
+        sed -i 's/5000:5000/5001:5000/g' docker-compose.yml
         
-        # Build and start containers
-        echo \"Building and starting production containers...\"
-        docker-compose -f docker-compose.prod.yml build
-        docker-compose -f docker-compose.prod.yml up -d
+        # Deploy
+        docker-compose down 2>/dev/null || true
+        docker-compose build
+        docker-compose up -d
         
-        # Show container status
-        docker-compose -f docker-compose.prod.yml ps
+        docker-compose ps
         echo \"Production deployment completed!\"
         echo \"Access at: http://137.43.49.26:8080\"
       "
