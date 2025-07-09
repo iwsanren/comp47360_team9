@@ -32,10 +32,16 @@ Services were not accessible from outside Docker containers because:
 - **Separated** staging and production deployment directories
 - **Added** extensive debugging and connectivity tests
 
-### 3. Fixed Container Network Binding ⚠️ **CRITICAL FIX**
+### 3. Fixed Container Network Binding
 - **webapp/Dockerfile**: Changed CMD to `["npm", "run", "dev", "--", "--hostname", "0.0.0.0"]`
 - **ml/app.py**: Changed to `app.run(host='0.0.0.0', port=5000, debug=True)`
 - Now both services bind to all interfaces (0.0.0.0) instead of just localhost
+
+### 4. Fixed Mapbox API Key Issue (NEW)
+- **Problem**: Next.js production build didn't have access to NEXT_PUBLIC_MAPBOX_API_KEY
+- **Solution**: Added build-time ARG and ENV variables in webapp/Dockerfile
+- **Updated**: docker-compose.yml and docker-compose.prod.yml to pass build args
+- **Result**: Mapbox GL can now access API tokens in production builds
 - **Added** automatic `.env` file creation in deployment directory
 - **Included** all required environment variables:
   - `OPENWEATHER_API_KEY`
