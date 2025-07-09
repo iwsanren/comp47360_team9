@@ -1,12 +1,20 @@
 # CI/CD Pipeline Fix Summary
 
-## 🎯 Problem Solved
+## 🎯 Problems Solved
+
+### 1. Missing .env File Issue
 The CI/CD pipeline was failing because the `.env` file was not available in the deployment directory. This happened because:
 1. `.env` is in `.gitignore` (correctly, for security)
 2. `cp -r . /deployment/dir/` doesn't copy ignored files
 3. `docker-compose.yml` uses `env_file: .env` but the file was missing
 
-## ✅ Solution Implemented
+### 2. Container Network Binding Issue ⚠️ **CRITICAL**
+Services were not accessible from outside Docker containers because:
+1. **Next.js dev server** only bound to localhost (127.0.0.1) inside container
+2. **Flask app** only bound to localhost (127.0.0.1) inside container
+3. External requests to http://137.43.49.26:3030 couldn't reach the services
+
+## ✅ Solutions Implemented
 
 ### 1. Fixed docker-compose.prod.yml
 - **Removed** problematic volume mounts that caused deployment issues
@@ -14,6 +22,20 @@ The CI/CD pipeline was failing because the `.env` file was not available in the 
 - **Updated** environment variables to match staging config
 
 ### 2. Updated .gitlab-ci.yml
+- **Added** automatic `.env` file creation in deployment directory
+- **Included** all required environment variables:
+  - `OPENWEATHER_API_KEY`
+  - `GOOGLE_MAPS_API_KEY` 
+  - `NEXT_PUBLIC_MAPBOX_API_KEY`
+  - `NODE_ENV`
+  - `FLASK_ENV`
+- **Separated** staging and production deployment directories
+- **Added** extensive debugging and connectivity tests
+
+### 3. Fixed Container Network Binding ⚠️ **CRITICAL FIX**
+- **webapp/Dockerfile**: Changed CMD to `["npm", "run", "dev", "--", "--hostname", "0.0.0.0"]`
+- **ml/app.py**: Changed to `app.run(host='0.0.0.0', port=5000, debug=True)`
+- Now both services bind to all interfaces (0.0.0.0) instead of just localhost
 - **Added** automatic `.env` file creation in deployment directory
 - **Included** all required environment variables:
   - `OPENWEATHER_API_KEY`
@@ -93,9 +115,18 @@ docker-compose -f /tmp/team9-deploy/staging/docker-compose.yml ps
 
 ## 📝 Key Files Changed
 
-- `.gitlab-ci.yml` - Fixed .env file handling
+- `.gitlab-ci.yml` - Fixed .env file handling + added connectivity tests
 - `docker-compose.prod.yml` - Removed volumes, added env_file
-- `scripts/test-docker-setup.*` - Added local testing scripts
-- `CONFIGURATION-SUMMARY.md` - Updated documentation
+- `webapp/Dockerfile` - **CRITICAL**: Fixed host binding to 0.0.0.0
+- `ml/app.py` - **CRITICAL**: Fixed Flask host binding to 0.0.0.0
+- `CI-CD-FIX-SUMMARY.md` - Updated documentation
 
-The pipeline should now successfully deploy both staging and production environments with all required environment variables properly configured.
+## 🚨 Why the Website Wasn't Working
+
+The main issue was **network binding**:
+- Next.js dev server was only listening on `localhost` inside the container
+- Flask app was only listening on `localhost` inside the container  
+- External requests to `http://137.43.49.26:3030` couldn't reach the services
+- **Solution**: Both services now bind to `0.0.0.0` (all network interfaces)
+
+The pipeline should now successfully deploy both staging and production environments with all services accessible from external IPs.

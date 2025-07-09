@@ -16,5 +16,5 @@ COPY . .
 # Expose default Next.js port
 EXPOSE 3000
 
-# Start development server (can change to `npm run build && npm start` for production)
-CMD ["npm", "run", "dev"]
+# Start development server with host binding for Docker
+CMD ["npm", "run", "dev", "--", "--hostname", "0.0.0.0"]

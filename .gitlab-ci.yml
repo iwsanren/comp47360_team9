@@ -44,6 +44,19 @@ deploy_staging:
     - docker-compose up -d
     - echo "Container status:"
     - docker-compose ps
+    - echo "Checking container logs..."
+    - docker-compose logs --tail=20 webapp
+    - docker-compose logs --tail=20 ml-api
+    - echo "Checking if services are responding..."
+    - sleep 10
+    - docker-compose ps
+    - echo "Testing webapp connectivity..."
+    - curl -f http://localhost:3030 || echo "Webapp not responding"
+    - echo "Testing ML API connectivity..."
+    - curl -f http://localhost:5000 || echo "ML API not responding"
+    - echo "Checking port bindings..."
+    - netstat -tlnp | grep :3030 || echo "Port 3030 not bound"
+    - netstat -tlnp | grep :5000 || echo "Port 5000 not bound"
     - echo "Staging deployment completed!"
     - echo "Access at http://137.43.49.26:3030"
   environment:
