@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 3000
 
 # Start development server (can change to `npm run build && npm start` for production)
-CMD ["npm", "run", "dev", "--", "--hostname", "0.0.0.0"]
+CMD ["next", "start", "-p", "3000", "-H", "0.0.0.0"]
