@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # Next.js Web Application
   webapp:
     build:
       context: ./webapp
@@ -12,4 +13,18 @@ services:
     environment:
       - NODE_ENV=development
       - NEXT_TELEMETRY_DISABLED=1
+    depends_on:
+      - ml-api
+
+  # ML Prediction Service
+  ml-api:
+    build:
+      context: ./ml
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+    volumes:
+      - ./ml:/app:ro  # Read-only mount for production security
       
