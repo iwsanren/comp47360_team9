@@ -40,3 +40,12 @@ frontend
 mapTest
 webapp/src/app/mapTest
 
+backup/
+CI-CD-FIX-SUMMARY.md
+CONFIGURATION-SUMMARY.md
+DEPLOYMENT-COMPLETE-GUIDE.md
+NGINX-SETUP.md
+SETUP-NEXT-STEPS.md
+
+docs/*
+!docs/git_workflow.md
