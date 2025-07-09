@@ -24,7 +24,7 @@ deploy_staging:
     - echo "NODE_ENV=development" >> .env
     - echo "FLASK_ENV=production" >> .env
     - docker-compose down || true
-    - docker-compose build
+    - docker-compose build --no-cache
     - docker-compose up -d
     - docker-compose ps
     - docker-compose logs --tail=20

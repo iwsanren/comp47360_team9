@@ -4,16 +4,20 @@ services:
     image: ${WEBAPP_IMAGE:-comp47360_team9-webapp}
     build:
       context: ./webapp
+      args:
+        - NEXT_PUBLIC_MAPBOX_API_KEY=${NEXT_PUBLIC_MAPBOX_API_KEY}
+        - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+        - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
     ports:
       - "${WEBAPP_PORT:-3030}:3000"
-    volumes:
-      - ./webapp:/app
-      - /app/node_modules
     environment:
-      - NODE_ENV=${NODE_ENV:-development}
+      - NODE_ENV=${NODE_ENV:-production}
       - NEXT_TELEMETRY_DISABLED=1
       - NEXT_PUBLIC_MAPBOX_API_KEY=${NEXT_PUBLIC_MAPBOX_API_KEY}
       - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+    env_file:
+      - .env
     depends_on:
       - ml-api
 

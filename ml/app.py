@@ -58,6 +58,28 @@ def classify_busyness_zone_hour(pred, zone_id, hour, day):
     else:
         return "normal"
 
+# Root route to provide API info
+@app.route('/', methods=['GET'])
+def root():
+    return jsonify({
+        "service": "Manhattan My Way ML API",
+        "version": "1.0.0",
+        "endpoints": {
+            "/predict-all": "GET/POST - Get busyness predictions for all Manhattan zones",
+            "/health": "GET - Health check endpoint"
+        },
+        "status": "running"
+    })
+
+# Health check endpoint
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({
+        "status": "healthy",
+        "service": "ML API",
+        "timestamp": datetime.now().isoformat()
+    })
+
 @app.route('/predict-all', methods=['GET', 'POST'])
 def predict_all():
     try:
