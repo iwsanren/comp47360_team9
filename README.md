@@ -123,6 +123,32 @@ We use a simple Git branching strategy based on `main`, `develop`, and `feature/
 
 See `docs/git_workflow.md` for full explanation and diagram.
 
+# ML API Integration Guide
+
+This document explains how to call the ML API in different environments.
+
+## Development Environment
+
+### ➤ **Option 1. Running Flask app directly**
+
+If you are running the Flask app directly on your local machine, fetch the API using: http://127.0.0.1:5000/predict-all
+
+### ➤ **Option 2. Running the entire project with Docker**
+
+If you are running the project via `docker`, fetch the API using: http://localhost:5001/predict-all
+
+> 💡 **Note:**  
+> Make sure the container’s port is mapped to your local `5001` port. Adjust accordingly
+
+---
+
+## 🌐 Production Environment
+
+In production, always fetch: /api/ml/predict-all
+
+This endpoint is **proxied by Nginx or the Next.js API route to the ML server**. You do not need to call the ML server directly.
+
+
 ## Project Structure
 ```
 comp47360_team9/

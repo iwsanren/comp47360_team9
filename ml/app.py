@@ -8,10 +8,12 @@ import pytz
 import holidays
 import os
 from dotenv import load_dotenv
+from flask_cors import CORS
 
 load_dotenv(override=True) # Load environment variables from .env file
 
 app = Flask(__name__)
+CORS(app)
 
 # Loading trained model.
 model = joblib.load('./xgboost_taxi_model.joblib')
