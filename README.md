@@ -21,108 +21,6 @@ This is a full-stack web application designed to help New Yorkers make smarter, 
 - **Deployment**: Docker + GitLab CI/CD on Linux server
 - **Infrastructure**: Docker Compose, nginx
 
-## Project Structure
-
-```
-├── webapp/                 # Next.js frontend application
-│   ├── src/               # Source code
-│   ├── public/            # Static assets
-│   ├── Dockerfile         # Docker configuration
-│   └── package.json       # Dependencies
-├── ml/                    # Python ML API service
-│   ├── app.py            # Flask API server
-│   ├── requirements.txt  # Python dependencies
-│   └── Dockerfile        # Docker configuration
-├── scripts/              # Deployment scripts
-│   ├── setup-server.sh   # Server initialization
-│   └── test-config.sh    # Configuration testing
-├── docs/                 # Documentation
-├── docker-compose.yml    # Multi-service configuration
-└── .gitlab-ci.yml       # CI/CD pipeline
-```
-
-## How to Run the Project
-
-### Local Development
-
-#### Prerequisites
-- Docker and Docker Compose
-- Node.js 18+ (for local development)
-- Python 3.9+ (for ML service development)
-
-#### Quick Start with Docker
-```bash
-# Clone the repository
-git clone https://csgitlab.ucd.ie/ZhaofangHe/comp47360_team9.git
-cd comp47360_team9
-
-# Create environment file
-cp .env.example .env
-# Edit .env with your API keys
-
-# Start all services
-docker-compose up --build
-
-# Access the application
-# Frontend: http://localhost:3000
-# ML API: http://localhost:5000
-```
-
-#### Development Mode
-```bash
-# Frontend development
-cd webapp
-npm install
-npm run dev
-
-# ML service development
-cd ml
-pip install -r requirements.txt
-python app.py
-```
-
-### Production Deployment
-
-The project uses GitLab CI/CD for automated deployment to a Linux server.
-
-#### Deployment URLs
-- **Staging**: http://137.43.49.26:3030 (develop branch)
-- **Production**: http://137.43.49.26:8080 (main branch)
-
-#### Setup Deployment
-1. Configure GitLab CI/CD variables (see `SETUP-NEXT-STEPS.md`)
-2. Set up SSH keys for server access
-3. Push to `develop` branch for staging deployment
-4. Merge to `main` branch for production deployment
-
-For detailed setup instructions, see:
-- `SETUP-NEXT-STEPS.md` - Quick setup guide
-- `docs/quick-setup-guide.md` - Detailed instructions
-- `CONFIGURATION-SUMMARY.md` - Complete configuration overview
-
-## Features
-
-- **Interactive Map**: Leaflet/Mapbox integration for NYC navigation
-- **Route Planning**: Multi-modal transportation options
-- **Real-time Data**: Weather, air quality, bike availability
-- **ML Predictions**: Crowd density and busyness forecasting
-- **Responsive Design**: Mobile-first approach
-TODO: Add instructions for setting up Python service (e.g., Flask, FastAPI)
-
-OSRM Routing Engine
-TODO: Add how to launch and integrate OSRM
-
-## Git Branching Model
-
-We use a simple Git branching strategy based on `main`, `develop`, and `feature/*`.
-
-- `main`: Stable and deployable version.
-- `develop`: Integration branch for all features.
-- `feature/*`: One branch per feature (created from `develop`, merged back into `develop`).
-- `hotfix/*`: For urgent fixes (from `main`, merged into `main` and `develop`).
-
-See `docs/git_workflow.md` for full explanation and diagram.
-
 # ML API Integration Guide
 
 This document explains how to call the ML API in different environments.
@@ -148,46 +46,126 @@ In production, always fetch: /api/ml/predict-all
 
 This endpoint is **proxied by Nginx or the Next.js API route to the ML server**. You do not need to call the ML server directly.
 
-
 ## Project Structure
+
 ```
 comp47360_team9/
-├── .next/                  # [ignored] Next.js build output
-├── node_modules/           # [ignored] Node.js dependencies
-├── osrm-data/              # [ignored] OSRM-generated routing files
-├── .env                    # [ignored] Environment variables (API keys, secrets)
-├── .gitignore              # Git ignore rules
-├── README.md               # Project overview and instructions
+├── README.md                    # Project overview and setup instructions
+├── package.json                 # Root package.json for project metadata
+├── docker-compose.yml           # Development Docker configuration
+├── docker-compose.prod.yml      # Production Docker configuration
+├── nginx.conf                   # Nginx configuration for production
+├── .gitignore                  # Git ignore rules
 
-# App Frontend (Next.js + Leaflet/Mapbox)
-├── public/                 # Static assets (e.g. favicon, icons)
-├── pages/                  # Next.js page routes (index.js, about.js etc.)
-├── components/             # Reusable UI components
-├── styles/                 # CSS modules or global styles
+# Frontend Application
+├── webapp/                     # Next.js application
+│   ├── src/
+│   │   ├── app/                # Next.js App Router
+│   │   │   ├── layout.tsx      # Root layout component
+│   │   │   ├── page.tsx        # Home page
+│   │   │   ├── globals.css     # Global styles
+│   │   │   ├── api/            # API route handlers
+│   │   │   │   ├── airquality/ # Air quality data endpoint
+│   │   │   │   ├── bikes/      # Bike sharing data endpoint
+│   │   │   │   ├── busyness/   # ML busyness prediction endpoint
+│   │   │   │   ├── contact/    # Contact form endpoint
+│   │   │   │   ├── directions/ # Routing directions endpoint
+│   │   │   │   ├── EV-charging/ # EV charging stations endpoint
+│   │   │   │   ├── parks/      # Parks data endpoint
+│   │   │   │   └── weather/    # Weather data endpoint
+│   │   │   ├── contact/        # Contact page
+│   │   │   ├── map/            # Interactive map page
+│   │   │   └── containers/     # Page-level container components
+│   │   ├── components/         # Reusable UI components
+│   │   ├── hooks/              # Custom React hooks
+│   │   ├── utils/              # Utility functions
+│   │   ├── assets/             # Images and static assets
+│   │   ├── constants/          # App constants and icons
+│   │   └── routing.json        # Routing configuration
+│   ├── public/                 # Static files served by Next.js
+│   │   ├── data/              # JSON data files for zones and maps
+│   │   └── *.svg, *.ico       # Icons and favicons
+│   ├── Dockerfile             # Docker configuration for webapp
+│   ├── package.json           # Frontend dependencies
+│   ├── next.config.ts         # Next.js configuration
+│   ├── tailwind.config.js     # Tailwind CSS configuration
+│   ├── postcss.config.mjs     # PostCSS configuration
+│   ├── eslint.config.mjs      # ESLint configuration
+│   └── tsconfig.json          # TypeScript configuration
 
-# Node.js Backend
-├── api/                    # Custom backend logic (if using API routes or server)
-│   ├── index.js
-│   └── route.js
+# Machine Learning Service
+├── ml/                         # Python Flask ML API service
+│   ├── app.py                 # Flask API server with prediction endpoints
+│   ├── requirements.txt       # Python dependencies
+│   ├── Dockerfile            # Docker configuration for ML service
+│   ├── xgboost_taxi_model.joblib      # Trained XGBoost model
+│   ├── manhattan_taxi_zones.csv       # NYC taxi zone reference data
+│   ├── zone_hourly_busyness_stats.csv # Busyness statistics
+│   └── zone_hourly_summary.csv        # Zone summary data
 
-# Python ML Microservice
-├── ml/                     # Lightweight Python-based microservice (Flask/FastAPI)
-│   ├── model.pkl           # Trained model
-│   ├── predictor.py        # Inference script or API
-│   └── requirements.txt    # Python dependencies
+# Deployment & Operations
+├── scripts/                    # Deployment and utility scripts
+│   ├── setup-server.sh       # Server initialization script
+│   ├── test-config.sh        # Configuration testing
+│   ├── manual-deploy.sh      # Manual deployment script
+│   ├── restart-project.sh    # Project restart utility
+│   ├── diagnose-containers.sh # Container debugging
+│   ├── fix-deployment.sh     # Deployment troubleshooting
+│   ├── test-ml-api.sh        # ML API testing
+│   ├── setup-nginx.sh       # Nginx setup script
+│   ├── configure-firewall.sh # Firewall configuration
+│   └── *.bat                 # Windows batch scripts
+├── nginx/                     # Nginx configuration files
+│   └── nginx.conf            # Nginx server block configuration
 
-# OSRM
-├── osrm/                   # OSRM setup scripts or Docker config
-│   └── run_osrm.sh
+# Documentation (only git_workflow.md is tracked)
+└── docs/
+    └── git_workflow.md        # Git branching strategy documentation
 
-# Documentation
-├── docs/                   # Collaboration docs and team process
-│   ├── git_workflow.md
-│   └── architecture.md
-
-# Deployment
-├── render.yaml             # Render deployment config (optional)
-└── Dockerfile              # for full containerized deployment
+# Note: The following directories/files are ignored by git:
+# - node_modules/, .next/, dist/, out/ (build outputs)
+# - .env files (environment variables)
+# - osrm-data/ (OSRM routing data)
+# - backup/ (backup configurations)
+# - Most files in docs/ except git_workflow.md
+# - __pycache__/, *.py[cod] (Python cache files)
+# - .vscode/ (VS Code settings)
 ```
 
+## How to Run the Project
+### Local Development
+#### Quick Start with Docker
+```bash
+docker-compose down
+docker-compose up --build
+```
 
+### Production Deployment
+The project uses GitLab CI/CD for automated deployment to a Linux server.
+#### Deployment URLs
+- **Webapp**: http://137.43.49.26 
+- **Flask**: http://137.43.49.26/api/ml/ and http://137.43.49.26/api/ml/predict-all
+
+
+## Features
+
+- **Interactive Map**: Leaflet/Mapbox integration for NYC navigation
+- **Route Planning**: Multi-modal transportation options
+- **Real-time Data**: Weather, air quality, bike availability
+- **ML Predictions**: Crowd density and busyness forecasting
+- **Responsive Design**: Mobile-first approach
+TODO: Add instructions for setting up Python service (e.g., Flask, FastAPI)
+
+OSRM Routing Engine
+TODO: Add how to launch and integrate OSRM
+
+## Git Branching Model
+
+We use a simple Git branching strategy based on `main`, `develop`, and `feature/*`.
+
+- `main`: Stable and deployable version.
+- `develop`: Integration branch for all features.
+- `feature/*`: One branch per feature (created from `develop`, merged back into `develop`).
+- `hotfix/*`: For urgent fixes (from `main`, merged into `main` and `develop`).
+
+See `docs/git_workflow.md` for full explanation and diagram.
