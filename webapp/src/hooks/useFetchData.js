@@ -6,7 +6,11 @@ const useFetchData = (url, body, method) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!url) return;
+    if (!url || !body || !body.origin || !body.destination) {
+      setData(null);
+      setLoading(false);
+      return;
+    }
 
     const fetchData = async () => {
       try {
@@ -28,7 +32,7 @@ const useFetchData = (url, body, method) => {
     };
 
     fetchData();
-  }, [url]);
+  }, [url, JSON.stringify(body), method]);
 
   return { data, loading, error };
 }

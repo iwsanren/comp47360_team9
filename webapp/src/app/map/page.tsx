@@ -9,6 +9,7 @@ import { FaTrain } from "react-icons/fa6";
 import { FaRecycle } from "react-icons/fa";
 import { FaExclamationCircle } from "react-icons/fa";
 import { FaArrowAltCircleDown } from "react-icons/fa";
+import { FaLeaf } from "react-icons/fa";
 import mapboxgl from "mapbox-gl";
 import Image from "next/image";
 
@@ -23,7 +24,9 @@ import Icon from '@/components/Icon';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import ShowWeatherModal from "./ShowWeatherModal";
+import DirectionsModal from "./DirectionsModal";
 import useFetchData from "@/hooks/useFetchData";
+import { calculateCarbonEmission, formatEmission, parseDistanceToKm } from "@/utils/carbonEmissions";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_PRAKHAR_MAPBOX_API_KEY || process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
@@ -61,9 +64,18 @@ export default function Map() {
   const [isToggleOpen, setIsToggleOpen] = useState<boolean>(true);
   const [startCoords, setStartCoords] = useState<Coordinates | null>(null);
   const [destCoords, setDestCoords] = useState<Coordinates | null>(null);
+  const [selectedRoute, setSelectedRoute] = useState<any>(null);
+  const [showDirectionsModal, setShowDirectionsModal] = useState(false);
+  const [hasSelectedRoute, setHasSelectedRoute] = useState(false);
 
-  const { data } = useFetchData('/api/directions', { origin: startCoords, destination: destCoords })
-  console.log(data)
+  const { data: directionsData, loading: directionsLoading } = useFetchData('/api/directions', { origin: startCoords, destination: destCoords })
+
+  // Debug log to see the API response structure
+  useEffect(() => {
+    if (directionsData) {
+      console.log('Directions API Response:', directionsData);
+    }
+  }, [directionsData]);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -415,7 +427,46 @@ export default function Map() {
     setDestination("");
     setStartCoords(null);
     setDestCoords(null);
+    setHasSelectedRoute(false);
   };
+
+  const handleRouteClick = (route: any) => {
+    setSelectedRoute(route);
+    setHasSelectedRoute(true);
+  };
+
+  const handleShowDirections = () => {
+    if (selectedRoute) {
+      setShowDirectionsModal(true);
+    }
+  };
+
+  const transportModes = [
+    { 
+      key: 'walking', 
+      icon: FaWalking, 
+      color: '#0FD892', 
+      emissionIcon: FaRecycle 
+    },
+    { 
+      key: 'bicycling', 
+      icon: FaBicycle, 
+      color: '#0FD892', 
+      emissionIcon: FaRecycle 
+    },
+    { 
+      key: 'driving', 
+      icon: FaCarAlt, 
+      color: '#FF281B', 
+      emissionIcon: FaExclamationCircle 
+    },
+    { 
+      key: 'transit', 
+      icon: FaTrain, 
+      color: '#FFC800', 
+      emissionIcon: FaArrowAltCircleDown 
+    }
+  ];
 
   return (
     <div className="relative">
@@ -574,254 +625,216 @@ export default function Map() {
             />
           </div>
           <div className="flex flex-col gap-3">
-            <div
-              style={{
-                width: 426,
-                height: 57,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                transform: 'rotate(0deg)',
-                opacity: 1,
-                borderRadius: '8px',
-                padding: '8px 12px',
-                background: '#FFFFFF',
-                boxShadow: '0px 2px 4px 0px #00000040',
-              }}
-            >
-              <FaWalking size="24" style={{ color: '#0FD892', marginTop: '6px' }} />
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <FaRecycle size="20" style={{ color: '#0FD892', marginTop: '6px' }} />
-                <div
-                  style={{
-                    width: 95,
-                    height: 41,
-                    transform: 'rotate(0deg)',
-                    opacity: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontWeight: 700,
-                      fontStyle: 'normal',
-                      fontSize: '15px',
-                      lineHeight: '24px',
-                      letterSpacing: '0%',
-                      color: '#0FD892',
-                    }}
-                  >
-                    0 kg CO₂
-                  </span>
-                  <span
-                    style={{
-                      fontWeight: 400,
-                      fontStyle: 'normal',
-                      fontSize: '12px',
-                      lineHeight: '18px',
-                      letterSpacing: '0%',
-                      color: '#000000',
-                    }}
-                  >
-                    Free of emissions
-                  </span>
-                </div>
+            {directionsLoading && startCoords && destCoords ? (
+              <div className="text-center py-8 text-gray-500">
+                Loading directions...
               </div>
-            </div>
-            <div
-              style={{
-                width: 426,
-                height: 57,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                transform: 'rotate(0deg)',
-                opacity: 1,
-                borderRadius: '8px',
-                padding: '8px 12px',
-                background: '#FFFFFF',
-                boxShadow: '0px 2px 4px 0px #00000040',
-              }}
-            >
-              <FaBicycle size="24" style={{ color: '#0FD892', marginTop: '6px' }} />
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <FaRecycle size="20" style={{ color: '#0FD892', marginTop: '6px' }} />
-                <div
-                  style={{
-                    width: 95,
-                    height: 41,
-                    transform: 'rotate(0deg)',
-                    opacity: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <span
+            ) : directionsData && startCoords && destCoords ? (
+              (() => {
+                // 收集所有路线数据
+                const allRoutes = transportModes.map((mode) => {
+                  const apiResponse = directionsData[mode.key] as any;
+                  if (!apiResponse || !apiResponse.routes || apiResponse.routes.length === 0) {
+                    return null;
+                  }
+
+                  const route = apiResponse.routes[0];
+                  const leg = route.legs[0];
+                  const duration = leg.duration?.text || 'N/A';
+                  const distance = leg.distance?.text || 'N/A';
+                  
+                  const distanceKm = parseDistanceToKm(distance);
+                  const emissionData = calculateCarbonEmission(mode.key, distanceKm);
+                  
+                  return {
+                    mode,
+                    duration,
+                    distance,
+                    emissionData,
+                    steps: leg.steps || [],
+                    polyline: route.overview_polyline?.points || '',
+                    routeData: route
+                  };
+                }).filter(Boolean);
+
+                // 按碳排放量排序（最低的在前面）
+                allRoutes.sort((a, b) => a!.emissionData.amount - b!.emissionData.amount);
+
+                return allRoutes.map((routeInfo, index) => {
+                  if (!routeInfo) return null;
+                  
+                  const { mode, duration, distance, emissionData, steps, polyline } = routeInfo;
+                  const IconComponent = mode.icon;
+                  const EmissionIcon = mode.emissionIcon;
+                  const isSelected = selectedRoute && selectedRoute.mode === mode.key;
+                  const isGreenest = index === 0; // 第一个是最环保的
+
+                  return (
+                    <div
+                      key={mode.key}
+                      onClick={() => handleRouteClick({
+                        mode: mode.key,
+                        duration: duration,
+                        distance: distance,
+                        emission: formatEmission(emissionData.amount),
+                        steps: steps,
+                        polyline: polyline,
+                        startCoords: startCoords,
+                        destCoords: destCoords
+                      })}
+                      className="cursor-pointer hover:bg-gray-50"
+                      style={{
+                        width: 426,
+                        height: 57,
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        transform: 'rotate(0deg)',
+                        opacity: 1,
+                        borderRadius: '8px',
+                        padding: '8px 12px',
+                        background: isSelected ? '#E8F5E8' : '#FFFFFF',
+                        boxShadow: isSelected ? '0px 2px 8px 0px #0FD89240' : '0px 2px 4px 0px #00000040',
+                        border: isSelected ? '2px solid #0FD892' : 'none',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <IconComponent size="24" style={{ color: mode.color, marginTop: '6px' }} />
+                        <span style={{ fontSize: '14px', fontWeight: 500, color: '#333' }}>
+                          {duration}
+                        </span>
+                        {isGreenest && (
+                          <FaLeaf size="16" style={{ color: '#0FD892', marginLeft: '4px' }} title="Most eco-friendly option" />
+                        )}
+                      </div>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                        }}
+                      >
+                        <EmissionIcon size="20" style={{ color: emissionData.color, marginTop: '6px' }} />
+                        <div
+                          style={{
+                            width: 95,
+                            height: 41,
+                            transform: 'rotate(0deg)',
+                            opacity: 1,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontWeight: 700,
+                              fontStyle: 'normal',
+                              fontSize: '13px',
+                              lineHeight: '24px',
+                              letterSpacing: '0%',
+                              color: emissionData.color,
+                            }}
+                          >
+                            {formatEmission(emissionData.amount)}
+                          </span>
+                          <span
+                            style={{
+                              fontWeight: 400,
+                              fontStyle: 'normal',
+                              fontSize: '12px',
+                              lineHeight: '18px',
+                              letterSpacing: '0%',
+                              color: '#000000',
+                            }}
+                          >
+                            {emissionData.description}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                });
+              })()
+            ) : (
+              // Fallback static cards when no route data is available
+              transportModes.map((mode) => {
+                const IconComponent = mode.icon;
+                const EmissionIcon = mode.emissionIcon;
+                const emissionData = calculateCarbonEmission(mode.key, 0);
+
+                return (
+                  <div
+                    key={mode.key}
                     style={{
-                      fontWeight: 700,
-                      fontStyle: 'normal',
-                      fontSize: '15px',
-                      lineHeight: '24px',
-                      letterSpacing: '0%',
-                      color: '#0FD892',
+                      width: 426,
+                      height: 57,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      transform: 'rotate(0deg)',
+                      opacity: 0.6,
+                      borderRadius: '8px',
+                      padding: '8px 12px',
+                      background: '#F5F5F5',
+                      boxShadow: '0px 2px 4px 0px #00000020',
                     }}
                   >
-                    0 kg CO₂
-                  </span>
-                  <span
-                    style={{
-                      fontWeight: 400,
-                      fontStyle: 'normal',
-                      fontSize: '12px',
-                      lineHeight: '18px',
-                      letterSpacing: '0%',
-                      color: '#000000',
-                    }}
-                  >
-                    Fast and clean
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div
-              style={{
-                width: 426,
-                height: 57,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                transform: 'rotate(0deg)',
-                opacity: 1,
-                borderRadius: '8px',
-                padding: '8px 12px',
-                background: '#FFFFFF',
-                boxShadow: '0px 2px 4px 0px #00000040',
-              }}
-            >
-              <FaCarAlt size="24" style={{ color: '#FF281B', marginTop: '6px' }} />
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <FaExclamationCircle size="20" style={{ color: '#FF281B', marginTop: '6px' }} />
-                <div
-                  style={{
-                    width: 95,
-                    height: 41,
-                    transform: 'rotate(0deg)',
-                    opacity: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontWeight: 700,
-                      fontStyle: 'normal',
-                      fontSize: '13px',
-                      lineHeight: '24px',
-                      letterSpacing: '0%',
-                      color: '#FF281B',
-                    }}
-                  >
-                    1.2 - 3.5 kg CO₂
-                  </span>
-                  <span
-                    style={{
-                      fontWeight: 400,
-                      fontStyle: 'normal',
-                      fontSize: '12px',
-                      lineHeight: '18px',
-                      letterSpacing: '0%',
-                      color: '#000000',
-                    }}
-                  >
-                    Highest emission
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div
-              style={{
-                width: 426,
-                height: 57,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                transform: 'rotate(0deg)',
-                opacity: 1,
-                borderRadius: '8px',
-                padding: '8px 12px',
-                background: '#FFFFFF',
-                boxShadow: '0px 2px 4px 0px #00000040',
-              }}
-            >
-              <FaTrain size="24" style={{ color: '#FFC800', marginTop: '6px' }} />
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <FaArrowAltCircleDown size="20" style={{ color: '#FFC800', marginTop: '6px' }} />
-                <div
-                  style={{
-                    width: 95,
-                    height: 41,
-                    transform: 'rotate(0deg)',
-                    opacity: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontWeight: 700,
-                      fontStyle: 'normal',
-                      fontSize: '13px',
-                      lineHeight: '24px',
-                      letterSpacing: '0%',
-                      color: '#FFC800',
-                    }}
-                  >
-                    0.5 - 1.2 kg CO₂
-                  </span>
-                  <span
-                    style={{
-                      fontWeight: 400,
-                      fontStyle: 'normal',
-                      fontSize: '12px',
-                      lineHeight: '18px',
-                      letterSpacing: '0%',
-                      color: '#000000',
-                    }}
-                  >
-                    A few emission
-                  </span>
-                </div>
-              </div>
-            </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <IconComponent size="24" style={{ color: mode.color, marginTop: '6px' }} />
+                      <span style={{ fontSize: '14px', fontWeight: 500, color: '#999' }}>
+                        Select route
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                      }}
+                    >
+                      <EmissionIcon size="20" style={{ color: emissionData.color, marginTop: '6px' }} />
+                      <div
+                        style={{
+                          width: 95,
+                          height: 41,
+                          transform: 'rotate(0deg)',
+                          opacity: 1,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontWeight: 700,
+                            fontStyle: 'normal',
+                            fontSize: '13px',
+                            lineHeight: '24px',
+                            letterSpacing: '0%',
+                            color: emissionData.color,
+                          }}
+                        >
+                          {formatEmission(emissionData.amount)}
+                        </span>
+                        <span
+                          style={{
+                            fontWeight: 400,
+                            fontStyle: 'normal',
+                            fontSize: '12px',
+                            lineHeight: '18px',
+                            letterSpacing: '0%',
+                            color: '#000000',
+                          }}
+                        >
+                          {emissionData.description}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
           <div className="flex justify-end gap-38 mt-2">
             <button
@@ -839,18 +852,21 @@ export default function Map() {
             >
               Clear
             </button>
-            <button
-              className="text-white hover:bg-[#0AAC82] focus:bg-[#0AAC82] disabled:bg-[#0FD892]"
-              style={{
-                width: 180,
-                height: 43,
-                borderRadius: 4,
-                padding: "8px 24px",
-                backgroundColor: startLocation && destination ? "#0AAC82" : "#0FD892",
-              }}
-            >
-              Show Directions
-            </button>
+            {hasSelectedRoute && (
+              <button
+                className="text-white hover:bg-[#0AAC82] focus:bg-[#0AAC82]"
+                style={{
+                  width: 180,
+                  height: 43,
+                  borderRadius: 4,
+                  padding: "8px 24px",
+                  backgroundColor: "#0AAC82",
+                }}
+                onClick={handleShowDirections}
+              >
+                Show Directions
+              </button>
+            )}
           </div>
         </div>
         <div
@@ -901,6 +917,13 @@ export default function Map() {
 
       {showModal && (
         <ShowWeatherModal current={current} hourly={hourly} setShowModal={setShowModal} />
+      )}
+      
+      {showDirectionsModal && selectedRoute && (
+        <DirectionsModal 
+          route={selectedRoute} 
+          onClose={() => setShowDirectionsModal(false)} 
+        />
       )}
     </div>
   );
