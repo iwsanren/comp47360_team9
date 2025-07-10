@@ -25,7 +25,8 @@ import Icon from '@/components/Icon';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import ShowWeatherModal from "./ShowWeatherModal";
-import { CARBON_EMISSIONS_WEIGHT } from "@/constants/formula";
+import { co2Emissions, transitEmissions } from "@/utils/formula";
+import Button from "@/components/Button";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
@@ -53,10 +54,10 @@ const toggleNames = [
 ] as const;
 
 const methods = [
-  { method: 'walking', icon: FaWalking, iconAlert: FaRecycle, color: 'fill-green-500', textColor: 'text-green-500', mesg: 'Free of emissions' }, 
-  { method: 'bicycling', icon: FaBicycle, iconAlert: FaRecycle, color: 'fill-green-500', textColor: 'text-green-500', mesg: 'Fast and clean' },
-  { method: 'driving', icon: FaCar, iconAlert: FaExclamationCircle, color: 'fill-red-700', textColor: 'text-red-700', mesg: 'Highest emissions' },
-  { method: 'transit', icon: FaTrain, iconAlert: FaArrowAltCircleDown, color: 'fill-yellow-500', textColor: 'text-yellow-500', mesg: 'A few emissions' },
+  { method: 'walking', icon: FaWalking, iconAlert: FaRecycle, color: '#0FD892', mesg: 'Free of emissions' }, 
+  { method: 'bicycling', icon: FaBicycle, iconAlert: FaRecycle, color: '#0FD892', mesg: 'Fast and clean' },
+  { method: 'driving', icon: FaCar, iconAlert: FaExclamationCircle, color: '#FF281B', mesg: 'Highest emissions' },
+  { method: 'transit', icon: FaTrain, iconAlert: FaArrowAltCircleDown, color: '#FFC800', mesg: 'A few emissions' },
 ]
 
 export default function Map() {
@@ -83,6 +84,7 @@ export default function Map() {
   const [destCoords, setDestCoords] = useState<Coordinates | null>(null);
   const [isInValid, setIsInVaildPos] = useState<boolean>();
   const [routes, setDirectionData] = useState<any>();
+  const [tool, setTool] = useState<any>();
 
   useEffect(() => {
     const fetchDirection = async () => {
@@ -494,14 +496,7 @@ export default function Map() {
 
         {isToggleOpen && (
           <div
-            style={{
-              padding: 8,
-              borderRadius: 0,
-              backgroundColor: "#00674CBF",
-              display: "flex",
-              flexDirection: "column",
-              gap: 4,
-            }}
+            className="flex flex-col gap-1 rounded-sm bg-[#00674CBF] p-2"
           >
             {toggleNames.map(({ key, label }) => (
               <div key={key} className="flex gap-1 items-center text-white text-sm px-2">
@@ -626,40 +621,38 @@ export default function Map() {
           </div>
           {routes && (
             <div className="flex flex-col gap-3">
-              {methods.map(({ method, color, icon, iconAlert, mesg, textColor }, i) => {
-                const route = routes?.[method]
-                const maxTime = route?.routes.length > 1 ? maxBy(route.routes, (n: any) => n.legs[0].duration.value) : route?.routes?.legs?.[0].duration.text
-                const minTime = route?.routes.length > 1 && minBy(route.routes, (n: any) => n.legs[0].duration.value)
-                const maxEmissions = CARBON_EMISSIONS_WEIGHT(route?.routes.length > 1 ? maxBy(route.routes, (n: any) => n.legs[0].distance.value).legs[0].distance.value : route.routes.legs[0].distance.value.legs[0].distance.value)
-                const minEmissions = CARBON_EMISSIONS_WEIGHT(route?.routes.length > 1 && minBy(route.routes, (n: any) => n.legs[0].distance.value).legs[0].distance.value)
+              {methods.map(({ method, color, icon, iconAlert, mesg }, i) => {
+                const paths = routes?.[method]?.routes
+                const maxTime = paths.length > 1 ? maxBy(paths, (n: any) => n.legs[0].duration.value) : paths.legs?.[0].duration.text
+                const minTime = paths.length > 1 && minBy(paths, (n: any) => n.legs[0].duration.value)
+                const maxEmissions = co2Emissions(paths.length > 1 ? maxBy(paths, (n: any) => n.legs[0].distance.value).legs[0].distance.value : paths.legs[0].distance.value.legs[0].distance.value)
+                const minEmissions = co2Emissions(paths.length > 1 && minBy(paths, (n: any) => n.legs[0].distance.value).legs[0].distance.value)
+                const transitCO2Arr = method == "transit" && transitEmissions(paths)
+                const isActive = tool === method
+                console.log(transitCO2Arr)
+                
                 return (
                   <div
                     style={{
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
-                      transform: 'rotate(0deg)',
-                      opacity: 1,
-                      borderRadius: '8px',
-                      padding: '8px 12px',
-                      background: '#FFFFFF',
+                      background: isActive ? color : 'white',
                       boxShadow: '0px 2px 4px 0px #00000040',
+                      color: isActive ? 'white' : color,
                     }}
+                    className={`py-2 px-3 rounded-lg cursor-pointer transition-all duration-250ms`}
+                    onClick={() => setTool(method)}
                     key={i}
                   >
                     <div className="flex gap-[10px] items-center">
-                      <Icon icon={icon} className={`${color}`} size="1.5rem" />
-                      <p className="text-sm">{route.routes.length > 1 ? (Math.floor(minTime?.legs[0].duration.value / 60) + ' - ' + Math.floor(maxTime?.legs[0].duration.value / 60) + ' mins') : max}</p>
+                      <Icon icon={icon} className="inherit" size="1.5rem" />
+                      <p className={`text-sm text-${isActive ? 'white' : 'black'}`}>{paths.length > 1 ? (Math.floor(minTime?.legs[0].duration.value / 60) + ' - ' + Math.floor(maxTime?.legs[0].duration.value / 60) + ' mins') : max}</p>
                     </div>
                     <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        width: '8.875rem'
-                      }}
+                      className="flex items-center gap-2 w-[8.875rem]"
                     >
-                      <Icon icon={iconAlert} className={`${color}`} size="1.5rem" />
+                      <Icon icon={iconAlert} className="inherit" size="1.25rem" />
                       <div
                         style={{
                           display: 'flex',
@@ -668,14 +661,14 @@ export default function Map() {
                         }}
                       >
                         <span
-                          className={`${textColor} font-bold`}
+                          className={`font-bold`}
                         >
                           {method === 'driving' ? (
                             `${minEmissions} - ${maxEmissions}`
-                          ) : 0} kg CO₂
+                          ) : transitCO2Arr ? transitCO2Arr.join(' - ') : 0} kg CO₂
                           
                         </span>
-                        <span className="text-xs">
+                        <span className="text-xs leading-[1.5]">
                           {mesg}
                         </span>
                       </div>
@@ -685,12 +678,10 @@ export default function Map() {
 
             </div>
           )}
-          <div className="flex justify-end gap-38 mt-2">
+          <div className="flex justify-between mt-2">
             <button
               className="text-white hover:bg-[#0AAC82] focus:bg-[#0AAC82] disabled:bg-[#0FD892]"
               style={{
-                width: 91,
-                height: 43,
                 borderRadius: 4,
                 padding: "8px 24px",
                 backgroundColor: "#0FD892",
@@ -699,20 +690,14 @@ export default function Map() {
               }}
               onClick={handleClear}
             >
-              Clear
+              {routes ? 'Clear' : 'Get Directions'}
             </button>
-            <button
-              className="text-white hover:bg-[#0AAC82] focus:bg-[#0AAC82] disabled:bg-[#0FD892]"
-              style={{
-                width: 180,
-                height: 43,
-                borderRadius: 4,
-                padding: "8px 24px",
-                backgroundColor: startLocation && destination ? "#0AAC82" : "#0FD892",
-              }}
-            >
-              Show Directions
-            </button>
+            {tool && (
+              <Button>
+                Show Directions
+              </Button>
+            )}
+    
           </div>
         </div>
         <div

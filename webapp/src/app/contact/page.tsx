@@ -104,7 +104,7 @@ const ContactPage = () => {
                       {team.map((member, i) => (
                         <div className="w-[48.25%]" key={i}>
                           <div className="flex gap-1 items-center">
-                              <Image width={60} src={member?.pic} alt={member.name} className="team-member-photo" />
+                              <Image width={60} src={member?.pic} alt={member.name} className="team-member-photo w-[60px] h-[60px]" />
                               <p className="font-bold text-xl">{member.name}</p>
                           </div>
                           <div className="mt-2">
