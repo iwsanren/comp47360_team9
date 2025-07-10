@@ -48,11 +48,11 @@ type InfoType = {
 }
 
 const infoObj = {
-    name: "",
-    email: "",
-    phone: "",
-    message: "",
-  }
+  name: "",
+  email: "",
+  phone: "",
+  message: "",
+}
 
 const ContactPage = () => {
   const [isCompleted, setComplete] = useState<boolean>(false);
@@ -121,8 +121,7 @@ const ContactPage = () => {
           ))}
       </div>
         <div className="flex flex-col gap-4 flex-1 min-w-200px">
-          {forms.map(({ label, tag, placeholder, key }) => {
-            return (
+          {forms.map(({ label, tag, placeholder, key }) => (
             <div key={label}>
               <p className="mb-2 text-2xl font-bold">{label}</p>
               {tag ? (
@@ -154,7 +153,7 @@ const ContactPage = () => {
                 />
               )}
             </div>
-          )})}
+          ))}
           {isError && <p className="text-sm text-red-500">{error}</p>}
           <div className="label">
             <button

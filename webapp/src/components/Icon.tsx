@@ -9,8 +9,8 @@ interface IconProps {
   stroke?: string;
 }
 
-export default function Icon({ icon: IconComp, className = '', ...props }: IconProps) {
+export default function Icon({ icon: IconComp, className = 'fill-green-700 stroke-green-700', ...props }: IconProps) {
   return (
-    <IconComp className={`${className} fill-green-700 stroke-green-700`} {...props} />
+    <IconComp className={`${className}`} {...props} />
   );
 }

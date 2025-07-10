@@ -3,12 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { BiSolidLeftArrow } from "react-icons/bi";
 import { FaWalking } from "react-icons/fa";
-import { FaBicycle, FaCar } from "react-icons/fa6";
-import { FaCarAlt } from "react-icons/fa";
-import { FaTrain } from "react-icons/fa6";
-import { FaRecycle } from "react-icons/fa";
-import { FaExclamationCircle } from "react-icons/fa";
-import { FaArrowAltCircleDown } from "react-icons/fa";
+import { FaBicycle, FaCar, FaTrain } from "react-icons/fa6";
+import { FaRecycle, FaExclamationCircle, FaArrowAltCircleDown } from "react-icons/fa";
+
+import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
+import { point } from '@turf/helpers';
+
+import { maxBy, minBy } from 'lodash';
+
 import mapboxgl from "mapbox-gl";
 import Image from "next/image";
 
@@ -23,9 +25,11 @@ import Icon from '@/components/Icon';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import ShowWeatherModal from "./ShowWeatherModal";
-import useFetchData from "@/hooks/useFetchData";
+import { CARBON_EMISSIONS_WEIGHT } from "@/constants/formula";
 
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_PRAKHAR_MAPBOX_API_KEY || process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
+
+const ML_API_URL = process.env.NODE_ENV == "development" ? 'http://127.0.0.1:5000/predict-all' : '/api/ml/predict-all'
 
 interface Toggles {
   parks: boolean;
@@ -40,9 +44,25 @@ interface Coordinates {
   lat: number;
 }
 
+const toggleNames = [
+  { key: "parks", label: "Parks" },
+  { key: "ev", label: "EV charging Stations" },
+  { key: "bikes", label: "Bike Stations" },
+  { key: "busyness", label: "Busyness" },
+  { key: "air", label: "Air Quality" },
+] as const;
+
+const methods = [
+  { method: 'walking', icon: FaWalking, iconAlert: FaRecycle, color: 'fill-green-500', textColor: 'text-green-500', mesg: 'Free of emissions' }, 
+  { method: 'bicycling', icon: FaBicycle, iconAlert: FaRecycle, color: 'fill-green-500', textColor: 'text-green-500', mesg: 'Fast and clean' },
+  { method: 'driving', icon: FaCar, iconAlert: FaExclamationCircle, color: 'fill-red-700', textColor: 'text-red-700', mesg: 'Highest emissions' },
+  { method: 'transit', icon: FaTrain, iconAlert: FaArrowAltCircleDown, color: 'fill-yellow-500', textColor: 'text-yellow-500', mesg: 'A few emissions' },
+]
+
 export default function Map() {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<mapboxgl.Map | null>(null);
+  const startLocationRef = useRef<any>(null);
   const [weatherData, setWeatherData] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
   const [toggles, setToggles] = useState<Toggles>({
@@ -61,9 +81,33 @@ export default function Map() {
   const [isToggleOpen, setIsToggleOpen] = useState<boolean>(true);
   const [startCoords, setStartCoords] = useState<Coordinates | null>(null);
   const [destCoords, setDestCoords] = useState<Coordinates | null>(null);
+  const [isInValid, setIsInVaildPos] = useState<boolean>();
+  const [routes, setDirectionData] = useState<any>();
 
-  const { data } = useFetchData('/api/directions', { origin: startCoords, destination: destCoords })
-  console.log(data)
+  useEffect(() => {
+    const fetchDirection = async () => {
+      try {
+        const res = await fetch('/api/directions', 
+          { 
+            method: 'POST', 
+            body: JSON.stringify({
+              origin: startCoords,
+              destination: destCoords,
+            }), 
+          }
+        )
+        const data = await res.json();
+        setDirectionData(data);
+      } catch (err) {
+        console.error("Failed to fetch weather", err);
+      }
+    };
+    if (startCoords && destCoords) {
+      fetchDirection()
+    }
+  }, [startCoords, destCoords])
+
+  console.log(routes)
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -95,9 +139,24 @@ export default function Map() {
       }
     });
 
+    mapInstanceRef.current = map;
+
+    return () => map.remove();
+  }, []);
+
+  useEffect(() => {
+    startLocationRef.current = startLocation;
+}, [startLocation]);
+
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+
+    const map = mapInstanceRef.current;
+    
     map.on('click', async (e) => {
       const { lng, lat } = e.lngLat;
-
+      // const pt = point([lng, lat]);
+      // const isInManhattan = booleanPointInPolygon(pt, manhattanPolygon);
       if (
         lng >= -74.0479 &&
         lng <= -73.9067 &&
@@ -122,7 +181,7 @@ export default function Map() {
             ? data.features[0].place_name
             : `(${lng.toFixed(6)}, ${lat.toFixed(6)})`;
 
-          if (!startLocation) {
+          if (!startLocationRef.current) {
             setStartCoords({ lng, lat });
             setStartLocation(address);
           } else {
@@ -133,16 +192,14 @@ export default function Map() {
           console.error("Failed to reverse geocode:", error);
         }
       } else {
-        console.error("Clicked location is outside Manhattan");
+        // setIsInVaildPos(true)
       }
     });
 
-    mapInstanceRef.current = map;
+  }, [])
 
-    return () => map.remove();
-  }, [startLocation, destination]);
-
-  console.log(Boolean(startLocation), destination, startCoords)
+  console.log(startLocation, startCoords)
+  console.log(destination, destCoords)
 
   useEffect(() => {
     if (!mapInstanceRef.current) return;
@@ -398,14 +455,6 @@ export default function Map() {
   const current = weatherData?.current;
   const hourly = weatherData?.hourly?.list || [];
 
-  const toggleNames = [
-    { key: "parks", label: "Parks" },
-    { key: "ev", label: "EV charging Stations" },
-    { key: "bikes", label: "Bike Stations" },
-    { key: "busyness", label: "Busyness" },
-    { key: "air", label: "Air Quality" },
-  ] as const;
-
   const handleToggleSlide = () => {
     setIsToggleOpen(!isToggleOpen);
   };
@@ -415,6 +464,7 @@ export default function Map() {
     setDestination("");
     setStartCoords(null);
     setDestCoords(null);
+    setDirectionData(null);
   };
 
   return (
@@ -556,6 +606,7 @@ export default function Map() {
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
               />
+              {isInValid && <div className="text-red-500 text-xs">Invaild position, the position is only available in Manhattan</div>}
             </div>
             <Image
               src={switchStartEndIcon}
@@ -573,256 +624,67 @@ export default function Map() {
               }}
             />
           </div>
-          <div className="flex flex-col gap-3">
-            <div
-              style={{
-                width: 426,
-                height: 57,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                transform: 'rotate(0deg)',
-                opacity: 1,
-                borderRadius: '8px',
-                padding: '8px 12px',
-                background: '#FFFFFF',
-                boxShadow: '0px 2px 4px 0px #00000040',
-              }}
-            >
-              <FaWalking size="24" style={{ color: '#0FD892', marginTop: '6px' }} />
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <FaRecycle size="20" style={{ color: '#0FD892', marginTop: '6px' }} />
-                <div
-                  style={{
-                    width: 95,
-                    height: 41,
-                    transform: 'rotate(0deg)',
-                    opacity: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <span
+          {routes && (
+            <div className="flex flex-col gap-3">
+              {methods.map(({ method, color, icon, iconAlert, mesg, textColor }, i) => {
+                const route = routes?.[method]
+                const maxTime = route?.routes.length > 1 ? maxBy(route.routes, (n: any) => n.legs[0].duration.value) : route?.routes?.legs?.[0].duration.text
+                const minTime = route?.routes.length > 1 && minBy(route.routes, (n: any) => n.legs[0].duration.value)
+                const maxEmissions = CARBON_EMISSIONS_WEIGHT(route?.routes.length > 1 ? maxBy(route.routes, (n: any) => n.legs[0].distance.value).legs[0].distance.value : route.routes.legs[0].distance.value.legs[0].distance.value)
+                const minEmissions = CARBON_EMISSIONS_WEIGHT(route?.routes.length > 1 && minBy(route.routes, (n: any) => n.legs[0].distance.value).legs[0].distance.value)
+                return (
+                  <div
                     style={{
-                      fontWeight: 700,
-                      fontStyle: 'normal',
-                      fontSize: '15px',
-                      lineHeight: '24px',
-                      letterSpacing: '0%',
-                      color: '#0FD892',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      transform: 'rotate(0deg)',
+                      opacity: 1,
+                      borderRadius: '8px',
+                      padding: '8px 12px',
+                      background: '#FFFFFF',
+                      boxShadow: '0px 2px 4px 0px #00000040',
                     }}
+                    key={i}
                   >
-                    0 kg CO₂
-                  </span>
-                  <span
-                    style={{
-                      fontWeight: 400,
-                      fontStyle: 'normal',
-                      fontSize: '12px',
-                      lineHeight: '18px',
-                      letterSpacing: '0%',
-                      color: '#000000',
-                    }}
-                  >
-                    Free of emissions
-                  </span>
-                </div>
-              </div>
+                    <div className="flex gap-[10px] items-center">
+                      <Icon icon={icon} className={`${color}`} size="1.5rem" />
+                      <p className="text-sm">{route.routes.length > 1 ? (Math.floor(minTime?.legs[0].duration.value / 60) + ' - ' + Math.floor(maxTime?.legs[0].duration.value / 60) + ' mins') : max}</p>
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        width: '8.875rem'
+                      }}
+                    >
+                      <Icon icon={iconAlert} className={`${color}`} size="1.5rem" />
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <span
+                          className={`${textColor} font-bold`}
+                        >
+                          {method === 'driving' ? (
+                            `${minEmissions} - ${maxEmissions}`
+                          ) : 0} kg CO₂
+                          
+                        </span>
+                        <span className="text-xs">
+                          {mesg}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+              )})}
+
             </div>
-            <div
-              style={{
-                width: 426,
-                height: 57,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                transform: 'rotate(0deg)',
-                opacity: 1,
-                borderRadius: '8px',
-                padding: '8px 12px',
-                background: '#FFFFFF',
-                boxShadow: '0px 2px 4px 0px #00000040',
-              }}
-            >
-              <FaBicycle size="24" style={{ color: '#0FD892', marginTop: '6px' }} />
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <FaRecycle size="20" style={{ color: '#0FD892', marginTop: '6px' }} />
-                <div
-                  style={{
-                    width: 95,
-                    height: 41,
-                    transform: 'rotate(0deg)',
-                    opacity: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontWeight: 700,
-                      fontStyle: 'normal',
-                      fontSize: '15px',
-                      lineHeight: '24px',
-                      letterSpacing: '0%',
-                      color: '#0FD892',
-                    }}
-                  >
-                    0 kg CO₂
-                  </span>
-                  <span
-                    style={{
-                      fontWeight: 400,
-                      fontStyle: 'normal',
-                      fontSize: '12px',
-                      lineHeight: '18px',
-                      letterSpacing: '0%',
-                      color: '#000000',
-                    }}
-                  >
-                    Fast and clean
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div
-              style={{
-                width: 426,
-                height: 57,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                transform: 'rotate(0deg)',
-                opacity: 1,
-                borderRadius: '8px',
-                padding: '8px 12px',
-                background: '#FFFFFF',
-                boxShadow: '0px 2px 4px 0px #00000040',
-              }}
-            >
-              <FaCarAlt size="24" style={{ color: '#FF281B', marginTop: '6px' }} />
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <FaExclamationCircle size="20" style={{ color: '#FF281B', marginTop: '6px' }} />
-                <div
-                  style={{
-                    width: 95,
-                    height: 41,
-                    transform: 'rotate(0deg)',
-                    opacity: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontWeight: 700,
-                      fontStyle: 'normal',
-                      fontSize: '13px',
-                      lineHeight: '24px',
-                      letterSpacing: '0%',
-                      color: '#FF281B',
-                    }}
-                  >
-                    1.2 - 3.5 kg CO₂
-                  </span>
-                  <span
-                    style={{
-                      fontWeight: 400,
-                      fontStyle: 'normal',
-                      fontSize: '12px',
-                      lineHeight: '18px',
-                      letterSpacing: '0%',
-                      color: '#000000',
-                    }}
-                  >
-                    Highest emission
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div
-              style={{
-                width: 426,
-                height: 57,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                transform: 'rotate(0deg)',
-                opacity: 1,
-                borderRadius: '8px',
-                padding: '8px 12px',
-                background: '#FFFFFF',
-                boxShadow: '0px 2px 4px 0px #00000040',
-              }}
-            >
-              <FaTrain size="24" style={{ color: '#FFC800', marginTop: '6px' }} />
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <FaArrowAltCircleDown size="20" style={{ color: '#FFC800', marginTop: '6px' }} />
-                <div
-                  style={{
-                    width: 95,
-                    height: 41,
-                    transform: 'rotate(0deg)',
-                    opacity: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontWeight: 700,
-                      fontStyle: 'normal',
-                      fontSize: '13px',
-                      lineHeight: '24px',
-                      letterSpacing: '0%',
-                      color: '#FFC800',
-                    }}
-                  >
-                    0.5 - 1.2 kg CO₂
-                  </span>
-                  <span
-                    style={{
-                      fontWeight: 400,
-                      fontStyle: 'normal',
-                      fontSize: '12px',
-                      lineHeight: '18px',
-                      letterSpacing: '0%',
-                      color: '#000000',
-                    }}
-                  >
-                    A few emission
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+          )}
           <div className="flex justify-end gap-38 mt-2">
             <button
               className="text-white hover:bg-[#0AAC82] focus:bg-[#0AAC82] disabled:bg-[#0FD892]"

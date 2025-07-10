@@ -4,6 +4,9 @@
 @theme {
   --color-green-700: #0AAC82;
   --color-green-300: #E0EEE9;
+  --color-yellow-500: #FFC800;
+  --color-red-700: #FF281B;
+  --color-green-500: #0FD892;
   --breakpoint-*: initial;
   --breakpoint-sm: 30rem;
   --breakpoint-md: 48rem;
