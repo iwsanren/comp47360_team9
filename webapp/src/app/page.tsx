@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from "next/link";
 import manhattan from '@/assets/images/manhattan.jpg'
-import arrow from '@/assets/images/Vector.png'
+import { BsArrowRight } from "react-icons/bs";
 
 export default function Home() {
   return (
@@ -17,7 +17,7 @@ export default function Home() {
           style={{ objectFit: 'cover' }}
           priority
         />
-        <div className="absolute inset-0 bg-black opacity-30 pointer-events-auto" />
+        <div className="absolute inset-0 bg-black opacity-30" />
       </div>
 
       {/* Centered Content */}
@@ -30,8 +30,6 @@ export default function Home() {
             top: '214px',
             left: '100px',
             width: '517px',
-            height: '90px',
-            letterSpacing: '0%',
           }}
         >
           Manhattan My Way
@@ -46,7 +44,6 @@ export default function Home() {
             left: '100px',
             width: '742px',
             height: '45px',
-            letterSpacing: '0%',
           }}
         >
           Greener choices. Smarter routes. Manhattan, your way.
@@ -67,11 +64,11 @@ export default function Home() {
         {/* CTA Button */}
         <Link
           href="/map"
-          className="absolute text-white font-semibold bg-[#0FD892] hover:bg-[#0AAC82] px-6 py-2 rounded-sm shadow-md transition flex items-center gap-2"
+          className="absolute text-white font-semibold bg-[#0FD892] hover:bg-[#0AAC82] rounded-sm shadow-md transition flex items-center gap-2"
           style={{
             top: '400px',
             left: '100px',
-            width: '225px',
+            width: '233px',
             height: '43px',
             padding: '8px 24px',
           }}
@@ -89,16 +86,13 @@ export default function Home() {
           >
             Explore Manhattan
           </span>
-          <Image
-            src={arrow}
-            alt="Arrow Icon"
-            width={14.000893592834473}
-            height={9.001262664794922}
+          <BsArrowRight
             style={{
-              position: 'relative',
-              top: '1px',
-              left: '1px',
-              objectFit: 'contain',
+              
+              top: '1.25px',
+              left: '1.5px',
+              width: '26',
+              height: '22',
             }}
           />
         </Link>
