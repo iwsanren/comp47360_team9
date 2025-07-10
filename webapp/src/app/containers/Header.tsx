@@ -9,7 +9,7 @@ const pages = [
 
 export default function Header() {
   return (
-    <nav className="absolute top-0 left-0 w-full bg-[#00674C] flex justify-between items-center px-6 py-3 z-10" style={{ zIndex: 99 }}>
+    <nav className="absolute top-0 left-0 w-full bg-[#00674C] flex justify-between items-center px-4 py-2 z-10" style={{ zIndex: 99 }}>
       <Link href="/">
         <div className="text-white font-bold text-lg flex items-center relative">
           <Image
