@@ -430,9 +430,22 @@ export default function Map() {
     setHasSelectedRoute(false);
   };
 
-  const handleRouteClick = (route: any) => {
-    setSelectedRoute(route);
-    setHasSelectedRoute(true);
+  const handleRouteClick = (modeKey: string) => {
+    // 找到选中的交通方式，并传递完整的路线数据
+    if (directionsData && startCoords && destCoords) {
+      const apiResponse = directionsData[modeKey] as any;
+      if (apiResponse && apiResponse.routes && apiResponse.routes.length > 0) {
+        const modeData = transportModes.find(mode => mode.key === modeKey);
+        setSelectedRoute({
+          mode: modeKey,
+          modeData: modeData,
+          routes: apiResponse.routes,
+          startCoords,
+          destCoords
+        });
+        setHasSelectedRoute(true);
+      }
+    }
   };
 
   const handleShowDirections = () => {
@@ -672,16 +685,7 @@ export default function Map() {
                   return (
                     <div
                       key={mode.key}
-                      onClick={() => handleRouteClick({
-                        mode: mode.key,
-                        duration: duration,
-                        distance: distance,
-                        emission: formatEmission(emissionData.amount),
-                        steps: steps,
-                        polyline: polyline,
-                        startCoords: startCoords,
-                        destCoords: destCoords
-                      })}
+                      onClick={() => handleRouteClick(mode.key)}
                       className="cursor-pointer hover:bg-gray-50"
                       style={{
                         width: 426,

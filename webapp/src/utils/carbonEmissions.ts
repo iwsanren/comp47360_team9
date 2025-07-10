@@ -1,4 +1,4 @@
-// Carbon emission factors (kg CO2 per km)
+// TODO: Carbon emission factors (kg CO2 per km)
 const EMISSION_FACTORS = {
   walking: 0,
   bicycling: 0,
