@@ -54,17 +54,17 @@ export default function Map() {
   });
   const [startLocation, setStartLocation] = useState<string>("");
   const [destination, setDestination] = useState<string>("");
-  const [parksData, setParksData] = useState<any>(null); // Store parks GeoJSON
-  const [bikesData, setBikesData] = useState<any>(null); // Store bikes GeoJSON
-  const [evData, setEvData] = useState<any>(null); // Store EV stations GeoJSON
+  const [parksData, setParksData] = useState<any>(null);
+  const [bikesData, setBikesData] = useState<any>(null);
+  const [evData, setEvData] = useState<any>(null);
   const [airQualityData, setAirQualityData] = useState<any>(null);
-  const [isToggleOpen, setIsToggleOpen] = useState<boolean>(true); // New state for toggle visibility
+  const [isToggleOpen, setIsToggleOpen] = useState<boolean>(true);
   const [startCoords, setStartCoords] = useState<Coordinates | null>(null);
   const [destCoords, setDestCoords] = useState<Coordinates | null>(null);
 
   const { data } = useFetchData('/api/directions', { origin: startCoords, destination: destCoords })
   console.log(data)
-  // Initialize Mapbox
+
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -75,7 +75,6 @@ export default function Map() {
       zoom: 12,
     });
 
-    // Load bike icon image
     map.loadImage(bikeIcon.src, (error, image) => {
       if (error) {
         console.error("Failed to load bike icon:", error);
@@ -86,7 +85,6 @@ export default function Map() {
       }
     });
 
-    // Load EV icon image
     map.loadImage(evIcon.src, (error, image) => {
       if (error) {
         console.error("Failed to load EV icon:", error);
@@ -97,18 +95,15 @@ export default function Map() {
       }
     });
 
-    // Add click event listener for getting coordinates
     map.on('click', async (e) => {
       const { lng, lat } = e.lngLat;
 
-      // Check if coordinates are within Manhattan's bounding box
       if (
         lng >= -74.0479 &&
         lng <= -73.9067 &&
         lat >= 40.6829 &&
         lat <= 40.8790
       ) {
-        // Reverse geocode to get human-readable address
         if (!mapboxgl.accessToken) {
           console.error("Mapbox access token is missing");
           return;
@@ -126,7 +121,7 @@ export default function Map() {
           const address = data.features && data.features.length > 0
             ? data.features[0].place_name
             : `(${lng.toFixed(6)}, ${lat.toFixed(6)})`;
-          
+
           if (!startLocation) {
             setStartCoords({ lng, lat });
             setStartLocation(address);
@@ -149,7 +144,6 @@ export default function Map() {
 
   console.log(Boolean(startLocation), destination, startCoords)
 
-  // Handle parks toggle
   useEffect(() => {
     if (!mapInstanceRef.current) return;
 
@@ -203,7 +197,6 @@ export default function Map() {
     }
   }, [toggles.parks, parksData]);
 
-  // Handle bikes toggle
   useEffect(() => {
     if (!mapInstanceRef.current) return;
 
@@ -255,7 +248,6 @@ export default function Map() {
     }
   }, [toggles.bikes, bikesData]);
 
-  // Handle EV stations toggle
   useEffect(() => {
     if (!mapInstanceRef.current) return;
 
@@ -291,7 +283,7 @@ export default function Map() {
           source: "ev-stations",
           layout: {
             "icon-image": "ev-icon",
-            "icon-size": 1, // Adjust size as needed
+            "icon-size": 1,
             "icon-allow-overlap": true,
             visibility: "visible",
           },
@@ -307,7 +299,6 @@ export default function Map() {
     }
   }, [toggles.ev, evData]);
 
-  // Handle air quality toggle
   useEffect(() => {
     if (!mapInstanceRef.current) return;
 
@@ -342,7 +333,6 @@ export default function Map() {
           type: "heatmap",
           source: "air-quality",
           paint: {
-            // Weight based on AQI value (0 to 5)
             "heatmap-weight": [
               "interpolate",
               ["linear"],
@@ -350,7 +340,6 @@ export default function Map() {
               0, 0,
               5, 1
             ],
-            // Color ramp
             "heatmap-color": [
               "interpolate",
               ["linear"],
@@ -361,7 +350,6 @@ export default function Map() {
               0.75, "rgb(255, 255, 0)",
               1, "rgb(255, 0, 0)"
             ],
-            // Radius by zoom level
             "heatmap-radius": [
               "interpolate",
               ["linear"],
@@ -372,7 +360,6 @@ export default function Map() {
               12, 75,
               15, 100
             ],
-            // Intensity by zoom level
             "heatmap-intensity": [
               "interpolate",
               ["linear"],
@@ -380,7 +367,6 @@ export default function Map() {
               0, 1,
               15, 3
             ],
-            // Opacity
             "heatmap-opacity": 0.8
           }
         });
@@ -395,7 +381,6 @@ export default function Map() {
     }
   }, [toggles.air, airQualityData]);
 
-  // Weather fetch
   useEffect(() => {
     const fetchWeather = async () => {
       try {
@@ -410,46 +395,6 @@ export default function Map() {
     fetchWeather();
   }, []);
 
-  //   // Geocoding for startLocation and destination
-  // useEffect(() => {
-  //   const geocodeLocation = async (location: string, setCoords: (coords: Coordinates | null) => void) => {
-  //     if (!location || !mapboxgl.accessToken) {
-  //       console.error("Location or Mapbox access token is missing");
-  //       setCoords(null);
-  //       return;
-  //     }
-
-  //     try {
-  //       const response = await fetch(
-  //         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(location)}.json?` +
-  //         new URLSearchParams({
-  //           access_token: mapboxgl.accessToken,
-  //           bbox: "-74.0479,40.6829,-73.9067,40.8790", // Manhattan bounding box
-  //           limit: "1",
-  //         })
-  //       );
-  //       const data = await response.json();
-  //       if (data.features && data.features.length > 0) {
-  //         const [lng, lat] = data.features[0].center;
-  //         setCoords({ lng, lat });
-  //       } else {
-  //         console.error(`No results found for ${location} in Manhattan`);
-  //         setCoords(null);
-  //       }
-  //     } catch (error) {
-  //       console.error(`Failed to geocode ${location}:`, error);
-  //       setCoords(null);
-  //     }
-  //   };
-
-  //   if (startLocation) {
-  //     geocodeLocation(startLocation, setStartCoords);
-  //   }
-  //   if (destination) {
-  //     geocodeLocation(destination, setDestCoords);
-  //   }
-  // }, [startLocation, destination]);
-
   const current = weatherData?.current;
   const hourly = weatherData?.hourly?.list || [];
 
@@ -461,18 +406,22 @@ export default function Map() {
     { key: "air", label: "Air Quality" },
   ] as const;
 
-  // Handle toggle container slide
   const handleToggleSlide = () => {
     setIsToggleOpen(!isToggleOpen);
+  };
+
+  const handleClear = () => {
+    setStartLocation("");
+    setDestination("");
+    setStartCoords(null);
+    setDestCoords(null);
   };
 
   return (
     <div className="relative">
       <div ref={mapRef} className="min-h-[750px] h-[100dvh]" />
 
-      {/* Toggle Container */}
       <div className="absolute flex items-center top-[50%] transform translate-y-[-50%] right-0">
-        {/* Arrow Button */}
         <div
           onClick={handleToggleSlide}
           className="cursor-pointer"
@@ -493,7 +442,6 @@ export default function Map() {
           />
         </div>
 
-        {/* Toggle Box */}
         {isToggleOpen && (
           <div
             style={{
@@ -571,116 +519,44 @@ export default function Map() {
         )}
       </div>
 
-      {/* Side Panel */}
       <div
         className="absolute shadow-lg p-6"
         style={{ top: 55, left: 16, bottom: 12, borderRadius: 20, backgroundColor: "#FFFFFF" }}
       >
         <h2 className="mb-4 font-bold text-[30px] leading-[32px] text-[#00674C]">Get Directions</h2>
-        <div className="flex gap-3 relative items-center pr-4">
-          <div>
+        <div className="flex flex-col gap-3">
+          <div className="flex gap-3 items-center pr-4">
             <Image src={startEndIcon} alt="Start and End Icon" width={32} height={100} />
-          </div>
-          <div className="w-[330px] flex flex-col gap-3">
-            <input
-              type="text"
-              placeholder="Start Location"
-              className="rounded-sm leading-[24px] lg:leading-[27px]"
-              style={{
-                width: '100%',
-                backgroundColor: "#F1F5F7",
-                padding: "16px 24px",
-                border: "none",
-                outline: "none",
-              }}
-              value={startLocation}
-              onChange={(e) => setStartLocation(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Enter Your Destination"
-              className="rounded-sm leading-[24px] lg:leading-[27px]"
-              style={{
-                width: '100%',
-                backgroundColor: "#F1F5F7",
-                padding: "16px 24px",
-                border: "none",
-                outline: "none",
-              }}
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
-            />
-            <div
-              style={{
-                width: 426,
-                height: 57,
-                display: 'flex',
-                justifyContent: 'space-between',
-                transform: 'rotate(0deg)',
-                opacity: 1,
-                borderRadius: '8px',
-                padding: '8px 12px',
-                background: '#FFFFFF',
-                boxShadow: '0px 2px 4px 0px #00000040',
-              }}
-            >
-              <FaWalking size="24" style={{ color: '#0FD892', marginTop: '6px' }} />
-              <FaRecycle size="20" style={{ color: '#0FD892', marginTop: '6px' , marginRight: '100px'}} />
+            <div className="w-[330px] flex flex-col gap-3">
+              <input
+                type="text"
+                placeholder="Start Location"
+                className="rounded-sm leading-[24px] lg:leading-[27px]"
+                style={{
+                  width: '100%',
+                  backgroundColor: "#F1F5F7",
+                  padding: "16px 24px",
+                  border: "none",
+                  outline: "none",
+                }}
+                value={startLocation}
+                onChange={(e) => setStartLocation(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Enter Your Destination"
+                className="rounded-sm leading-[24px] lg:leading-[27px]"
+                style={{
+                  width: '100%',
+                  backgroundColor: "#F1F5F7",
+                  padding: "16px 24px",
+                  border: "none",
+                  outline: "none",
+                }}
+                value={destination}
+                onChange={(e) => setDestination(e.target.value)}
+              />
             </div>
-            <div
-              style={{
-                width: 426,
-                height: 58,
-                display: 'flex',
-                justifyContent: 'space-between',
-                transform: 'rotate(0deg)',
-                opacity: 1,
-                borderRadius: '8px',
-                padding: '8px 12px',
-                background: '#FFFFFF',
-                boxShadow: '0px 2px 4px 0px #00000040',
-              }}
-            >
-              <FaBicycle size="24" style={{ color: '#0FD892', marginTop: '6px' }} />
-              <FaRecycle size="20" style={{ color: '#0FD892', marginTop: '6px' , marginRight: '100px'}} />
-            </div>
-            <div
-              style={{
-                width: 426,
-                height: 57,
-                display: 'flex',
-                justifyContent: 'space-between',
-                transform: 'rotate(0deg)',
-                opacity: 1,
-                borderRadius: '8px',
-                padding: '8px 12px',
-                background: '#FFFFFF',
-                boxShadow: '0px 2px 4px 0px #00000040',
-              }}
-            >
-              <FaCarAlt size="24" style={{ color: '#FF281B', marginTop: '6px' }} />
-                <FaExclamationCircle size="20" style={{ color: '#FF281B', marginTop: '6px' , marginRight: '100px'}} />
-            </div>
-            <div
-              style={{
-                width: 426,
-                height: 57,
-                display: 'flex',
-                justifyContent: 'space-between',
-                transform: 'rotate(0deg)',
-                opacity: 1,
-                borderRadius: '8px',
-                padding: '8px 12px',
-                background: '#FFFFFF',
-                boxShadow: '0px 2px 4px 0px #00000040',
-              }}
-            >
-              <FaTrain size="24" style={{ color: '#FFC800', marginTop: '6px' }} />
-              <FaArrowAltCircleDown size="20" style={{ color: '#FFC800', marginTop: '6px' , marginRight: '100px'}} />
-            
-            </div>
-          </div>
-          <div>
             <Image
               src={switchStartEndIcon}
               alt="Switch Icon"
@@ -691,23 +567,292 @@ export default function Map() {
                 const temp = startLocation;
                 setStartLocation(destination);
                 setDestination(temp);
+                const tempCoords = startCoords;
+                setStartCoords(destCoords);
+                setDestCoords(tempCoords);
               }}
             />
           </div>
+          <div className="flex flex-col gap-3">
+            <div
+              style={{
+                width: 426,
+                height: 57,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                transform: 'rotate(0deg)',
+                opacity: 1,
+                borderRadius: '8px',
+                padding: '8px 12px',
+                background: '#FFFFFF',
+                boxShadow: '0px 2px 4px 0px #00000040',
+              }}
+            >
+              <FaWalking size="24" style={{ color: '#0FD892', marginTop: '6px' }} />
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                <FaRecycle size="20" style={{ color: '#0FD892', marginTop: '6px' }} />
+                <div
+                  style={{
+                    width: 95,
+                    height: 41,
+                    transform: 'rotate(0deg)',
+                    opacity: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontWeight: 700,
+                      fontStyle: 'normal',
+                      fontSize: '15px',
+                      lineHeight: '24px',
+                      letterSpacing: '0%',
+                      color: '#0FD892',
+                    }}
+                  >
+                    0 kg CO₂
+                  </span>
+                  <span
+                    style={{
+                      fontWeight: 400,
+                      fontStyle: 'normal',
+                      fontSize: '12px',
+                      lineHeight: '18px',
+                      letterSpacing: '0%',
+                      color: '#000000',
+                    }}
+                  >
+                    Free of emissions
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              style={{
+                width: 426,
+                height: 57,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                transform: 'rotate(0deg)',
+                opacity: 1,
+                borderRadius: '8px',
+                padding: '8px 12px',
+                background: '#FFFFFF',
+                boxShadow: '0px 2px 4px 0px #00000040',
+              }}
+            >
+              <FaBicycle size="24" style={{ color: '#0FD892', marginTop: '6px' }} />
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                <FaRecycle size="20" style={{ color: '#0FD892', marginTop: '6px' }} />
+                <div
+                  style={{
+                    width: 95,
+                    height: 41,
+                    transform: 'rotate(0deg)',
+                    opacity: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontWeight: 700,
+                      fontStyle: 'normal',
+                      fontSize: '15px',
+                      lineHeight: '24px',
+                      letterSpacing: '0%',
+                      color: '#0FD892',
+                    }}
+                  >
+                    0 kg CO₂
+                  </span>
+                  <span
+                    style={{
+                      fontWeight: 400,
+                      fontStyle: 'normal',
+                      fontSize: '12px',
+                      lineHeight: '18px',
+                      letterSpacing: '0%',
+                      color: '#000000',
+                    }}
+                  >
+                    Fast and clean
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              style={{
+                width: 426,
+                height: 57,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                transform: 'rotate(0deg)',
+                opacity: 1,
+                borderRadius: '8px',
+                padding: '8px 12px',
+                background: '#FFFFFF',
+                boxShadow: '0px 2px 4px 0px #00000040',
+              }}
+            >
+              <FaCarAlt size="24" style={{ color: '#FF281B', marginTop: '6px' }} />
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                <FaExclamationCircle size="20" style={{ color: '#FF281B', marginTop: '6px' }} />
+                <div
+                  style={{
+                    width: 95,
+                    height: 41,
+                    transform: 'rotate(0deg)',
+                    opacity: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontWeight: 700,
+                      fontStyle: 'normal',
+                      fontSize: '13px',
+                      lineHeight: '24px',
+                      letterSpacing: '0%',
+                      color: '#FF281B',
+                    }}
+                  >
+                    1.2 - 3.5 kg CO₂
+                  </span>
+                  <span
+                    style={{
+                      fontWeight: 400,
+                      fontStyle: 'normal',
+                      fontSize: '12px',
+                      lineHeight: '18px',
+                      letterSpacing: '0%',
+                      color: '#000000',
+                    }}
+                  >
+                    Highest emission
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              style={{
+                width: 426,
+                height: 57,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                transform: 'rotate(0deg)',
+                opacity: 1,
+                borderRadius: '8px',
+                padding: '8px 12px',
+                background: '#FFFFFF',
+                boxShadow: '0px 2px 4px 0px #00000040',
+              }}
+            >
+              <FaTrain size="24" style={{ color: '#FFC800', marginTop: '6px' }} />
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                <FaArrowAltCircleDown size="20" style={{ color: '#FFC800', marginTop: '6px' }} />
+                <div
+                  style={{
+                    width: 95,
+                    height: 41,
+                    transform: 'rotate(0deg)',
+                    opacity: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontWeight: 700,
+                      fontStyle: 'normal',
+                      fontSize: '13px',
+                      lineHeight: '24px',
+                      letterSpacing: '0%',
+                      color: '#FFC800',
+                    }}
+                  >
+                    0.5 - 1.2 kg CO₂
+                  </span>
+                  <span
+                    style={{
+                      fontWeight: 400,
+                      fontStyle: 'normal',
+                      fontSize: '12px',
+                      lineHeight: '18px',
+                      letterSpacing: '0%',
+                      color: '#000000',
+                    }}
+                  >
+                    A few emission
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-38 mt-2">
+            <button
+              className="text-white hover:bg-[#0AAC82] focus:bg-[#0AAC82] disabled:bg-[#0FD892]"
+              style={{
+                width: 91,
+                height: 43,
+                borderRadius: 4,
+                padding: "8px 24px",
+                backgroundColor: "#0FD892",
+                opacity: 1,
+                transform: "rotate(0deg)",
+              }}
+              onClick={handleClear}
+            >
+              Clear
+            </button>
+            <button
+              className="text-white hover:bg-[#0AAC82] focus:bg-[#0AAC82] disabled:bg-[#0FD892]"
+              style={{
+                width: 180,
+                height: 43,
+                borderRadius: 4,
+                padding: "8px 24px",
+                backgroundColor: startLocation && destination ? "#0AAC82" : "#0FD892",
+              }}
+            >
+              Show Directions
+            </button>
+          </div>
         </div>
-        <button
-          className="text-white opacity-50 mt-4"
-          style={{
-            width: 180,
-            height: 43,
-            borderRadius: 4,
-            padding: "8px 24px",
-            backgroundColor: startLocation && destination ? "#0AAC82" : "#0FD892",
-          }}
-        >
-          Show Directions
-        </button>
-        {/* Weather Card at the bottom of Side Panel */}
         <div
           className="px-6 py-4"
           style={{
@@ -722,7 +867,7 @@ export default function Map() {
         >
           <p className="font-bold text-[18px] leading-[27px] text-[#00674C]">Current Weather</p>
           <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center gapSonyaSoftech gap-2">
+            <div className="flex items-center gap-2">
               {current ? (
                 <>
                   <Icon size="3.75rem" icon={WEATHER_CONDITION_ICONS[current.weather[0].icon]} />
@@ -754,7 +899,6 @@ export default function Map() {
         </div>
       </div>
 
-      {/* Forecast Modal */}
       {showModal && (
         <ShowWeatherModal current={current} hourly={hourly} setShowModal={setShowModal} />
       )}

@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from "next/link";
 import manhattan from '@/assets/images/manhattan.jpg'
-import arrow from '@/assets/images/Vector.png'
+import { BsArrowRight } from "react-icons/bs";
 
 export default function Home() {
   return (
@@ -71,7 +71,7 @@ export default function Home() {
           style={{
             top: '400px',
             left: '100px',
-            width: '225px',
+            width: '233px',
             height: '43px',
             padding: '8px 24px',
           }}
@@ -89,16 +89,15 @@ export default function Home() {
           >
             Explore Manhattan
           </span>
-          <Image
-            src={arrow}
-            alt="Arrow Icon"
-            width={14.000893592834473}
-            height={9.001262664794922}
+          <BsArrowRight
             style={{
-              position: 'relative',
-              top: '1px',
-              left: '1px',
-              objectFit: 'contain',
+              
+              top: '1.25px',
+              left: '1.5px',
+              width: '26',
+              height: '22',
+              transform: 'rotate(0deg)',
+              opacity: 1,
             }}
           />
         </Link>
