@@ -1,5 +1,5 @@
 # Importing.
-from flask import Flask, jsonify
+from flask import Flask, jsonify, Response
 import joblib
 import pandas as pd
 import requests
@@ -9,6 +9,10 @@ import holidays
 import os
 from dotenv import load_dotenv
 from flask_cors import CORS
+import json
+from collections import OrderedDict
+from shapely import wkt
+from shapely.geometry import mapping
 
 load_dotenv(override=True) # Load environment variables from .env file
 
@@ -117,7 +121,7 @@ def predict_all():
         }
 
         # Generating predictions for each zone.
-        predictions = []
+        features = []
         for _, row in zones_df.iterrows():
            
             input_data = {
@@ -147,26 +151,59 @@ def predict_all():
                 pred, int(row['OBJECTID']), pickup_hour, day_of_week
             )
 
+            geometry = OrderedDict()
+            
+            geom = row.get('geometry', '')
+
+            if geom.startswith("POLYGON (("):
+                # handle POLYGON
+                coords_text = geom.replace("POLYGON ((", "").replace("))", "")
+                points = coords_text.split(", ")
+                coords = []
+                for pt in points:
+                    lon, lat = pt.split(" ")
+                    coords.append([float(lon), float(lat)])
+                geometry["type"] = "Polygon"
+                geometry["coordinates"] = [coords]
+
+            elif geom.startswith("MULTIPOLYGON ((("):
+                # handle MULTIPOLYGON
+                geo = wkt.loads(geom)
+                geometry = mapping(geo)
+            
             # Appending the results.
-            predictions.append({
-                "PULocationID": int(row['OBJECTID']),
-                "zone": row.get('zone', ''),
-                "borough": row.get('borough', ''),
-                "centroid_lat": row['centroid_lat'],
-                "centroid_lon": row['centroid_lon'],
-                "Shape_Area": row['Shape_Area'],
-                "Shape_Leng": row['Shape_Leng'],
-                "geometry": row.get('geometry', ''),
-                "busyness": round(float(pred), 2),
-                "busyness_level": busyness_level
+            features.append({
+                "type": "Feature",
+                "properties": {
+                    "PULocationID": int(row['OBJECTID']),
+                    "zone": row.get('zone', ''),
+                    "borough": row.get('borough', ''),
+                    "centroid_lat": row['centroid_lat'],
+                    "centroid_lon": row['centroid_lon'],
+                    "Shape_Area": row['Shape_Area'],
+                    "Shape_Leng": row['Shape_Leng'],
+                    "busyness": round(float(pred), 2),
+                    "busyness_level": busyness_level,
+                    # "geom": row.get('geometry', ''),
+                },
+                "geometry": geometry,
             })
 
-        return jsonify({
-            "timestamp": now.strftime('%Y-%m-%d %H:%M'),
-            "weather": weather_main,
-            "is_holiday": bool(is_holiday),
-            "predictions": predictions
-        })
+            geojson = {
+                "type": "FeatureCollection",
+                "properties": {
+                    "timestamp": now.strftime('%Y-%m-%d %H:%M'),
+                    "weather": weather_main,
+                    "is_holiday": bool(is_holiday),
+                },
+                "features": features
+            }
+
+
+        return Response(
+            json.dumps(geojson, ensure_ascii=False),
+            mimetype='application/json'
+        )
 
     except Exception as e:
         return jsonify({"error": str(e)})
