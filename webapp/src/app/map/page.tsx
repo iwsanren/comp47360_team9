@@ -647,7 +647,7 @@ export default function Map() {
                   >
                     <div className="flex gap-[10px] items-center">
                       <Icon icon={icon} className="inherit" size="1.5rem" />
-                      <p className={`text-sm text-${isActive ? 'white' : 'black'}`}>{paths.length > 1 ? (Math.floor(minTime?.legs[0].duration.value / 60) + ' - ' + Math.floor(maxTime?.legs[0].duration.value / 60) + ' mins') : max}</p>
+                      <p className={`text-sm text-${isActive ? 'white' : 'black'}`}>{paths.length > 1 ? (Math.floor(minTime?.legs[0].duration.value / 60) + ' - ' + Math.floor(maxTime?.legs[0].duration.value / 60) + ' mins') : maxTime}</p>
                     </div>
                     <div
                       className="flex items-center gap-2 w-[8.875rem]"
