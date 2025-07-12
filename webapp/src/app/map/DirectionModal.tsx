@@ -11,7 +11,7 @@ import badge from "@/assets/images/green-badge.png";
 
 interface DirectionModalProps {
   data: any; // TODO: replace 'any' with the actual type
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setOpen: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setNavigation: React.Dispatch<React.SetStateAction<any>>; // replace 'any' with your Navigation type
   navigation: any; // replace 'any' with your Navigation type
 }
