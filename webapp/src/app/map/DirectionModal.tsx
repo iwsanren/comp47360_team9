@@ -47,7 +47,7 @@ const DirectionModal = ({ data, setOpen, setNavigation, navigation }: DirectionM
         <Icon icon={IoMdClose} size="1.5rem" className="fill-white" />
       </button>
       <Slide>
-        {data.paths.map(({ legs, overview_polyline }, i) => (
+        {data.paths.map(({ legs, overview_polyline }: { legs: any; overview_polyline: any }, i: number) => (
           <div className="pr-3 h-[100%]" key={i}>
             <button
               onClick={() => setNavigation({ steps: legs?.[0].steps, overview_polyline })}
@@ -77,7 +77,7 @@ const DirectionModal = ({ data, setOpen, setNavigation, navigation }: DirectionM
       {steps && (
         <div className="pt-6">
           <Text className="text-white mb-2">Steps</Text>
-          {steps?.map(({ distance, html_instructions }, i, { length }) => (
+          {steps?.map(({ distance, html_instructions }: { distance: any; html_instructions: any }, i:number, { length }: { length: number }) => (
             <div className="flex pb-5 gap-3 relative" key={i}>
               {i != length - 1 && (
                 <div className="absolute w-[2px] bg-green-700 left-[10.5px] top-4 bottom-[-4px]" />
