@@ -77,7 +77,7 @@ export default function Map() {
   const mapInstanceRef = useRef<mapboxgl.Map | null>(null);
   const startLocationRef = useRef<any>(null);
   const [weatherData, setWeatherData] = useState<any>(null);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState<boolean>();
   const [toggles, setToggles] = useState<Toggles>({
     parks: false,
     ev: false,
