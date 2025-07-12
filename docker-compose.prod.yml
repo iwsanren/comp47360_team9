@@ -27,7 +27,7 @@ services:
     build:
       context: ./ml
     ports:
-      - "${ML_API_PORT:-5000}:5000"
+      - "${ML_API_PORT:-5001}:5000"
     environment:
       - FLASK_ENV=${FLASK_ENV:-production}
       - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
