@@ -7,6 +7,8 @@
   --color-yellow-500: #FFC800;
   --color-green-700: #0AAC82;
   --color-red-700: #FF281B;
+  --color-green-800: #00674C;
+  --color-green-900: #1B4332;
   --breakpoint-*: initial;
   --breakpoint-sm: 30rem;
   --breakpoint-md: 48rem;
@@ -90,6 +92,22 @@ body {
   width: 100%;
   padding: .5em;
   background: white;
+}
+
+.slick-list {
+  overflow: visible;
+}
+
+.slick-track {
+  display: flex!important;
+}
+
+.slick-slide {
+  height: auto!important;
+}
+
+.slick-slide > div {
+  height: 100%;
 }
 
 @media (max-width: 768px) {

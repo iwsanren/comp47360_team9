@@ -1,36 +1,48 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BiSolidLeftArrow } from "react-icons/bi";
-import { FaWalking } from "react-icons/fa";
 import { FaBicycle, FaCar, FaTrain } from "react-icons/fa6";
-import { FaRecycle, FaExclamationCircle, FaArrowAltCircleDown } from "react-icons/fa";
-
-import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
-import { point } from '@turf/helpers';
-
+import { FaWalking, FaRecycle, FaExclamationCircle, FaArrowAltCircleDown } from "react-icons/fa";
 import { maxBy, minBy } from 'lodash';
+import { Feature, Point, GeoJsonProperties } from 'geojson';
+
+import Image from "next/image";
+
+import polyline from "@mapbox/polyline";
+import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
+import { lineString } from '@turf/helpers';
+import booleanIntersects from '@turf/boolean-intersects';
 
 import mapboxgl from "mapbox-gl";
-import Image from "next/image";
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 import startEndIcon from "@/assets/images/start_end_icon.png";
 import switchStartEndIcon from "@/assets/images/switch_start_end_icon.png";
 import bikeIcon from "@/assets/images/bike_icon.png";
 import evIcon from "@/assets/images/ev_icon.png";
+import start from "@/assets/images/start.png";
+import dest from "@/assets/images/dest.png";
+
 import { WEATHER_CONDITION_ICONS } from '@/constants/icons';
 
 import Icon from '@/components/Icon';
+import Button from "@/components/Button";
 
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { co2Emissions, transitEmissions } from "@/utils/formula";
 
 import ShowWeatherModal from "./ShowWeatherModal";
-import { co2Emissions, transitEmissions } from "@/utils/formula";
-import Button from "@/components/Button";
+import DirectionModal from "./DirectionModal";
+import decodeToGeoJSON from "@/utils/decodeToGeoJSON";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
-const ML_API_URL = process.env.NODE_ENV == "development" ? 'http://127.0.0.1:5000/predict-all' : '/api/ml/predict-all'
+const loadImage = [
+  { icon: bikeIcon, key: 'bike' },
+  { icon: evIcon, key: 'ev' },
+  { icon: start, key: 'start' },
+  { icon: dest, key: 'dest' }
+]
 
 interface Toggles {
   parks: boolean;
@@ -84,7 +96,42 @@ export default function Map() {
   const [destCoords, setDestCoords] = useState<Coordinates | null>(null);
   const [isInValid, setIsInVaildPos] = useState<boolean>();
   const [routes, setDirectionData] = useState<any>();
+  const [busyness, setBusyness] = useState<any>();
   const [tool, setTool] = useState<any>();
+  const [isOpen, setOpen] = useState<boolean>();
+  const [clickPoints, setClickPoints] = useState<Feature<Point, GeoJsonProperties>[]>([]);
+  const [navigation, setNavigation] = useState<any>()
+  const navLineGeo = useMemo(() => navigation && decodeToGeoJSON(navigation?.overview_polyline?.points), [navigation])
+  console.log(navLineGeo, navigation?.overview_polyline)
+  const allMethodsRouteCoords = useMemo(() => {
+    const paths = []
+    methods.forEach(({ method }) => {
+      const routeCoords = routes?.[method].routes?.map((element: any) => {
+        let allRoutes = []
+        element.legs[0].steps.forEach((step: any) => {
+          const decoded = polyline.decode(step.polyline.points);
+          const stepCoords = decoded.map(([lat, lng]) => [lng, lat]); // GeoJSON location [lng, lat]
+          allRoutes = allRoutes.concat(stepCoords)
+        })
+        return allRoutes
+      })
+      paths.push(routeCoords)
+    })
+    return paths
+  }, [routes]);
+
+  const allMethodPassedZones = useMemo(() => allMethodsRouteCoords.map((routeCoords => routeCoords?.map((r: any) => lineString(r))
+    .map((route: any) => busyness.features?.filter((feature: any) =>
+    booleanIntersects(feature, route))
+  ))), [allMethodsRouteCoords, busyness])
+
+  const greenScoreforEachRoute = useMemo(() => (allMethodPassedZones || []).map(methodRoutedata => {
+    return (
+      methodRoutedata?.map(zones => zones?.reduce((res, d) => {
+        res = res + +d.properties.aqi + +d.properties.busyness
+        return res
+      }, 0))
+  )}), [allMethodPassedZones])
 
   useEffect(() => {
     const fetchDirection = async () => {
@@ -109,7 +156,7 @@ export default function Map() {
     }
   }, [startCoords, destCoords])
 
-  console.log(routes)
+  // console.log(routes)
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -121,25 +168,14 @@ export default function Map() {
       zoom: 12,
     });
 
-    map.loadImage(bikeIcon.src, (error, image) => {
-      if (error) {
-        console.error("Failed to load bike icon:", error);
-        return;
-      }
-      if (image) {
-        map.addImage("bike-icon", image);
-      }
-    });
-
-    map.loadImage(evIcon.src, (error, image) => {
-      if (error) {
-        console.error("Failed to load EV icon:", error);
-        return;
-      }
-      if (image) {
-        map.addImage("ev-icon", image);
-      }
-    });
+    loadImage.forEach(({ icon, key }) => {
+      map.loadImage(icon.src, (error, image) => {
+        if (error) throw error;
+        if (image) {
+          map.addImage(`${key}-icon`, image);
+        }
+      });
+    })
 
     mapInstanceRef.current = map;
 
@@ -157,6 +193,25 @@ export default function Map() {
     
     map.on('click', async (e) => {
       const { lng, lat } = e.lngLat;
+
+      setClickPoints((prev) => {
+        const newPoint: Feature<Point, GeoJsonProperties> = {
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [e.lngLat.lng, e.lngLat.lat],
+          },
+          properties: {
+            icon: prev.length === 0 ? "start-icon" : "dest-icon",
+          },
+        };
+
+        if (prev.length >= 2) {
+          return [newPoint];
+        } else {
+          return [...prev, newPoint];
+        }
+      });
       // const pt = point([lng, lat]);
       // const isInManhattan = booleanPointInPolygon(pt, manhattanPolygon);
       if (
@@ -200,8 +255,131 @@ export default function Map() {
 
   }, [])
 
-  console.log(startLocation, startCoords)
-  console.log(destination, destCoords)
+  // add start point and dest point icon
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    const map = mapInstanceRef.current;
+
+    const addClickPoints = () => {
+      if (!map.getSource("click-points")) {
+        map.addSource("click-points", {
+          type: "geojson",
+          data: {
+            type: "FeatureCollection",
+            features: clickPoints,
+          },
+        });
+
+        map.addLayer({
+          id: "click-points-layer",
+          type: "symbol",
+          source: "click-points",
+          layout: {
+            "icon-image": ["get", "icon"],
+            "icon-size": 0.33,
+            "icon-allow-overlap": true,
+          },
+        });
+      } else {
+        const source = map.getSource("click-points") as mapboxgl.GeoJSONSource;;
+        if (source) {
+          source.setData({
+            type: "FeatureCollection",
+            features: clickPoints,
+          });
+        }
+      }
+    };
+
+    if (!map.loaded()) {
+      map.on("load", addClickPoints);
+    } else {
+      addClickPoints();
+    }
+
+    return () => {
+      map.off("load", addClickPoints);
+    };
+  }, [clickPoints]);
+
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+
+    const map = mapInstanceRef.current;
+
+    if (toggles.parks) {
+      if (!parksData) {
+        const fetchParks = async () => {
+          try {
+            const res = await fetch("/api/parks", { method: "POST" });
+            const geojson = await res.json();
+            if (geojson.features) {
+              setParksData(geojson);
+            } else {
+              console.error("Invalid parks GeoJSON data");
+            }
+          } catch (error) {
+            console.error("Failed to fetch parks data:", error);
+          }
+        };
+        fetchParks();
+      }
+
+      if (parksData && !map.getSource("parks")) {
+        map.addSource("parks", {
+          type: "geojson",
+          data: parksData,
+        });
+
+        map.addLayer({
+          id: "parks-layer",
+          type: "fill",
+          source: "parks",
+          paint: {
+            "fill-color": "#00674C",
+            "fill-opacity": 0.5,
+            "fill-outline-color": "#006400",
+          },
+          layout: {
+            visibility: "visible",
+          },
+        });
+      }
+    } else {
+      if (map.getLayer("parks-layer")) {
+        map.removeLayer("parks-layer");
+      }
+      if (map.getSource("parks")) {
+        map.removeSource("parks");
+      }
+    }
+  }, [toggles.parks, parksData]);
+
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+
+    const map = mapInstanceRef.current;
+
+    if (!busyness) {
+      const fetchParks = async () => {
+        try {
+          const res = await fetch("/api/manhattan?data=busyness", { method: "POST" });
+          const geojson = await res.json();
+          if (geojson.features) {
+            setBusyness(geojson);
+          } else {
+            console.error("Invalid busyness GeoJSON data");
+          }
+        } catch (error) {
+          console.error("Failed to fetch busyness data:", error);
+        }
+      };
+      fetchParks();
+    }
+    if (toggles.busyness) {
+
+    }
+  }, [toggles.busyness, busyness]);
 
   useEffect(() => {
     if (!mapInstanceRef.current) return;
@@ -359,27 +537,57 @@ export default function Map() {
   }, [toggles.ev, evData]);
 
   useEffect(() => {
+  if (!mapInstanceRef.current) return;
+
+  const map = mapInstanceRef.current;
+  if (navLineGeo) {
+    if (map.getSource('route')) {
+      map.getSource('route').setData(navLineGeo);
+    } else {
+      map.addSource('route', {
+        type: 'geojson',
+        data: navLineGeo
+      });
+
+      map.addLayer({
+        id: 'route',
+        type: 'line',
+        source: 'route',
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': '#3887be',
+          'line-width': 5,
+          'line-opacity': 0.75
+        }
+      });
+    }
+  }
+}, [navLineGeo]);
+
+  useEffect(() => {
     if (!mapInstanceRef.current) return;
 
     const map = mapInstanceRef.current;
-
-    if (toggles.air) {
-      if (!airQualityData) {
-        const fetchAirQuality = async () => {
-          try {
-            const res = await fetch("/api/airquality", { method: "POST" });
-            const geojson = await res.json();
-            if (geojson.features) {
-              setAirQualityData(geojson);
-            } else {
-              console.error("Invalid air quality GeoJSON data");
-            }
-          } catch (error) {
-            console.error("Failed to fetch air quality data:", error);
+    if (!airQualityData) {
+      const fetchAirQuality = async () => {
+        try {
+          const res = await fetch("/api/manhattan?data=air-quality", { method: "POST" });
+          const geojson = await res.json();
+          if (geojson.features) {
+            setAirQualityData(geojson);
+          } else {
+            console.error("Invalid air quality GeoJSON data");
           }
-        };
-        fetchAirQuality();
-      }
+        } catch (error) {
+          console.error("Failed to fetch air quality data:", error);
+        }
+      };
+      fetchAirQuality();
+    }
+    if (toggles.air) {
 
       if (airQualityData && !map.getSource("air-quality")) {
         map.addSource("air-quality", {
@@ -395,7 +603,7 @@ export default function Map() {
             "heatmap-weight": [
               "interpolate",
               ["linear"],
-              ["get", "value"],
+              ["get", "aqi"],
               0, 0,
               5, 1
             ],
@@ -467,6 +675,8 @@ export default function Map() {
     setStartCoords(null);
     setDestCoords(null);
     setDirectionData(null);
+    setClickPoints([])
+    setTool('')
   };
 
   return (
@@ -623,13 +833,12 @@ export default function Map() {
             <div className="flex flex-col gap-3">
               {methods.map(({ method, color, icon, iconAlert, mesg }, i) => {
                 const paths = routes?.[method]?.routes
-                const maxTime = paths.length > 1 ? maxBy(paths, (n: any) => n.legs[0].duration.value) : paths.legs?.[0].duration.text
-                const minTime = paths.length > 1 && minBy(paths, (n: any) => n.legs[0].duration.value)
-                const maxEmissions = co2Emissions(paths.length > 1 ? maxBy(paths, (n: any) => n.legs[0].distance.value).legs[0].distance.value : paths.legs[0].distance.value.legs[0].distance.value)
-                const minEmissions = co2Emissions(paths.length > 1 && minBy(paths, (n: any) => n.legs[0].distance.value).legs[0].distance.value)
+                const maxTime = paths.length > 1 ? maxBy(paths, (n: any) => n.legs?.[0].duration.value) : paths[0]?.legs?.[0].duration.text
+                const minTime = paths.length > 1 && minBy(paths, (n: any) => n.legs?.[0].duration.value)
+                const maxEmissions = co2Emissions(paths.length > 1 ? maxBy(paths, (n: any) => n.legs?.[0].distance.value).legs?.[0].distance.value : paths.legs?.[0].distance.value.legs?.[0].distance.value)
+                const minEmissions = co2Emissions(paths.length > 1 && minBy(paths, (n: any) => n.legs?.[0].distance.value).legs?.[0].distance.value)
                 const transitCO2Arr = method == "transit" && transitEmissions(paths)
-                const isActive = tool === method
-                console.log(transitCO2Arr)
+                const isActive = tool?.method === method
                 
                 return (
                   <div
@@ -642,12 +851,12 @@ export default function Map() {
                       color: isActive ? 'white' : color,
                     }}
                     className={`py-2 px-3 rounded-lg cursor-pointer transition-all duration-250ms`}
-                    onClick={() => setTool(method)}
+                    onClick={() => setTool({ method, greenScores: greenScoreforEachRoute[i], paths })}
                     key={i}
                   >
                     <div className="flex gap-[10px] items-center">
                       <Icon icon={icon} className="inherit" size="1.5rem" />
-                      <p className={`text-sm text-${isActive ? 'white' : 'black'}`}>{paths.length > 1 ? (Math.floor(minTime?.legs[0].duration.value / 60) + ' - ' + Math.floor(maxTime?.legs[0].duration.value / 60) + ' mins') : maxTime}</p>
+                      <p className={`text-sm text-${isActive ? 'white' : 'black'}`}>{paths.length > 1 ? (Math.floor(minTime?.legs?.[0].duration.value / 60) + ' - ' + Math.floor(maxTime?.legs?.[0].duration.value / 60) + ' mins') : maxTime}</p>
                     </div>
                     <div
                       className="flex items-center gap-2 w-[8.875rem]"
@@ -678,27 +887,27 @@ export default function Map() {
 
             </div>
           )}
-          <div className="flex justify-between mt-2">
-            <button
-              className="text-white hover:bg-[#0AAC82] focus:bg-[#0AAC82] disabled:bg-[#0FD892]"
-              style={{
-                borderRadius: 4,
-                padding: "8px 24px",
-                backgroundColor: "#0FD892",
-                opacity: 1,
-                transform: "rotate(0deg)",
-              }}
-              onClick={handleClear}
-            >
-              {routes ? 'Clear' : 'Get Directions'}
-            </button>
-            {tool && (
-              <Button>
+          {tool && (
+            <div className="flex justify-between mt-2">
+              <button
+                className="text-white hover:bg-[#0AAC82] focus:bg-[#0AAC82] disabled:bg-[#0FD892]"
+                style={{
+                  borderRadius: 4,
+                  padding: "8px 24px",
+                  backgroundColor: "#0FD892",
+                  opacity: 1,
+                  transform: "rotate(0deg)",
+                }}
+                onClick={handleClear}
+              >
+                Clear
+              </button>
+
+              <Button onClick={() => setOpen(true)}>
                 Show Directions
               </Button>
-            )}
-    
-          </div>
+            </div>
+          )}
         </div>
         <div
           className="px-6 py-4"
@@ -744,11 +953,15 @@ export default function Map() {
             </div>
           </div>
         </div>
+        {isOpen && (
+          <DirectionModal data={tool} setOpen={setOpen} setNavigation={setNavigation} navigation={navigation} />
+        )}
       </div>
 
       {showModal && (
         <ShowWeatherModal current={current} hourly={hourly} setShowModal={setShowModal} />
       )}
+
     </div>
   );
 }
