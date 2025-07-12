@@ -13,6 +13,9 @@ deploy_staging:
     - docker --version
     - docker-compose --version
   script:
+    - echo "Cleaning Docker cache before build..."
+    - docker system prune -af || true
+    - echo "Docker cache cleaned successfully"
     - echo "Building and deploying to staging..."
     - mkdir -p /tmp/team9-deploy/staging
     - rsync -av --exclude='.git' --exclude='.gitlab' ./ /tmp/team9-deploy/staging/
@@ -43,6 +46,9 @@ deploy_production:
     - apk add --no-cache docker-compose git curl
     - docker info
   script:
+    - echo "Cleaning Docker cache before build..."
+    - docker system prune -af || true
+    - echo "Docker cache cleaned successfully"
     - echo "Building and deploying to production..."
     - echo "Current directory is $(pwd)"
     - echo "Files in directory:"
@@ -70,6 +76,9 @@ deploy_production:
     - cat .env
     - echo "Stopping any existing containers..."
     - docker-compose -f docker-compose.prod.yml down || true
+    - echo "Cleaning Docker cache before build..."
+    - docker system prune -af || true
+    - echo "Docker cache cleaned successfully"
     - echo "Building containers..."
     - docker-compose -f docker-compose.prod.yml build
     - echo "Starting containers..."
