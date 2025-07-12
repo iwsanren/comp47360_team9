@@ -26,6 +26,7 @@ import dest from "@/assets/images/dest.png";
 
 import Icon from '@/components/Icon';
 import Button from "@/components/Button";
+import Input from '@/components/Input';
 
 import { WEATHER_CONDITION_ICONS } from '@/constants/icons';
 
@@ -832,33 +833,19 @@ export default function Map() {
           <div className="flex gap-3 items-center pr-4">
             <Image src={startEndIcon} alt="Start and End Icon" width={32} height={100} />
             <div className="w-[330px] flex flex-col gap-3">
-              <input
-                type="text"
+              <Input
                 placeholder="Start Location"
-                className="rounded-sm leading-[24px] lg:leading-[27px]"
-                style={{
-                  width: '100%',
-                  backgroundColor: "#F1F5F7",
-                  padding: "16px 24px",
-                  border: "none",
-                  outline: "none",
-                }}
                 value={startLocation}
                 onChange={(e) => setStartLocation(e.target.value)}
+                width="full"
+                className="h-[56px] px-6 text-base leading-[24px] lg:leading-[27px]"
               />
-              <input
-                type="text"
+              <Input
                 placeholder="Enter Your Destination"
-                className="rounded-sm leading-[24px] lg:leading-[27px]"
-                style={{
-                  width: '100%',
-                  backgroundColor: "#F1F5F7",
-                  padding: "16px 24px",
-                  border: "none",
-                  outline: "none",
-                }}
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
+                width="full"
+                className="h-[56px] px-6 text-base leading-[24px] lg:leading-[27px]"
               />
               {isInValid && <div className="text-red-500 text-xs">Invaild position, the position is only available in Manhattan</div>}
             </div>

@@ -5,6 +5,7 @@ import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import Icon from '@/components/Icon';
 import Heading from "@/components/Heading";
+import Input from '@/components/Input';
 
 import { CiLocationOn, CiPhone, CiTimer } from "react-icons/ci";
 import { RiTeamLine } from "react-icons/ri";
@@ -138,12 +139,13 @@ const ContactPage = () => {
                   }} 
                 />
               ) : (
-                <input 
+                <Input
                   disabled={isLoading}
                   name={key}
                   value={info?.[key]}
-                  className={`form outline-none ${isLoading && 'cursor-not-allowed'}`}
                   placeholder={placeholder}
+                  width="full"
+                  className={`${isLoading && 'cursor-not-allowed'}`}
                   onChange={(e) => {
                     setInfo(prev => ({
                       ...prev,
