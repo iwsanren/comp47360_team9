@@ -6,7 +6,7 @@ type BtnProps = {
   children: React.ReactNode;
   className?: string;
   isDisabled?: boolean;
-  onClick?: Function;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
 };
 
 const Button = ({ children, isDisabled, className = "", ...props }: BtnProps) => {
