@@ -34,6 +34,7 @@ import { co2Emissions, transitEmissions } from "@/utils/formula";
 import ShowWeatherModal from "./ShowWeatherModal";
 import DirectionModal from "./DirectionModal";
 import decodeToGeoJSON from "@/utils/decodeToGeoJSON";
+import { ML_API_URL } from "@/constants/url";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
@@ -71,6 +72,8 @@ const methods = [
   { method: 'driving', icon: FaCar, iconAlert: FaExclamationCircle, color: '#FF281B', mesg: 'Highest emissions' },
   { method: 'transit', icon: FaTrain, iconAlert: FaArrowAltCircleDown, color: '#FFC800', mesg: 'A few emissions' },
 ]
+
+console.log(ML_API_URL)
 
 export default function Map() {
   const mapRef = useRef<HTMLDivElement | null>(null);
