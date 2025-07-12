@@ -17,8 +17,6 @@ export async function POST(req) {
 
   const { searchParams } = new URL(req.url);
   const data = searchParams.get("data");
-  
-  console.log(ML_API_URL)
 
   try {
 
