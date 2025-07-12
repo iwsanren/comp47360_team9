@@ -101,7 +101,7 @@ def predict_all():
         # Fetching current weather.
         weather_url = (
             f"http://api.openweathermap.org/data/2.5/weather?"
-            f"lat=40.75&lon=-73.99&appid={WEATHER_API_KEY}&units=metric"
+            f"lat=40.728333&lon=-73.994167&appid={WEATHER_API_KEY}&units=metric"
         )
         weather_data = requests.get(weather_url).json()
         temp = weather_data['main']['temp']

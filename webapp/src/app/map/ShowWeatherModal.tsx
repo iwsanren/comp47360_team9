@@ -76,7 +76,7 @@ const ShowWeatherModal = ({ setShowModal, current, hourly }: modalProps) => {
                 className="bg-white rounded-lg shadow-md text-center relative"
               >
                 <div className="flex flex-col gap-[10px] py-[12px]">
-                  <Icon className="mx-auto" size="2.5rem" icon={WEATHER_CONDITION_ICONS[hour.weather[0].icon]} />
+                  <Icon size="2.5rem" style={{ margin: '0 auto' }} icon={WEATHER_CONDITION_ICONS[hour.weather[0].icon]} />
                   <div
                     style={{
                       fontWeight: 700,
