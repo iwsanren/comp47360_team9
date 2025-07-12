@@ -1,13 +1,15 @@
-import React from "react";
+import React, { ReactNode } from "react";
 
 import Slider from "react-slick";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
+interface SlideProps {
+  children: ReactNode;
+}
 
-
-const Slide = ({ children }) => {
+const Slide = ({ children }: SlideProps) => {
 
   const settings = {
     // dots: true,
