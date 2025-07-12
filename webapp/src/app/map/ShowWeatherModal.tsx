@@ -3,7 +3,7 @@ import Icon from "@/components/Icon";
 import { WEATHER_CONDITION_ICONS } from "@/constants/icons";
 
 interface modalProps {
-  setShowModal: Function;
+  setShowModal: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   current: any;
   hourly: any;
 }
