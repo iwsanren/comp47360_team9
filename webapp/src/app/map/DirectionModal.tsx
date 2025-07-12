@@ -9,7 +9,14 @@ import Slide from "@/components/Slide";
 
 import badge from "@/assets/images/green-badge.png";
 
-const DirectionModal = ({ data, setOpen, setNavigation, navigation }) => {
+interface DirectionModalProps {
+  data: any; // TODO: replace 'any' with the actual type
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setNavigation: React.Dispatch<React.SetStateAction<any>>; // replace 'any' with your Navigation type
+  navigation: any; // replace 'any' with your Navigation type
+}
+
+const DirectionModal = ({ data, setOpen, setNavigation, navigation }: DirectionModalProps) => {
   const steps = useMemo(
     () => navigation?.steps,
     [navigation]
@@ -33,7 +40,7 @@ const DirectionModal = ({ data, setOpen, setNavigation, navigation }) => {
       <button
         onClick={() => {
           setOpen(false)
-          setNavigation()
+          setNavigation(undefined)
         }}
         className="absolute right-[8px] top-[8px] cursor-pointer"
       >
