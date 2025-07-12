@@ -102,12 +102,12 @@ export default function Map() {
   const [clickPoints, setClickPoints] = useState<Feature<Point, GeoJsonProperties>[]>([]);
   const [navigation, setNavigation] = useState<any>()
   const navLineGeo = useMemo(() => navigation && decodeToGeoJSON(navigation?.overview_polyline?.points), [navigation])
-  console.log(navLineGeo, navigation?.overview_polyline)
+  // console.log(navLineGeo, navigation?.overview_polyline)
   const allMethodsRouteCoords = useMemo(() => {
-    const paths = []
+    const paths: number[][][][] = []
     methods.forEach(({ method }) => {
       const routeCoords = routes?.[method].routes?.map((element: any) => {
-        let allRoutes = []
+        let allRoutes: number[][] = []
         element.legs[0].steps.forEach((step: any) => {
           const decoded = polyline.decode(step.polyline.points);
           const stepCoords = decoded.map(([lat, lng]) => [lng, lat]); // GeoJSON location [lng, lat]
@@ -120,14 +120,14 @@ export default function Map() {
     return paths
   }, [routes]);
 
-  const allMethodPassedZones = useMemo(() => allMethodsRouteCoords.map((routeCoords => routeCoords?.map((r: any) => lineString(r))
+  const allMethodPassedZones = useMemo(() => allMethodsRouteCoords.map(((routeCoords: any) => routeCoords?.map((r: any) => lineString(r))
     .map((route: any) => busyness.features?.filter((feature: any) =>
     booleanIntersects(feature, route))
   ))), [allMethodsRouteCoords, busyness])
 
-  const greenScoreforEachRoute = useMemo(() => (allMethodPassedZones || []).map(methodRoutedata => {
+  const greenScoreforEachRoute = useMemo(() => (allMethodPassedZones || []).map((methodRoutedata: any) => {
     return (
-      methodRoutedata?.map(zones => zones?.reduce((res, d) => {
+      methodRoutedata?.map((zones: any) => zones?.reduce((res: number, d: any) => {
         res = res + +d.properties.aqi + +d.properties.busyness
         return res
       }, 0))
@@ -306,24 +306,23 @@ export default function Map() {
     if (!mapInstanceRef.current) return;
 
     const map = mapInstanceRef.current;
-
-    if (toggles.parks) {
-      if (!parksData) {
-        const fetchParks = async () => {
-          try {
-            const res = await fetch("/api/parks", { method: "POST" });
-            const geojson = await res.json();
-            if (geojson.features) {
-              setParksData(geojson);
-            } else {
-              console.error("Invalid parks GeoJSON data");
-            }
-          } catch (error) {
-            console.error("Failed to fetch parks data:", error);
+    if (!parksData) {
+      const fetchParks = async () => {
+        try {
+          const res = await fetch("/api/parks", { method: "POST" });
+          const geojson = await res.json();
+          if (geojson.features) {
+            setParksData(geojson);
+          } else {
+            console.error("Invalid parks GeoJSON data");
           }
-        };
-        fetchParks();
-      }
+        } catch (error) {
+          console.error("Failed to fetch parks data:", error);
+        }
+      };
+      fetchParks();
+    }
+    if (toggles.parks) {
 
       if (parksData && !map.getSource("parks")) {
         map.addSource("parks", {
@@ -385,24 +384,24 @@ export default function Map() {
     if (!mapInstanceRef.current) return;
 
     const map = mapInstanceRef.current;
+    if (!parksData) {
+      const fetchParks = async () => {
+        try {
+          const res = await fetch("/api/parks", { method: "POST" });
+          const geojson = await res.json();
+          if (geojson.features) {
+            setParksData(geojson);
+          } else {
+            console.error("Invalid parks GeoJSON data");
+          }
+        } catch (error) {
+          console.error("Failed to fetch parks data:", error);
+        }
+      };
+      fetchParks();
+    }
 
     if (toggles.parks) {
-      if (!parksData) {
-        const fetchParks = async () => {
-          try {
-            const res = await fetch("/api/parks", { method: "POST" });
-            const geojson = await res.json();
-            if (geojson.features) {
-              setParksData(geojson);
-            } else {
-              console.error("Invalid parks GeoJSON data");
-            }
-          } catch (error) {
-            console.error("Failed to fetch parks data:", error);
-          }
-        };
-        fetchParks();
-      }
 
       if (parksData && !map.getSource("parks")) {
         map.addSource("parks", {
