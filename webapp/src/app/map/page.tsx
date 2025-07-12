@@ -540,8 +540,9 @@ export default function Map() {
 
   const map = mapInstanceRef.current;
   if (navLineGeo) {
-    if (map.getSource('route')) {
-      map.getSource('route').setData(navLineGeo);
+    const source = map.getSource('route');
+    if (source && 'setData' in source) {
+      source.setData(navLineGeo);
     } else {
       map.addSource('route', {
         type: 'geojson',
