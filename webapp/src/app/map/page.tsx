@@ -204,6 +204,7 @@ export default function Map() {
         const isInManhattan = busyness.features.some((region: any) => booleanPointInPolygon(pt, region))
         // console.log(isInManhattan)
         if (isInManhattan) {
+          setIsInVaildPos(false)
           if (!mapboxgl.accessToken) {
             console.error("Mapbox access token is missing");
             return;
