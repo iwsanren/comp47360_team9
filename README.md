@@ -2,6 +2,27 @@
 
 This is a full-stack web application designed to help New Yorkers make smarter, greener, and less crowded mobility decisions.
 
+## 🚀 Quick Start with Automation
+
+For the complete project setup with automatic code quality and maintenance:
+
+```bash
+# One-time setup (includes git hooks and dependencies)
+npm run setup
+
+# Daily development
+git add .
+git commit -m "feat: your changes"  # Automatic code formatting and checks
+
+# When you need to clean up Docker cache
+npm run cleanup
+
+# Start the project
+docker-compose up -d
+```
+
+📖 **For detailed automation features, see [AUTOMATION-GUIDE.md](AUTOMATION-GUIDE.md)**
+
 ## Team Members
 
 | Name               | Role                |
