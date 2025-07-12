@@ -196,7 +196,7 @@ const ContactPage = () => {
           </div>
         </div>
       </div>
-      <div className={`absolute center pop-up whitespace-pre-wrap trasition-opacity duration-250ms ${isCompleted ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`absolute center pop-up whitespace-pre-wrap trasition-opacity duration-250 ${isCompleted ? 'opacity-100' : 'opacity-0'}`}>
         {isFailed ? (
           "Sorry, failed to submit.\nPlease directly send a email to a team member"
         ) : (

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { indexOf, min, minBy } from "lodash";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
@@ -34,6 +34,9 @@ const DirectionModal = ({ data, setOpen, setNavigation, navigation }: DirectionM
     const minIndex = indexOf(data.greenScores, minValue);
     return minIndex;
   }, [data]);
+  useEffect(() => {
+    setNavigation({ steps: data?.paths?.[bestOptIndex]?.legs?.[0].steps, overview_polyline: data?.paths?.[bestOptIndex]?.overview_polyline, key: bestOptIndex })
+  }, [bestOptIndex])
   // console.log(data);
   return (
     <div className="absolute left-0 right-0 top-0 bottom-0 rounded-lg bg-green-800 py-11 px-8 overflow-scroll">
@@ -50,10 +53,10 @@ const DirectionModal = ({ data, setOpen, setNavigation, navigation }: DirectionM
         {data.paths.map(({ legs, overview_polyline }: { legs: any; overview_polyline: any }, i: number) => (
           <div className="pr-3 h-[100%]" key={i}>
             <button
-              onClick={() => setNavigation({ steps: legs?.[0].steps, overview_polyline })}
+              onClick={() => setNavigation({ steps: legs?.[0].steps, overview_polyline, key: i })}
               className={`cursor-pointer py-2 px-6 text-white h-[100%] ${
-                bestOptIndex === i ? "bg-green-500" : "bg-green-900"
-              } rounded-lg active:bg-green-500`}
+                (navigation?.key === i) ? "bg-green-500" : "bg-green-900"
+              } rounded-lg hover:bg-green-500 trasition-all duration-250`}
             >
               <div className="flex gap-2 items-center justify-center">
                 {bestOptIndex === i && (

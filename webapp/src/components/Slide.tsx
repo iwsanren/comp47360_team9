@@ -12,13 +12,13 @@ interface SlideProps {
 const Slide = ({ children }: SlideProps) => {
 
   const settings = {
-    // dots: true,
     infinite: false,
     arrows: false,
     speed: 500,
     slidesToShow: 2,
     slidesToScroll: 1,
     variableWidth: true,
+    swipeToSlide: true,
   };
   return (
     <div className="relative">

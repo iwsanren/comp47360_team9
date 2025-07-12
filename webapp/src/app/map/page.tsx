@@ -5,13 +5,13 @@ import { BiSolidLeftArrow } from "react-icons/bi";
 import { FaBicycle, FaCar, FaTrain } from "react-icons/fa6";
 import { FaWalking, FaRecycle, FaExclamationCircle, FaArrowAltCircleDown } from "react-icons/fa";
 import { maxBy, minBy } from 'lodash';
-import { Feature, Point, GeoJsonProperties } from 'geojson';
+import { Feature, Point, Polygon, MultiPolygon, GeoJsonProperties } from 'geojson';
 
 import Image from "next/image";
 
 import polyline from "@mapbox/polyline";
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
-import { lineString } from '@turf/helpers';
+import { lineString, point } from '@turf/helpers';
 import booleanIntersects from '@turf/boolean-intersects';
 
 import mapboxgl from "mapbox-gl";
@@ -24,17 +24,16 @@ import evIcon from "@/assets/images/ev_icon.png";
 import start from "@/assets/images/start.png";
 import dest from "@/assets/images/dest.png";
 
-import { WEATHER_CONDITION_ICONS } from '@/constants/icons';
-
 import Icon from '@/components/Icon';
 import Button from "@/components/Button";
 
+import { WEATHER_CONDITION_ICONS } from '@/constants/icons';
+
 import { co2Emissions, transitEmissions } from "@/utils/formula";
+import decodeToGeoJSON from "@/utils/decodeToGeoJSON";
 
 import ShowWeatherModal from "./ShowWeatherModal";
 import DirectionModal from "./DirectionModal";
-import decodeToGeoJSON from "@/utils/decodeToGeoJSON";
-import { ML_API_URL } from "@/constants/url";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
@@ -73,7 +72,7 @@ const methods = [
   { method: 'transit', icon: FaTrain, iconAlert: FaArrowAltCircleDown, color: '#FFC800', mesg: 'A few emissions' },
 ]
 
-console.log(ML_API_URL)
+// console.log(ML_API_URL)
 
 export default function Map() {
   const mapRef = useRef<HTMLDivElement | null>(null);
@@ -104,6 +103,9 @@ export default function Map() {
   const [isOpen, setOpen] = useState<boolean>();
   const [clickPoints, setClickPoints] = useState<Feature<Point, GeoJsonProperties>[]>([]);
   const [navigation, setNavigation] = useState<any>()
+
+  // console.log(busyness)
+
   const navLineGeo = useMemo(() => navigation && decodeToGeoJSON(navigation?.overview_polyline?.points), [navigation])
   // console.log(navLineGeo, navigation?.overview_polyline)
   const allMethodsRouteCoords = useMemo(() => {
@@ -193,70 +195,69 @@ export default function Map() {
     if (!mapInstanceRef.current) return;
 
     const map = mapInstanceRef.current;
-    
-    map.on('click', async (e) => {
-      const { lng, lat } = e.lngLat;
+    if (busyness) {
+      map.on('click', async (e) => {
+        const { lng, lat } = e.lngLat;
 
-      setClickPoints((prev) => {
-        const newPoint: Feature<Point, GeoJsonProperties> = {
-          type: "Feature",
-          geometry: {
-            type: "Point",
-            coordinates: [e.lngLat.lng, e.lngLat.lat],
-          },
-          properties: {
-            icon: prev.length === 0 ? "start-icon" : "dest-icon",
-          },
-        };
+        const pt = point([lng, lat]);
+      
+        const isInManhattan = busyness.features.some((region: any) => booleanPointInPolygon(pt, region))
+        // console.log(isInManhattan)
+        if (isInManhattan) {
+          if (!mapboxgl.accessToken) {
+            console.error("Mapbox access token is missing");
+            return;
+          }
 
-        if (prev.length >= 2) {
-          return [newPoint];
+          setClickPoints((prev) => {
+            const newPoint: Feature<Point, GeoJsonProperties> = {
+              type: "Feature",
+              geometry: {
+                type: "Point",
+                coordinates: [e.lngLat.lng, e.lngLat.lat],
+              },
+              properties: {
+                icon: prev.length === 0 ? "start-icon" : "dest-icon",
+              },
+            };
+
+            if (prev.length >= 2) {
+              return [newPoint];
+            } else {
+              return [...prev, newPoint];
+            }
+          });
+
+          try {
+            const response = await fetch(
+              `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?` +
+              new URLSearchParams({
+                access_token: mapboxgl.accessToken,
+                limit: "1",
+              })
+            );
+            const data = await response.json();
+            const address = data.features && data.features.length > 0
+              ? data.features[0].place_name
+              : `(${lng.toFixed(6)}, ${lat.toFixed(6)})`;
+
+            if (!startLocationRef.current) {
+              setStartCoords({ lng, lat });
+              setStartLocation(address);
+            } else {
+              setDestCoords({ lng, lat });
+              setDestination(address);
+            }
+          } catch (error) {
+            console.error("Failed to reverse geocode:", error);
+          }
         } else {
-          return [...prev, newPoint];
+          setIsInVaildPos(true)
         }
       });
-      // const pt = point([lng, lat]);
-      // const isInManhattan = booleanPointInPolygon(pt, manhattanPolygon);
-      if (
-        lng >= -74.0479 &&
-        lng <= -73.9067 &&
-        lat >= 40.6829 &&
-        lat <= 40.8790
-      ) {
-        if (!mapboxgl.accessToken) {
-          console.error("Mapbox access token is missing");
-          return;
-        }
+    }
 
-        try {
-          const response = await fetch(
-            `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?` +
-            new URLSearchParams({
-              access_token: mapboxgl.accessToken,
-              limit: "1",
-            })
-          );
-          const data = await response.json();
-          const address = data.features && data.features.length > 0
-            ? data.features[0].place_name
-            : `(${lng.toFixed(6)}, ${lat.toFixed(6)})`;
-
-          if (!startLocationRef.current) {
-            setStartCoords({ lng, lat });
-            setStartLocation(address);
-          } else {
-            setDestCoords({ lng, lat });
-            setDestination(address);
-          }
-        } catch (error) {
-          console.error("Failed to reverse geocode:", error);
-        }
-      } else {
-        // setIsInVaildPos(true)
-      }
-    });
-
-  }, [])
+  }, [busyness])
 
   // add start point and dest point icon
   useEffect(() => {
@@ -378,8 +379,44 @@ export default function Map() {
       };
       fetchParks();
     }
-    if (toggles.busyness) {
+    const visibility = toggles.busyness ? "visible" : "none";
+    if (toggles.busyness && !map.getSource('busyness')) {
+      map.addSource('busyness', {
+        type: "geojson",
+        data: busyness,
+      });
 
+      map.addLayer({
+        id: "busyness-layer",
+        type: "fill",
+        source: "busyness",
+        paint: {
+          'fill-color': [
+            'interpolate',
+            ['linear'],
+            ['get', 'busyness'],
+            // min, color
+            1, '#B7E4C7',    
+            100, '#95D5B2',   
+            200, '#FFE066', 
+            300, '#FAA307', 
+            400, '#F48C06', 
+            500, '#D00000', 
+          ],
+          'fill-opacity': 0.8
+        },
+        layout: {
+          visibility,
+        },
+      });
+    } else {
+      if (map.getLayer('busyness-layer')) {
+        map.setLayoutProperty(
+          'busyness-layer',
+          'visibility',
+          visibility
+        );
+      }
     }
   }, [toggles.busyness, busyness]);
 
@@ -539,36 +576,43 @@ export default function Map() {
   }, [toggles.ev, evData]);
 
   useEffect(() => {
-  if (!mapInstanceRef.current) return;
+    if (!mapInstanceRef.current) return;
 
-  const map = mapInstanceRef.current;
-  if (navLineGeo) {
-    const source = map.getSource('route');
-    if (source && 'setData' in source) {
-      source.setData(navLineGeo);
+    const map = mapInstanceRef.current;
+    if (navLineGeo) {
+      const source = map.getSource('route');
+      if (source && 'setData' in source) {
+        source.setData(navLineGeo);
+      } else {
+        map.addSource('route', {
+          type: 'geojson',
+          data: navLineGeo
+        });
+
+        map.addLayer({
+          id: 'route',
+          type: 'line',
+          source: 'route',
+          layout: {
+            'line-join': 'round',
+            'line-cap': 'round'
+          },
+          paint: {
+            'line-color': '#3887be',
+            'line-width': 5,
+            'line-opacity': 0.75
+          }
+        });
+      }
     } else {
-      map.addSource('route', {
-        type: 'geojson',
-        data: navLineGeo
-      });
-
-      map.addLayer({
-        id: 'route',
-        type: 'line',
-        source: 'route',
-        layout: {
-          'line-join': 'round',
-          'line-cap': 'round'
-        },
-        paint: {
-          'line-color': '#3887be',
-          'line-width': 5,
-          'line-opacity': 0.75
-        }
-      });
+      if (map.getLayer("route")) {
+        map.removeLayer("route");
+      }
+      if (map.getSource("route")) {
+        map.removeSource("route");
+      }
     }
-  }
-}, [navLineGeo]);
+  }, [navLineGeo]);
 
   useEffect(() => {
     if (!mapInstanceRef.current) return;
@@ -680,6 +724,7 @@ export default function Map() {
     setDirectionData(null);
     setClickPoints([])
     setTool('')
+    setNavigation(undefined)
   };
 
   return (
@@ -832,85 +877,78 @@ export default function Map() {
               }}
             />
           </div>
-          {routes && (
-            <div className="flex flex-col gap-3">
-              {methods.map(({ method, color, icon, iconAlert, mesg }, i) => {
-                const paths = routes?.[method]?.routes
-                const maxTime = paths.length > 1 ? maxBy(paths, (n: any) => n.legs?.[0].duration.value) : paths[0]?.legs?.[0].duration.text
-                const minTime = paths.length > 1 && minBy(paths, (n: any) => n.legs?.[0].duration.value)
-                const maxEmissions = co2Emissions(paths.length > 1 ? maxBy(paths, (n: any) => n.legs?.[0].distance.value).legs?.[0].distance.value : paths.legs?.[0].distance.value.legs?.[0].distance.value)
-                const minEmissions = co2Emissions(paths.length > 1 && minBy(paths, (n: any) => n.legs?.[0].distance.value).legs?.[0].distance.value)
-                const transitCO2Arr = method == "transit" && transitEmissions(paths)
-                const isActive = tool?.method === method
-                
-                return (
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      background: isActive ? color : 'white',
-                      boxShadow: '0px 2px 4px 0px #00000040',
-                      color: isActive ? 'white' : color,
-                    }}
-                    className={`py-2 px-3 rounded-lg cursor-pointer transition-all duration-250ms`}
-                    onClick={() => setTool({ method, greenScores: greenScoreforEachRoute[i], paths })}
-                    key={i}
-                  >
-                    <div className="flex gap-[10px] items-center">
-                      <Icon icon={icon} className="inherit" size="1.5rem" />
-                      <p className={`text-sm text-${isActive ? 'white' : 'black'}`}>{paths.length > 1 ? (Math.floor(minTime?.legs?.[0].duration.value / 60) + ' - ' + Math.floor(maxTime?.legs?.[0].duration.value / 60) + ' mins') : maxTime}</p>
-                    </div>
+          {startCoords && destCoords && (
+            routes ? (
+              <div className="flex flex-col gap-3">
+                {methods.map(({ method, color, icon, iconAlert, mesg }, i) => {
+                  const paths = routes?.[method]?.routes
+                  const maxTime = paths.length > 1 ? maxBy(paths, (n: any) => n.legs?.[0].duration.value) : paths[0]?.legs?.[0].duration.text
+                  const minTime = paths.length > 1 && minBy(paths, (n: any) => n.legs?.[0].duration.value)
+                  const maxEmissions = co2Emissions(paths.length > 1 ? maxBy(paths, (n: any) => n.legs?.[0].distance.value).legs?.[0].distance.value : paths?.[0].legs?.[0].distance.value)
+                  const minEmissions = co2Emissions(paths.length > 1 && minBy(paths, (n: any) => n.legs?.[0].distance.value).legs?.[0].distance.value)
+                  const transitCO2Arr = method == "transit" && transitEmissions(paths)
+                  const isActive = tool?.method === method
+                  // console.log(paths, minEmissions, maxEmissions)
+                  return (
                     <div
-                      className="flex items-center gap-2 w-[8.875rem]"
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        background: isActive ? color : 'white',
+                        boxShadow: '0px 2px 4px 0px #00000040',
+                        color: isActive ? 'white' : color,
+                      }}
+                      className={`py-2 px-3 rounded-lg cursor-pointer transition-all duration-250`}
+                      onClick={() => setTool({ method, greenScores: greenScoreforEachRoute[i], paths })}
+                      key={i}
                     >
-                      <Icon icon={iconAlert} className="inherit" size="1.25rem" />
+                      <div className="flex gap-[10px] items-center">
+                        <Icon icon={icon} className="inherit" size="1.5rem" />
+                        <p className={`text-sm text-${isActive ? 'white' : 'black'}`}>{paths.length > 1 ? (Math.floor(minTime?.legs?.[0].duration.value / 60) + ' - ' + Math.floor(maxTime?.legs?.[0].duration.value / 60) + ' mins') : maxTime}</p>
+                      </div>
                       <div
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'center',
-                        }}
+                        className="flex items-center gap-2 w-[8.875rem]"
                       >
-                        <span
-                          className={`font-bold`}
+                        <Icon icon={iconAlert} className="inherit" size="1.25rem" />
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                          }}
                         >
-                          {method === 'driving' ? (
-                            `${minEmissions} - ${maxEmissions}`
-                          ) : transitCO2Arr ? transitCO2Arr.join(' - ') : 0} kg CO₂
-                          
-                        </span>
-                        <span className="text-xs leading-[1.5]">
-                          {mesg}
-                        </span>
+                          <span
+                            className={`font-bold`}
+                          >
+                            {method === 'driving' ? (minEmissions ?
+                              `${minEmissions} - ${maxEmissions}` : maxEmissions
+                            ) : transitCO2Arr ? transitCO2Arr.join(' - ') : 0} kg CO₂
+                            
+                          </span>
+                          <span className="text-xs leading-[1.5]">
+                            {mesg}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-              )})}
-
-            </div>
-          )}
-          {tool && (
+                )})}
+              </div>
+          ) : (
+            <div className="py-3">Loading...</div>
+          ))}
             <div className="flex justify-between mt-2">
-              <button
-                className="text-white hover:bg-[#0AAC82] focus:bg-[#0AAC82] disabled:bg-[#0FD892]"
-                style={{
-                  borderRadius: 4,
-                  padding: "8px 24px",
-                  backgroundColor: "#0FD892",
-                  opacity: 1,
-                  transform: "rotate(0deg)",
-                }}
+              <Button
                 onClick={handleClear}
               >
                 Clear
-              </button>
-
-              <Button onClick={() => setOpen(true)}>
-                Show Directions
               </Button>
+              {tool && (
+                <Button onClick={() => setOpen(true)}>
+                  Show Directions
+                </Button>
+              )}
             </div>
-          )}
         </div>
         <div
           className="px-6 py-4"
