@@ -35,6 +35,7 @@ import decodeToGeoJSON from "@/utils/decodeToGeoJSON";
 
 import ShowWeatherModal from "./ShowWeatherModal";
 import DirectionModal from "./DirectionModal";
+import useFetchData from "@/hooks/useFetchData";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
@@ -104,8 +105,6 @@ export default function Map() {
   const [isOpen, setOpen] = useState<boolean>();
   const [clickPoints, setClickPoints] = useState<Feature<Point, GeoJsonProperties>[]>([]);
   const [navigation, setNavigation] = useState<any>()
-
-  // console.log(busyness)
 
   const navLineGeo = useMemo(() => navigation && decodeToGeoJSON(navigation?.overview_polyline?.points), [navigation])
   // console.log(navLineGeo, navigation?.overview_polyline)

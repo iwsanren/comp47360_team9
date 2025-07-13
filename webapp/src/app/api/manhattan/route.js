@@ -1,26 +1,16 @@
-// import { readFileSync } from "fs";
-// import path from "path";
 import { ML_API_URL } from "@/constants/url";
 
 const API_KEY = process.env.OPENWEATHER_API_KEY; // use .env to get api key.
-
-// const filePath = path.join(
-//   process.cwd(),
-//   "public",
-//   "data",
-//   "manhattan_zones.json"
-// );
-
-// const data = JSON.parse(readFileSync(filePath, "utf-8"));
 
 export async function POST(req) {
 
   const { searchParams } = new URL(req.url);
   const data = searchParams.get("data");
+  const timestamp = searchParams.get("timestamp");
 
   try {
 
-    const res = await fetch(ML_API_URL, { method: "POST" });
+    const res = await fetch(timestamp ? `${ML_API_URL}?timestamp=${timestamp}` : ML_API_URL, { method: "POST" });
     const geojson = await res.json();
 
     if (data == 'air-quality') {
@@ -38,19 +28,23 @@ export async function POST(req) {
 
       return Response.json(geojsonData);
     } else {
-      await Promise.all(
-        geojson.features.map(async (feature) => {
-          const res = await fetch(
-            `http://api.openweathermap.org/data/2.5/air_pollution?lat=${feature.properties.centroid_lat}&lon=${feature.properties.centroid_lon}&appid=${API_KEY}`
-          );
-          const data = await res.json();
+      if (timestamp) {
+        return Response.json(geojson);
+      } else {
+        await Promise.all(
+          geojson.features.map(async (feature) => {
+            const res = await fetch(
+              `http://api.openweathermap.org/data/2.5/air_pollution?lat=${feature.properties.centroid_lat}&lon=${feature.properties.centroid_lon}&appid=${API_KEY}`
+            );
+            const data = await res.json();
 
-          // 更新 properties
-          feature.properties.aqi = data.list[0].main.aqi;
-          feature.properties.air_pollution = data;
-        })
-      );
-      return Response.json(geojson);
+            // 更新 properties
+            feature.properties.aqi = data.list[0].main.aqi;
+            feature.properties.air_pollution = data;
+          })
+        );
+        return Response.json(geojson);
+      }
     }
   } catch (error) {
     console.error(error);

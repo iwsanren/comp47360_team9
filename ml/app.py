@@ -1,9 +1,9 @@
 # Importing.
-from flask import Flask, jsonify, Response
+from flask import Flask, jsonify, Response, request
 import joblib
 import pandas as pd
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 import pytz
 import holidays
 import os
@@ -90,7 +90,12 @@ def health():
 def predict_all():
     try:
         # Current time and date features.
+        time = request.args.get("timestamp") # Format: 1752490800
+        if time is not None:
+            time = int(time)  
         now = datetime.now(pytz.timezone("America/New_York"))
+        if time is not None: 
+            now = datetime.fromtimestamp(time, tz=timezone.utc)
         # Use this hour if minutes ≤ 30, else use next hour.
         pickup_hour = now.hour if now.minute <= 30 else (now.hour + 1) % 24
         day_of_week = now.weekday()
@@ -100,10 +105,17 @@ def predict_all():
 
         # Fetching current weather.
         weather_url = (
-            f"http://api.openweathermap.org/data/2.5/weather?"
+            f"http://api.openweathermap.org/data/2.5/{'weather' if time is None else 'forecast/hourly'}?"
             f"lat=40.728333&lon=-73.994167&appid={WEATHER_API_KEY}&units=metric"
         )
+
         weather_data = requests.get(weather_url).json()
+        
+        print(now)
+
+        if time is not None:
+            weather_data = next(filter(lambda x: x["dt"] == time, weather_data['list']), None)
+
         temp = weather_data['main']['temp']
         feels_like = weather_data['main']['feels_like']
         humidity = weather_data['main']['humidity']

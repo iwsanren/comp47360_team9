@@ -1,9 +1,15 @@
 import { useState, useEffect } from "react";
 
-const useFetchData = (url, body, method) => {
+interface FetchDataProps {
+  url: string;
+  body?: any;
+  method?: string
+}
+
+const useFetchData = ({ url, body, method }: FetchDataProps) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<any>();
 
   useEffect(() => {
     if (!url) return;
