@@ -107,7 +107,9 @@ export default function Map() {
   const [navigation, setNavigation] = useState<any>()
 
   const navLineGeo = useMemo(() => navigation && decodeToGeoJSON(navigation?.overview_polyline?.points), [navigation])
+  
   // console.log(navLineGeo, navigation?.overview_polyline)
+
   const allMethodsRouteCoords = useMemo(() => {
     const paths: number[][][][] = []
     methods.forEach(({ method }) => {

@@ -145,7 +145,7 @@ const ContactPage = () => {
                   value={info?.[key]}
                   placeholder={placeholder}
                   width="full"
-                  className={`${isLoading && 'cursor-not-allowed'}`}
+                  className={"form"}
                   onChange={(e) => {
                     setInfo(prev => ({
                       ...prev,

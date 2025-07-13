@@ -2,12 +2,18 @@
 @import "tailwindcss";
 
 @theme {
+  --color-blue-100: #F1F5F7;
+  --color-green-200: #E9F8F3;
   --color-green-300: #E0EEE9;
+  --color-gray-300: #F0F0F0;
+  --color-gray-500: #DADADA;
   --color-green-500: #0FD892;
   --color-yellow-500: #FFC800;
   --color-green-700: #0AAC82;
   --color-red-700: #FF281B;
+  --color-gray-700: #A6A6A6;
   --color-green-800: #00674C;
+  --color-red-800: #DF2320;
   --color-green-900: #1B4332;
   --breakpoint-*: initial;
   --breakpoint-sm: 30rem;
