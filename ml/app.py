@@ -142,8 +142,6 @@ def predict_all():
         )
 
         weather_data = requests.get(weather_url).json()
-        
-        print(now)
 
         if time is not None:
             weather_data = next(filter(lambda x: x["dt"] == time, weather_data['list']), None)
