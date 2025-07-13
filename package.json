@@ -6,7 +6,16 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "pre-commit": "pre-commit run --all-files",
+    "maintenance": "bash scripts/maintenance.sh",
+    "setup": "bash scripts/start-project.sh",
+    "setup-production": "bash scripts/start-project.sh production",
+    "health-check": "bash scripts/maintenance.sh health-check",
+    "cleanup": "bash scripts/maintenance.sh cleanup",
+    "security-scan": "bash scripts/maintenance.sh security-scan",
+    "diagnose": "bash scripts/diagnose-project.sh",
+    "test-api": "bash scripts/test-ml-api.sh"
   },
   "dependencies": {
     "@fontsource/roboto": "^5.2.6",

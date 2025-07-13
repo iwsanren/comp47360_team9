@@ -3,7 +3,29 @@ default:
     - shell
 
 stages:
+  - quality-check
   - deploy
+
+# 代码质量检查阶段
+quality_check:
+  stage: quality-check
+  tags:
+    - shell
+  script:
+    - echo "🔍 Running code quality checks..."
+    - echo "🧹 Cleaning up before checks..."
+    - docker system prune -af || true
+    - echo "📦 Installing dependencies..."
+    - cd webapp && npm ci
+    - cd ../ml && pip install -r requirements.txt
+    - cd ..
+    - echo "🔒 Running security scan..."
+    - bash scripts/maintenance.sh security-scan
+    - echo "✅ Quality checks completed"
+  only:
+    - merge_requests
+    - develop
+    - main
 
 deploy_staging:
   stage: deploy
