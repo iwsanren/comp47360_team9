@@ -52,17 +52,34 @@ case "$1" in
     "security-scan")
         echo "🔒 Running security scans..."
         cd webapp
-        run_with_error_handling "npm audit" "NPM security audit"
+        
+        # Check if npm is available locally, otherwise use Docker
+        if command_exists npm; then
+            run_with_error_handling "npm audit" "NPM security audit"
+        else
+            echo "🐳 NPM not found locally, using Docker for security scan..."
+            run_with_error_handling "docker run --rm -v $(pwd):/app -w /app node:18 npm audit" "Docker-based NPM security audit"
+        fi
+        
         cd ../ml
         if command_exists safety; then
             run_with_error_handling "safety check" "Python security scan"
         else
-            echo "⚠️ Safety not installed, skipping Python security scan"
+            echo "⚠️ Safety not installed, checking with Docker..."
+            if command_exists docker; then
+                run_with_error_handling "docker run --rm -v $(pwd):/app -w /app python:3.11-slim sh -c 'pip install safety && safety check'" "Docker-based Python security scan"
+            else
+                echo "⚠️ Docker not available, skipping Python security scan"
+            fi
         fi
         
-        # Run pre-commit hooks for additional security checks
-        echo "🔒 Running pre-commit security checks..."
-        run_precommit "run --all-files" "Pre-commit security and quality checks"
+        # Run pre-commit hooks for additional security checks (skip if not available)
+        if [ -f "../.pre-commit-config.yaml" ]; then
+            echo "🔒 Running pre-commit security checks..."
+            run_precommit "run --all-files" "Pre-commit security and quality checks"
+        else
+            echo "⚠️ Pre-commit config not found, skipping pre-commit checks"
+        fi
         ;;
     
     "cleanup")
