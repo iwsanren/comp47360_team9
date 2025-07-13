@@ -220,11 +220,13 @@ export default function Map() {
                 coordinates: [e.lngLat.lng, e.lngLat.lat],
               },
               properties: {
-                icon: prev.length === 0 ? "start-icon" : "dest-icon",
+                icon: (prev.length === 0 || prev.length === 2) ? "start-icon" : "dest-icon",
               },
             };
 
             if (prev.length >= 2) {
+              setDirectionData(null)
+              // console.log(prev.length, prev)
               return [newPoint];
             } else {
               return [...prev, newPoint];
@@ -839,14 +841,12 @@ export default function Map() {
                 value={startLocation}
                 onChange={(e) => setStartLocation(e.target.value)}
                 width="full"
-                className="h-[56px] px-6 text-base leading-[24px] lg:leading-[27px]"
               />
               <Input
                 placeholder="Enter Your Destination"
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
                 width="full"
-                className="h-[56px] px-6 text-base leading-[24px] lg:leading-[27px]"
               />
               {isInValid && <div className="text-red-500 text-xs">Invaild position, the position is only available in Manhattan</div>}
             </div>
