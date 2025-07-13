@@ -5,15 +5,12 @@ import { BiSolidLeftArrow } from "react-icons/bi";
 import { FaBicycle, FaCar, FaTrain } from "react-icons/fa6";
 import { FaWalking, FaRecycle, FaExclamationCircle, FaArrowAltCircleDown } from "react-icons/fa";
 import { maxBy, minBy } from 'lodash';
-import { Feature, Point, Polygon, MultiPolygon, GeoJsonProperties } from 'geojson';
-
+import { Feature, Point, GeoJsonProperties } from 'geojson';
 import Image from "next/image";
-
 import polyline from "@mapbox/polyline";
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import { lineString, point } from '@turf/helpers';
 import booleanIntersects from '@turf/boolean-intersects';
-
 import mapboxgl from "mapbox-gl";
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -23,19 +20,15 @@ import bikeIcon from "@/assets/images/bike_icon.png";
 import evIcon from "@/assets/images/ev_icon.png";
 import start from "@/assets/images/start.png";
 import dest from "@/assets/images/dest.png";
-
 import Icon from '@/components/Icon';
 import Button from "@/components/Button";
 import Input from '@/components/Input';
-
 import { WEATHER_CONDITION_ICONS } from '@/constants/icons';
-
 import { co2Emissions, transitEmissions } from "@/utils/formula";
 import decodeToGeoJSON from "@/utils/decodeToGeoJSON";
 
 import ShowWeatherModal from "./ShowWeatherModal";
 import DirectionModal from "./DirectionModal";
-import useFetchData from "@/hooks/useFetchData";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
@@ -113,7 +106,7 @@ export default function Map() {
   const allMethodsRouteCoords = useMemo(() => {
     const paths: number[][][][] = []
     methods.forEach(({ method }) => {
-      const routeCoords = routes?.[method].routes?.map((element: any) => {
+      const routeCoords = routes?.[method]?.routes?.map((element: any) => {
         let allRoutes: number[][] = []
         element.legs[0].steps.forEach((step: any) => {
           const decoded = polyline.decode(step.polyline.points);

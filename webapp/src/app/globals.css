@@ -45,6 +45,7 @@ body {
 }
 
 input::placeholder {
+  color: var(--color-gray-700);
   transition: color 200ms ease-in-out;
 }
 

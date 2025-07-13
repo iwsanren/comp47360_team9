@@ -1,3 +1,5 @@
+import { NextResponse } from 'next/server';
+
 import convertToGeoJSON from "../../../utils/convertToGeoJSON";
 
 export async function POST() {
@@ -30,11 +32,11 @@ export async function POST() {
 
     // console.log(data)
     // 7. return GeoJSON
-    return Response.json(geojson);
+    return NextResponse.json(geojson);
 
   } catch (error) {
     console.error(error);
-    return Response.json(
+    return NextResponse.json(
       { error: "Failed to fetch EV charging stations data." },
       { status: 500 }
     );

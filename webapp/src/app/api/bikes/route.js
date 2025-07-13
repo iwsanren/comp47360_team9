@@ -1,4 +1,5 @@
 // app/api/bike/route.js
+import { NextResponse } from "next/server";
 
 import convertToGeoJSON from "../../../utils/convertToGeoJSON";
 
@@ -32,19 +33,15 @@ const getData = async () => {
     const geojson = convertToGeoJSON(data.elements)
     // Return raw Overpass JSON response
 
-    return Response.json(geojson);
+    return NextResponse.json(geojson);
 
   } catch (error) {
     console.error(error);
-    return Response.json(
+    return NextResponse.json(
       { error: "Failed to fetch bike station data." },
       { status: 500 }
     );
   } 
-}
-
-export async function GET() {
-    return getData()
 }
 
 export async function POST() {

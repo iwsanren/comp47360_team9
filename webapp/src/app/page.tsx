@@ -2,8 +2,9 @@
 
 import Image from 'next/image'
 import Link from "next/link";
-import manhattan from '@/assets/images/manhattan.jpg'
 import { BsArrowRight } from "react-icons/bs";
+
+import manhattan from '@/assets/images/manhattan.jpg'
 
 export default function Home() {
   return (
@@ -42,11 +43,10 @@ export default function Home() {
             position: 'absolute',
             top: '304px',
             left: '100px',
-            width: '742px',
             height: '45px',
           }}
         >
-          Greener choices. Smarter routes. Manhattan, your way.
+          Greener choices. Smarter routes. Prediction. Manhattan, your way.
         </h3>
 
         {/* Description */}

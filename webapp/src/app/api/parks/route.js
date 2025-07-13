@@ -1,3 +1,5 @@
+import { NextResponse } from "next/server";
+
 import convertToGeoJSON from "../../../utils/convertToGeoJSON";
 
 export async function POST() {
@@ -26,11 +28,11 @@ export async function POST() {
     // Convert Overpass elements to GeoJSON FeatureCollection
    const geojson = convertToGeoJSON(data.elements)
 
-    return Response.json(geojson);
+    return NextResponse.json(geojson);
 
   } catch (error) {
     console.error(error);
-    return Response.json(
+    return NextResponse.json(
       { error: "Failed to fetch park data." },
       { status: 500 }
     );

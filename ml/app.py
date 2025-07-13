@@ -13,6 +13,7 @@ import json
 from collections import OrderedDict
 from shapely import wkt
 from shapely.geometry import mapping
+import jwt
 
 load_dotenv(override=True) # Load environment variables from .env file
 
@@ -42,6 +43,7 @@ MODEL_FEATURE_ORDER = [
 
 # Weather API key.
 WEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY')
+JWT_SECRET = os.getenv('JWT_SECRET')
 
 # Function to classify busyness.
 def classify_busyness_zone_hour(pred, zone_id, hour, day):
@@ -118,9 +120,17 @@ def health_check():
             'timestamp': datetime.now().isoformat()
         }), 500
 
-@app.route('/predict-all', methods=['GET', 'POST'])
+@app.route('/predict-all', methods=['POST'])
 def predict_all():
+    auth_header = request.headers.get('Authorization')
+    
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return {'error': 'Missing or invalid token'}, 401
+    
+    token = auth_header.split(' ')[1]
+
     try:
+        decoded = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
         # Current time and date features.
         time = request.args.get("timestamp") # Format: 1752490800
         if time is not None:
@@ -241,12 +251,15 @@ def predict_all():
                 "features": features
             }
 
-
         return Response(
             json.dumps(geojson, ensure_ascii=False),
             mimetype='application/json'
         )
 
+    except jwt.ExpiredSignatureError:
+        return jsonify({'error': 'Token expired'}), 403
+    except jwt.InvalidTokenError:
+        return jsonify({'error': 'Invalid token'}), 403
     except Exception as e:
         return jsonify({"error": str(e)})
 

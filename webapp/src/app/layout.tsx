@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 
 import "./globals.css";
+
 import Header from "./containers/Header";
+import AuthWrapper from "./containers/AuthWrapper";
 
 export const metadata: Metadata = {
   title: "Manhattan My Way",
@@ -16,12 +18,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <main className="min-h-dvh flex flex-col">
-        {/* put Header here */}
-        <Header />
-        {children}
-        {/* put Footer here */}
-        </main>
+        <AuthWrapper>
+          <main className="min-h-dvh flex flex-col">
+          {/* put Header here */}
+          <Header />
+          {children}
+          {/* put Footer here */}
+          </main>
+        </AuthWrapper>
       </body>
     </html>
   );

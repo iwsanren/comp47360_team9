@@ -22,7 +22,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
 
   // Basic styles: height, spacing, text size - follow mobile-first principles
   const baseStyles = `
-    px-3 py-1 text-base/[24px] outline-none text-gray-700 hover:text-black
+    px-3 py-1 text-base/[24px] outline-none hover:text-black
     lg:leading-[27px] lg:px-6 lg:py-4 lg:text-lg
     rounded-sm bg-blue-100
     transition-all duration-250 ease-in-out
