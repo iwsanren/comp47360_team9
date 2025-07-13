@@ -79,12 +79,44 @@ def root():
 
 # Health check endpoint
 @app.route('/health', methods=['GET'])
-def health():
-    return jsonify({
-        "status": "healthy",
-        "service": "ML API",
-        "timestamp": datetime.now().isoformat()
-    })
+def health_check():
+    """Health check endpoint for monitoring and load balancing."""
+    try:
+        # Check if model is loaded
+        if model is None:
+            return jsonify({
+                'status': 'unhealthy',
+                'error': 'Model not loaded',
+                'timestamp': datetime.now().isoformat()
+            }), 503
+        
+        # Check if required data files exist
+        if zones_df is None or zone_stats is None:
+            return jsonify({
+                'status': 'unhealthy',
+                'error': 'Required data files not loaded',
+                'timestamp': datetime.now().isoformat()
+            }), 503
+        
+        # Basic health check
+        health_data = {
+            'status': 'healthy',
+            'timestamp': datetime.now().isoformat(),
+            'model_loaded': True,
+            'zones_count': len(zones_df),
+            'stats_count': len(zone_stats),
+            'environment': os.getenv('FLASK_ENV', 'development'),
+            'weather_api_configured': bool(WEATHER_API_KEY)
+        }
+        
+        return jsonify(health_data), 200
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'unhealthy',
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 500
 
 @app.route('/predict-all', methods=['GET', 'POST'])
 def predict_all():
