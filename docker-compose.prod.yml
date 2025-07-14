@@ -32,5 +32,6 @@ services:
     environment:
       - FLASK_ENV=${FLASK_ENV:-production}
       - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
     volumes:
       - ./ml:/app:ro  # Read-only mount for production security
