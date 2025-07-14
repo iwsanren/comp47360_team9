@@ -1,0 +1,11 @@
+[phases.build]
+nixPkgs = ["nodejs-18_x"]
+cmds = ["npm ci", "npm run build"]
+
+[phases.start]
+cmd = "npm start"
+
+[variables]
+NODE_ENV = "production"
+NEXT_TELEMETRY_DISABLED = "1"
+PORT = "3000"

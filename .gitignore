@@ -51,3 +51,9 @@ SETUP-NEXT-STEPS.md
 
 docs/*
 !docs/git_workflow.md
+!docs/DOCKER-GUIDE.md
+
+# Railway deployment files (keep these for testing)
+# railway.json
+# */railway.json
+# */nixpacks.toml
