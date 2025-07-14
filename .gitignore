@@ -49,5 +49,10 @@ DEPLOYMENT-COMPLETE-GUIDE.md
 NGINX-SETUP.md
 SETUP-NEXT-STEPS.md
 
+# Render deployment files (keep these for testing)
+# render.yaml
+# RENDER-DEPLOYMENT-GUIDE.md
+
 docs/*
 !docs/git_workflow.md
+!docs/DOCKER-GUIDE.md
