@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { verify } from 'jsonwebtoken';
 
 import { ML_API_URL } from "@/constants/url";
 
@@ -15,7 +15,7 @@ export async function POST(req) {
   }
 
   try {
-      const decoded = jwt.verify(token, JWT_SECRET);
+      const decoded = verify(token, JWT_SECRET);
       
       if (decoded.source !== 'Manhattan_My_Way') return NextResponse.json({ error: 'Invalid token' }, { status: 403 });
 

@@ -57,6 +57,7 @@ deploy_staging:
     url: http://137.43.49.26:3030
   only:
     - develop
+    - feature/jwt-auth  # TODO: temporary for testing JWT auth
 
 deploy_production:
   stage: deploy

@@ -51,3 +51,4 @@ SETUP-NEXT-STEPS.md
 
 docs/*
 !docs/git_workflow.md
+!docs/DOCKER-GUIDE.md

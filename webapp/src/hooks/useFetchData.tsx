@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { authenticatedFetch } from './useAuth';
 
 interface FetchDataProps {
   url: string;
@@ -17,15 +18,21 @@ const useFetchData = ({ url, body, method }: FetchDataProps) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await fetch(url, {
+        const res = await authenticatedFetch(url, {
             method: method || 'POST',
             headers: {
-                'Content-Type': 'application/json', // to call sever the body is in JSON format.
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify(body),
+            body: body ? JSON.stringify(body) : undefined,
         });
+        
         const json = await res.json();
-        setData(json);
+        
+        if (res.ok) {
+          setData(json);
+        } else {
+          throw new Error(json.error || 'Request failed');
+        }
       } catch (err) {
         setError(err);
       } finally {
@@ -34,7 +41,7 @@ const useFetchData = ({ url, body, method }: FetchDataProps) => {
     };
 
     fetchData();
-  }, [url]);
+  }, [url, body, method]);
 
   return { data, loading, error };
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { verify } from 'jsonwebtoken';
 
 const API_KEY = process.env.OPENWEATHER_API_KEY;
 const JWT_SECRET = process.env.JWT_SECRET
@@ -16,7 +16,7 @@ export async function POST(req) {
   }
   
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);      
+    const decoded = verify(token, JWT_SECRET);      
     if (decoded.source !== 'Manhattan_My_Way') return NextResponse.json({ error: 'Invalid token' }, { status: 403 });
 
     try {
