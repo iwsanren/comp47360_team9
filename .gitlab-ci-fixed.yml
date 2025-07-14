@@ -44,6 +44,7 @@ deploy_staging:
     - echo "OPENWEATHER_API_KEY=$OPENWEATHER_API_KEY" > .env
     - echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> .env
     - echo "NEXT_PUBLIC_MAPBOX_API_KEY=$NEXT_PUBLIC_MAPBOX_API_KEY" >> .env
+    - export JWT_SECRET="$JWT_SECRET"
     - echo "NODE_ENV=development" >> .env
     - echo "FLASK_ENV=production" >> .env
     - docker-compose down || true
@@ -78,6 +79,7 @@ deploy_production:
     - export OPENWEATHER_API_KEY="$OPENWEATHER_API_KEY"
     - export GOOGLE_MAPS_API_KEY="$GOOGLE_MAPS_API_KEY"
     - export NEXT_PUBLIC_MAPBOX_API_KEY="$NEXT_PUBLIC_MAPBOX_API_KEY"
+    - export JWT_SECRET="$JWT_SECRET"
     - export WEBAPP_PORT=8080
     - export ML_API_PORT=5000
     - echo "Creating deployment directory..."
