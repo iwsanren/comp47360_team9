@@ -12,7 +12,7 @@ const decodeToGeoJSON = (encoded: string) => {
         type: "Feature",
         geometry: {
             type: "LineString",
-            coordinates: coordinates,
+            coordinates,
         },
         properties: {},
     };
