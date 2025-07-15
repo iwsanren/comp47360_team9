@@ -115,6 +115,7 @@ input:hover::placeholder {
 
 .slick-track {
   display: flex!important;
+  margin: 0!important;
 }
 
 .slick-slide {
