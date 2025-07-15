@@ -1,15 +1,13 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-
 import Image from "next/image";
+import { CiLocationOn, CiPhone, CiTimer, CiUser } from "react-icons/ci";
+import { RiTeamLine } from "react-icons/ri";
+
 import Icon from '@/components/Icon';
 import Heading from "@/components/Heading";
 import Input from '@/components/Input';
-
-import { CiLocationOn, CiPhone, CiTimer } from "react-icons/ci";
-import { RiTeamLine } from "react-icons/ri";
-
 import tan from "@/assets/images/tan.png";
 import prakhar from "@/assets/images/prakhar.jpeg";
 import martynas from "@/assets/images/martynas.jpeg";
@@ -17,7 +15,7 @@ import billie from "@/assets/images/billie.jpeg";
 
 const team = [
   { 'name': 'Martynas', 'pic': martynas, title: 'Coordination lead', 'email': "martynas.kapocius@ucdconnect.ie" }, 
-  { 'name': 'Neasa', 'pic': tan, title: 'Data lead', 'email': "neasa.nifhatharta2@ucdconnect.ie" },
+  { 'name': 'Neasa', title: 'Data lead', 'email': "neasa.nifhatharta2@ucdconnect.ie" },
   { 'name': 'Zhaofang He', 'pic': billie, title: 'Maintenance', 'email': "zhaofang.he@ucdconnect.ie" },
   { 'name': 'Hsuan-Yu Tan', 'pic': tan, title: 'Backend lead', 'email': "hsuan-yu.tan@ucdconnect.ie" },
   { 'name': 'Prakhar', 'pic': prakhar, title: 'Frontend lead', 'email': "prakhar.dayal@ucdconnect.ie" },
@@ -105,7 +103,13 @@ const ContactPage = () => {
                       {team.map((member, i) => (
                         <div className="w-[48.25%]" key={i}>
                           <div className="flex gap-1 items-center">
+                            {member.pic ? (
                               <Image width={60} src={member?.pic} alt={member.name} className="team-member-photo w-[60px] h-[60px]" />
+                            ) : (
+                              <div className="rounded-full bg-white mr-4">
+                                <Icon icon={CiUser} size="3.75rem" />
+                              </div>
+                            )}  
                               <p className="font-bold text-xl">{member.name}</p>
                           </div>
                           <div className="mt-2">
