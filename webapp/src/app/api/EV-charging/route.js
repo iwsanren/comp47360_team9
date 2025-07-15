@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-
-import convertToGeoJSON from "../../../utils/convertToGeoJSON";
+import osmtogeojson from 'osmtogeojson';
 
 export async function POST() {
   try {
@@ -14,7 +13,7 @@ export async function POST() {
         way["amenity"="charging_station"](area.a);
         relation["amenity"="charging_station"](area.a);
       );
-      out center tags;
+      out geom;
     `;
 
     // 3. transfer Query to URL safe format
@@ -28,9 +27,8 @@ export async function POST() {
     const data = await response.json();
 
     // 6. convert Overpass output to GeoJSON FeatureCollection
-    const geojson = convertToGeoJSON(data.elements)
+    const geojson = osmtogeojson(data)
 
-    // console.log(data)
     // 7. return GeoJSON
     return NextResponse.json(geojson);
 

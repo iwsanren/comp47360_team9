@@ -1,7 +1,6 @@
 // app/api/bike/route.js
 import { NextResponse } from "next/server";
-
-import convertToGeoJSON from "../../../utils/convertToGeoJSON";
+import osmtogeojson from 'osmtogeojson';
 
 const getData = async () => {
    try {
@@ -12,13 +11,10 @@ const getData = async () => {
     const overpassQuery = `
       [out:json][timeout:25];
       area[name="${areaName}"][boundary=administrative]->.a;
-
       (
         node["amenity"="bicycle_rental"](area.a);      // Bike rental stations
       );
-      out body;
-      >;
-      out skel qt;
+      out geom;
     `;
 
     const encodedQuery = encodeURIComponent(overpassQuery);
@@ -30,7 +26,7 @@ const getData = async () => {
 
     // console.log(data)
 
-    const geojson = convertToGeoJSON(data.elements)
+    const geojson = osmtogeojson(data)
     // Return raw Overpass JSON response
 
     return NextResponse.json(geojson);

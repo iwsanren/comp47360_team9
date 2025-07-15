@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
-
-import convertToGeoJSON from "../../../utils/convertToGeoJSON";
+import osmtogeojson from 'osmtogeojson';
 
 export async function POST() {
   try {
 
     // Overpass QL query: parks in the specified area
     const overpassQuery = `
-        [out:json];
+        [out:json][timeout:25];
         area[name="Manhattan"][boundary=administrative]->.a;
         (
         way["leisure"="park"](area.a);
@@ -23,10 +22,8 @@ export async function POST() {
     const response = await fetch(url);
     const data = await response.json();
 
-    // console.log(data)
-
     // Convert Overpass elements to GeoJSON FeatureCollection
-   const geojson = convertToGeoJSON(data.elements)
+    const geojson = osmtogeojson(data)
 
     return NextResponse.json(geojson);
 
