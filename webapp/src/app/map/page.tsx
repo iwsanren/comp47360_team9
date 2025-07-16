@@ -190,72 +190,81 @@ export default function Map() {
     if (!mapInstanceRef.current) return;
 
     const map = mapInstanceRef.current;
-    if (busyness) {
-      map.on('click', async (e) => {
-        const { lng, lat } = e.lngLat;
+    
+    const handleClick = async (e: any) => {
+      const { lng, lat } = e.lngLat;
+      const pt = point([lng, lat]);
+      const isInManhattan = busyness.features.some((region: any) =>
+        booleanPointInPolygon(pt, region)
+      );
 
-        const pt = point([lng, lat]);
-      
-        const isInManhattan = busyness.features.some((region: any) => booleanPointInPolygon(pt, region))
-        // console.log(isInManhattan)
-        if (isInManhattan) {
-          setIsInVaildPos(false)
-          if (!mapboxgl.accessToken) {
-            console.error("Mapbox access token is missing");
-            return;
+      if (isInManhattan) {
+        setIsInVaildPos(false);
+        if (!mapboxgl.accessToken) {
+          console.error("Mapbox access token is missing");
+          return;
+        }
+
+        setClickPoints((prev) => {
+          const newPoint: Feature<Point, GeoJsonProperties> = {
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [lng, lat],
+            },
+            properties: {
+              icon: prev.length === 0 || prev.length === 2 ? "start-icon" : "dest-icon",
+            },
+          };
+
+          if (prev.length >= 2) {
+            setDirectionData(null);
+            return [newPoint];
+          } else {
+            return [...prev, newPoint];
           }
+        });
 
-          setClickPoints((prev) => {
-            const newPoint: Feature<Point, GeoJsonProperties> = {
-              type: "Feature",
-              geometry: {
-                type: "Point",
-                coordinates: [e.lngLat.lng, e.lngLat.lat],
-              },
-              properties: {
-                icon: (prev.length === 0 || prev.length === 2) ? "start-icon" : "dest-icon",
-              },
-            };
-
-            if (prev.length >= 2) {
-              setDirectionData(null)
-              // console.log(prev.length, prev)
-              return [newPoint];
-            } else {
-              return [...prev, newPoint];
-            }
-          });
-
-          try {
-            const response = await fetch(
-              `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?` +
+        try {
+          const response = await fetch(
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?` +
               new URLSearchParams({
                 access_token: mapboxgl.accessToken,
                 limit: "1",
               })
-            );
-            const data = await response.json();
-            const address = data.features && data.features.length > 0
+          );
+          const data = await response.json();
+          const address =
+            data.features && data.features.length > 0
               ? data.features[0].place_name
               : `(${lng.toFixed(6)}, ${lat.toFixed(6)})`;
 
-            if (!startLocationRef.current) {
-              setStartCoords({ lng, lat });
-              setStartLocation(address);
-            } else {
-              setDestCoords({ lng, lat });
-              setDestination(address);
-            }
-          } catch (error) {
-            console.error("Failed to reverse geocode:", error);
+          if (!startLocationRef.current) {
+            setStartCoords({ lng, lat });
+            setStartLocation(address);
+          } else {
+            setDestCoords({ lng, lat });
+            setDestination(address);
           }
-        } else {
-          setIsInVaildPos(true)
+        } catch (error) {
+          console.error("Failed to reverse geocode:", error);
         }
-      });
+      } else {
+        setIsInVaildPos(true);
+      }
+    };
+
+    if (busyness && !isOpen) {
+      map.on('click', handleClick);
     }
 
-  }, [busyness])
+    return () => {
+      map.off('click', handleClick);
+    };
+
+  }, [busyness, isOpen])
+
+  // console.log(isOpen)
 
   // add start point and dest point icon
   useEffect(() => {
