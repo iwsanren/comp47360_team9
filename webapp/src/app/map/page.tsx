@@ -203,6 +203,8 @@ export default function Map() {
   const [clickPoints, setClickPoints] = useState<Feature<Point, GeoJsonProperties>[]>([]);
   const [navigation, setNavigation] = useState<any>()
   const [featuresData, setFeatureData] = useState<any>({})
+  const [isLoadingDirection, setIsLoadingDirection] = useState(false);
+
 
   const navLineGeo = useMemo(() => navigation && decodeToGeoJSON(navigation?.overview_polyline?.points), [navigation])
 
@@ -239,6 +241,7 @@ export default function Map() {
 
   useEffect(() => {
     const fetchDirection = async () => {
+      setIsLoadingDirection(true);
       try {
         const res = await fetch('/api/directions', 
           { 
@@ -253,6 +256,8 @@ export default function Map() {
         setDirectionData(data);
       } catch (err) {
         console.error("Failed to fetch weather", err);
+      } finally {
+        setIsLoadingDirection(false); 
       }
     };
     if (startCoords && destCoords) {
@@ -650,14 +655,12 @@ export default function Map() {
                 disabled={true}
                 placeholder="Start Location (Click on Map)"
                 value={startLocation}
-                // onChange={(e) => setStartLocation(e.target.value)}
                 width="full"
               />
               <Input
                 disabled={true}
                 placeholder="Your Destination (Click on Map)"
                 value={destination}
-                // onChange={(e) => setDestination(e.target.value)}
                 width="full"
               />
               {isInValid && <div className="text-red-500 text-xs">Invaild position, the position is only available in Manhattan</div>}
@@ -689,8 +692,10 @@ export default function Map() {
             />
           </div>
           {startCoords && destCoords && (
-            routes ? (
-              <div className="flex flex-col gap-3">
+            isLoadingDirection ? (
+             <div className="py-3">Loading...</div>
+          ) : (
+             <div className="flex flex-col gap-3">
                 {methods.map(({ method, color, icon, iconAlert, mesg }, i) => {
                   const paths = routes?.[method]?.routes
                   const maxTime = paths.length > 1 ? maxBy(paths, (n: any) => n.legs?.[0].duration.value) : paths[0]?.legs?.[0].duration.text
@@ -745,8 +750,6 @@ export default function Map() {
                     </div>
                 )})}
               </div>
-          ) : (
-            <div className="py-3">Loading...</div>
           ))}
             <div className="flex justify-between mt-2">
               <Button
