@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { BiSolidLeftArrow } from "react-icons/bi";
 import { FaBicycle, FaCar, FaTrain } from "react-icons/fa6";
 import { FaWalking, FaRecycle, FaExclamationCircle, FaArrowAltCircleDown } from "react-icons/fa";
-import { keys, maxBy, minBy } from 'lodash';
+import { maxBy, minBy, uniq } from 'lodash';
 import { Feature, Point, GeoJsonProperties } from 'geojson';
 import Image from "next/image";
 import polyline from "@mapbox/polyline";
@@ -51,14 +51,6 @@ interface Coordinates {
   lng: number;
   lat: number;
 }
-
-const toggleNames = [
-  { key: "parks", label: "Parks" },
-  { key: "ev", label: "EV Charging Stations" },
-  { key: "bikes", label: "Bike Stations" },
-  { key: "busyness", label: "Busyness" },
-  { key: "air", label: "Air Quality" },
-] as const;
 
 const methods = [
   { method: 'walking', icon: FaWalking, iconAlert: FaRecycle, color: '#0FD892', mesg: 'Free of emissions' }, 
@@ -206,7 +198,6 @@ export default function Map() {
   const [destCoords, setDestCoords] = useState<Coordinates | null>(null);
   const [isInValid, setIsInVaildPos] = useState<boolean>();
   const [routes, setDirectionData] = useState<any>();
-  const [busyness, setBusyness] = useState<any>();
   const [tool, setTool] = useState<any>();
   const [isOpen, setOpen] = useState<boolean>();
   const [clickPoints, setClickPoints] = useState<Feature<Point, GeoJsonProperties>[]>([]);
@@ -232,6 +223,7 @@ export default function Map() {
     return paths
   }, [routes]);
 
+  // find the zones where the routes will pass.
   const allMethodPassedZones = useMemo(() => allMethodsRouteCoords.map(((routeCoords: any) => routeCoords?.map((r: any) => lineString(r))
     .map((route: any) => featuresData.busyness.features?.filter((feature: any) =>
     booleanIntersects(feature, route))
@@ -319,7 +311,7 @@ export default function Map() {
               coordinates: [lng, lat],
             },
             properties: {
-              icon: prev.length === 0 || prev.length === 2 ? "start-icon" : "dest-icon",
+              icon: prev.length === 0 ? "start-icon" : "dest-icon",
             },
           };
 
@@ -368,8 +360,6 @@ export default function Map() {
     };
 
   }, [featuresData.busyness, clickPoints, startCoords, destCoords])
-
-  console.log(featuresData)
 
   // add start point and dest point icon
   useEffect(() => {
@@ -679,6 +669,16 @@ export default function Map() {
               height={24}
               className="cursor-pointer"
               onClick={() => {
+                setClickPoints(prev => {
+                  if (prev.length !== 2) return prev;
+                  const [first, second] = prev;
+                  const updated = [
+                    { ...first, properties: { icon: second.properties?.icon } },
+                    { ...second, properties: { icon: first.properties?.icon }},
+                  ];
+                  return updated;
+                })
+                
                 const temp = startLocation;
                 setStartLocation(destination);
                 setDestination(temp);
@@ -697,9 +697,9 @@ export default function Map() {
                   const minTime = paths.length > 1 && minBy(paths, (n: any) => n.legs?.[0].duration.value)
                   const maxEmissions = co2Emissions(paths.length > 1 ? maxBy(paths, (n: any) => n.legs?.[0].distance.value).legs?.[0].distance.value : paths?.[0].legs?.[0].distance.value)
                   const minEmissions = co2Emissions(paths.length > 1 && minBy(paths, (n: any) => n.legs?.[0].distance.value).legs?.[0].distance.value)
-                  const transitCO2Arr = method == "transit" && transitEmissions(paths)
+                  const transitCO2Arr = method == "transit" && uniq(transitEmissions(paths))
                   const isActive = tool?.method === method
-                  // console.log(paths, minEmissions, maxEmissions)
+                  const isEqual = minEmissions == maxEmissions
                   return (
                     <div
                       style={{
@@ -733,7 +733,7 @@ export default function Map() {
                             className={`font-bold`}
                           >
                             {method === 'driving' ? (minEmissions ?
-                              `${minEmissions} - ${maxEmissions}` : maxEmissions
+                             isEqual ? minEmissions : `${minEmissions} - ${maxEmissions}` : maxEmissions
                             ) : transitCO2Arr ? transitCO2Arr.join(' - ') : 0} kg CO₂
                             
                           </span>
