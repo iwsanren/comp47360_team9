@@ -3,10 +3,10 @@ import { indexOf, min, minBy } from "lodash";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
 import Image from "next/image";
+
 import Icon from "@/components/Icon";
 import Text from "@/components/Text";
 import Slide from "@/components/Slide";
-
 import badge from "@/assets/images/green-badge.png";
 
 interface RouteStep {

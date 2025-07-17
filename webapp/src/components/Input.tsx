@@ -6,6 +6,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   disabled?: boolean;
   className?: string;
   width?: 'full' | 'auto';
+  value?: any;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(({
@@ -13,6 +14,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
   disabled = false,
   className = '',
   width = 'auto',
+  value,
   ...props
 }, ref) => {
   const widthClasses = {
@@ -31,7 +33,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
   `;
 
   // State styles: Mobile devices only have default, while desktop devices have hover/focus.
-  const stateStyles = disabled && 'bg-gray-100 cursor-not-allowed opacity-50'
+  const stateStyles = disabled && `bg-gray-100 cursor-not-allowed hover:text- opacity-${value ? 100 : 50}`
 
   return (
     <input
@@ -39,6 +41,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
       placeholder={placeholder}
       disabled={disabled}
       className={`${baseStyles} ${stateStyles}`}
+      value={value}
       {...props}
     />
   );

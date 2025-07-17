@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { BiSolidLeftArrow } from "react-icons/bi";
 import { FaBicycle, FaCar, FaTrain } from "react-icons/fa6";
 import { FaWalking, FaRecycle, FaExclamationCircle, FaArrowAltCircleDown } from "react-icons/fa";
-import { maxBy, minBy } from 'lodash';
+import { keys, maxBy, minBy } from 'lodash';
 import { Feature, Point, GeoJsonProperties } from 'geojson';
 import Image from "next/image";
 import polyline from "@mapbox/polyline";
@@ -41,10 +41,10 @@ const loadImage = [
 
 interface Toggles {
   parks: boolean;
-  ev: boolean;
+  'ev-stations': boolean;
   bikes: boolean;
   busyness: boolean;
-  air: boolean;
+  'air-quality': boolean;
 }
 
 interface Coordinates {
@@ -54,7 +54,7 @@ interface Coordinates {
 
 const toggleNames = [
   { key: "parks", label: "Parks" },
-  { key: "ev", label: "EV charging Stations" },
+  { key: "ev", label: "EV Charging Stations" },
   { key: "bikes", label: "Bike Stations" },
   { key: "busyness", label: "Busyness" },
   { key: "air", label: "Air Quality" },
@@ -67,27 +67,140 @@ const methods = [
   { method: 'transit', icon: FaTrain, iconAlert: FaArrowAltCircleDown, color: '#FFC800', mesg: 'A few emissions' },
 ]
 
+type MvpFeatures<T extends keyof Toggles> = {
+  key: T,
+  label: string,
+  api: string,
+  layer: any,
+}
+
+const mvpFeatures: MvpFeatures<keyof Toggles>[] = [
+  {
+    key: 'parks',
+    label: 'Parks',
+    api: '/parks',
+    layer: {
+      type: 'fill',
+      paint: {
+        "fill-color": "#00674C",
+        "fill-opacity": 0.5,
+        "fill-outline-color": "#006400",
+      },
+    } 
+  },
+  {
+    key: 'ev-stations',
+    api: '/EV-charging',
+    label: "EV Charging Stations",
+    layer: {
+      layout: {
+        "icon-image": "ev-icon",
+        "icon-size": 1,
+        "icon-allow-overlap": true,
+      },
+      type: "symbol"
+    },
+  },
+  {
+    key: 'bikes',
+    api: '/bikes',
+    label: 'Bike Stations',
+    layer: {
+      layout: {
+        "icon-image": "bike-icon",
+        "icon-size": 1,
+        "icon-allow-overlap": true,
+      },
+      type: "symbol"
+    },
+  },
+  {
+    key: 'busyness',
+    api: '/manhattan?data=busyness',
+    label: 'Busyness',
+    layer: {
+      type: "fill",
+      paint: {
+        'fill-color': [
+          'interpolate',
+          ['linear'],
+          ['get', 'busyness'],
+          // min, color
+          1, '#B7E4C7',    
+          100, '#95D5B2',   
+          200, '#FFE066', 
+          300, '#FAA307', 
+          400, '#F48C06', 
+          500, '#D00000', 
+        ],
+        'fill-opacity': 0.8
+      },
+    }
+  },
+  {
+    key: 'air-quality',
+    label: "Air Quality",
+    api: '/manhattan?data=air-quality',
+    layer: {
+      type: "heatmap",
+      paint: {
+        "heatmap-weight": [
+          "interpolate",
+          ["linear"],
+          ["get", "aqi"],
+          0, 0,
+          5, 1
+        ],
+        "heatmap-color": [
+          "interpolate",
+          ["linear"],
+          ["heatmap-density"],
+          0, "rgba(0, 0, 255, 0)",
+          0.3, "rgb(0, 0, 255)",
+          0.5, "rgb(0, 255, 0)",
+          0.75, "rgb(255, 255, 0)",
+          1, "rgb(255, 0, 0)"
+        ],
+        "heatmap-radius": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          0, 1,
+          3, 25,
+          9, 50,
+          12, 75,
+          15, 100
+        ],
+        "heatmap-intensity": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          0, 1,
+          15, 3
+        ],
+        "heatmap-opacity": 0.8
+      }
+    }
+  }
+] 
+
+
 // console.log(ML_API_URL)
 
 export default function Map() {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<mapboxgl.Map | null>(null);
-  const startLocationRef = useRef<any>(null);
   const [weatherData, setWeatherData] = useState<any>(null);
   const [showModal, setShowModal] = useState<boolean>();
   const [toggles, setToggles] = useState<Toggles>({
     parks: false,
-    ev: false,
+    'ev-stations': false,
     bikes: false,
     busyness: false,
-    air: false,
+    'air-quality': false,
   });
   const [startLocation, setStartLocation] = useState<string>("");
   const [destination, setDestination] = useState<string>("");
-  const [parksData, setParksData] = useState<any>(null);
-  const [bikesData, setBikesData] = useState<any>(null);
-  const [evData, setEvData] = useState<any>(null);
-  const [airQualityData, setAirQualityData] = useState<any>(null);
   const [isToggleOpen, setIsToggleOpen] = useState<boolean>(true);
   const [startCoords, setStartCoords] = useState<Coordinates | null>(null);
   const [destCoords, setDestCoords] = useState<Coordinates | null>(null);
@@ -98,10 +211,9 @@ export default function Map() {
   const [isOpen, setOpen] = useState<boolean>();
   const [clickPoints, setClickPoints] = useState<Feature<Point, GeoJsonProperties>[]>([]);
   const [navigation, setNavigation] = useState<any>()
+  const [featuresData, setFeatureData] = useState<any>({})
 
   const navLineGeo = useMemo(() => navigation && decodeToGeoJSON(navigation?.overview_polyline?.points), [navigation])
-  
-  // console.log(navLineGeo, navigation?.overview_polyline)
 
   const allMethodsRouteCoords = useMemo(() => {
     const paths: number[][][][] = []
@@ -121,9 +233,9 @@ export default function Map() {
   }, [routes]);
 
   const allMethodPassedZones = useMemo(() => allMethodsRouteCoords.map(((routeCoords: any) => routeCoords?.map((r: any) => lineString(r))
-    .map((route: any) => busyness.features?.filter((feature: any) =>
+    .map((route: any) => featuresData.busyness.features?.filter((feature: any) =>
     booleanIntersects(feature, route))
-  ))), [allMethodsRouteCoords, busyness])
+  ))), [allMethodsRouteCoords, featuresData.busyness])
 
   const greenScoreforEachRoute = useMemo(() => (allMethodPassedZones || []).map((methodRoutedata: any) => {
     return (
@@ -156,8 +268,6 @@ export default function Map() {
     }
   }, [startCoords, destCoords])
 
-  // console.log(routes)
-
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -183,10 +293,6 @@ export default function Map() {
   }, []);
 
   useEffect(() => {
-    startLocationRef.current = startLocation;
-}, [startLocation]);
-
-  useEffect(() => {
     if (!mapInstanceRef.current) return;
 
     const map = mapInstanceRef.current;
@@ -194,7 +300,7 @@ export default function Map() {
     const handleClick = async (e: any) => {
       const { lng, lat } = e.lngLat;
       const pt = point([lng, lat]);
-      const isInManhattan = busyness.features.some((region: any) =>
+      const isInManhattan = featuresData.busyness.features.some((region: any) =>
         booleanPointInPolygon(pt, region)
       );
 
@@ -218,7 +324,6 @@ export default function Map() {
           };
 
           if (prev.length >= 2) {
-            setDirectionData(null);
             return [newPoint];
           } else {
             return [...prev, newPoint];
@@ -239,10 +344,10 @@ export default function Map() {
               ? data.features[0].place_name
               : `(${lng.toFixed(6)}, ${lat.toFixed(6)})`;
 
-          if (!startLocationRef.current) {
+          if (!startCoords) {
             setStartCoords({ lng, lat });
             setStartLocation(address);
-          } else {
+          } else if (!destCoords) {
             setDestCoords({ lng, lat });
             setDestination(address);
           }
@@ -254,7 +359,7 @@ export default function Map() {
       }
     };
 
-    if (busyness && !isOpen) {
+    if (featuresData.busyness && clickPoints.length != 2) {
       map.on('click', handleClick);
     }
 
@@ -262,9 +367,9 @@ export default function Map() {
       map.off('click', handleClick);
     };
 
-  }, [busyness, isOpen])
+  }, [featuresData.busyness, clickPoints, startCoords, destCoords])
 
-  // console.log(isOpen)
+  console.log(featuresData)
 
   // add start point and dest point icon
   useEffect(() => {
@@ -317,270 +422,63 @@ export default function Map() {
     if (!mapInstanceRef.current) return;
 
     const map = mapInstanceRef.current;
-    if (!parksData) {
-      const fetchParks = async () => {
-        try {
-          const res = await fetch("/api/parks", { method: "POST" });
-          const geojson = await res.json();
-          if (geojson.features) {
-            setParksData(geojson);
-          } else {
-            console.error("Invalid parks GeoJSON data");
-          }
-        } catch (error) {
-          console.error("Failed to fetch parks data:", error);
+
+    const fetchData = async ({ api, key }: { api: string, key: string }) => {
+      try {
+        const res = await fetch(`/api/${api}`, { method: "POST" });
+        const geojson = await res.json();
+        if (geojson.features) {
+          setFeatureData((prev: any) => ({
+            ...prev,
+            [key]: geojson,
+          }));
+        } else {
+          console.error("Invalid GeoJSON data");
         }
-      };
-      fetchParks();
-    }
-    if (toggles.parks) {
-
-      if (parksData && !map.getSource("parks")) {
-        map.addSource("parks", {
-          type: "geojson",
-          data: parksData,
-        });
-
-        map.addLayer({
-          id: "parks-layer",
-          type: "fill",
-          source: "parks",
-          paint: {
-            "fill-color": "#00674C",
-            "fill-opacity": 0.5,
-            "fill-outline-color": "#006400",
-          },
-          layout: {
-            visibility: "visible",
-          },
-        });
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
       }
-    } else {
-      if (map.getLayer("parks-layer")) {
-        map.removeLayer("parks-layer");
+    };
+
+    const setLayerVisibility = (
+      map: mapboxgl.Map,
+      layerId: string,
+      visibility: "visible" | "none"
+    ) => {
+      if (map.getLayer(layerId)) {
+        map.setLayoutProperty(layerId, "visibility", visibility);
       }
-      if (map.getSource("parks")) {
-        map.removeSource("parks");
+    };
+
+    mvpFeatures.forEach((feature) => {
+      const visibility = toggles[feature.key] ? "visible" : "none";
+      
+      if (!featuresData[feature.key]) {
+        fetchData({ api: feature.api, key: feature.key })
       }
-    }
-  }, [toggles.parks, parksData]);
 
-  useEffect(() => {
-    if (!mapInstanceRef.current) return;
+      if (toggles[feature.key]) {
+        if (featuresData[feature.key] && !map.getSource(feature.key)) {
+          map.addSource(feature.key, {
+            type: "geojson",
+            data: featuresData[feature.key],
+          });
 
-    const map = mapInstanceRef.current;
-
-    if (!busyness) {
-      const fetchParks = async () => {
-        try {
-          const res = await fetch("/api/manhattan?data=busyness", { method: "POST" });
-          const geojson = await res.json();
-          if (geojson.features) {
-            setBusyness(geojson);
-          } else {
-            console.error("Invalid busyness GeoJSON data");
-          }
-        } catch (error) {
-          console.error("Failed to fetch busyness data:", error);
+          map.addLayer({
+            id: `${feature.key}-layer`,
+            source: feature.key,
+            ...feature.layer,
+            visibility
+          });
+        } else {
+          setLayerVisibility(map, `${feature.key}-layer`, visibility);
         }
-      };
-      fetchParks();
-    }
-    const visibility = toggles.busyness ? "visible" : "none";
-    if (toggles.busyness && !map.getSource('busyness')) {
-      map.addSource('busyness', {
-        type: "geojson",
-        data: busyness,
-      });
-
-      map.addLayer({
-        id: "busyness-layer",
-        type: "fill",
-        source: "busyness",
-        paint: {
-          'fill-color': [
-            'interpolate',
-            ['linear'],
-            ['get', 'busyness'],
-            // min, color
-            1, '#B7E4C7',    
-            100, '#95D5B2',   
-            200, '#FFE066', 
-            300, '#FAA307', 
-            400, '#F48C06', 
-            500, '#D00000', 
-          ],
-          'fill-opacity': 0.8
-        },
-        layout: {
-          visibility,
-        },
-      });
-    } else {
-      if (map.getLayer('busyness-layer')) {
-        map.setLayoutProperty(
-          'busyness-layer',
-          'visibility',
-          visibility
-        );
+      } else {
+        setLayerVisibility(map, `${feature.key}-layer`, visibility);
       }
-    }
-  }, [toggles.busyness, busyness]);
-
-  useEffect(() => {
-    if (!mapInstanceRef.current) return;
-
-    const map = mapInstanceRef.current;
-    if (!parksData) {
-      const fetchParks = async () => {
-        try {
-          const res = await fetch("/api/parks", { method: "POST" });
-          const geojson = await res.json();
-          if (geojson.features) {
-            setParksData(geojson);
-          } else {
-            console.error("Invalid parks GeoJSON data");
-          }
-        } catch (error) {
-          console.error("Failed to fetch parks data:", error);
-        }
-      };
-      fetchParks();
-    }
-
-    if (toggles.parks) {
-
-      if (parksData && !map.getSource("parks")) {
-        map.addSource("parks", {
-          type: "geojson",
-          data: parksData,
-        });
-
-        map.addLayer({
-          id: "parks-layer",
-          type: "fill",
-          source: "parks",
-          paint: {
-            "fill-color": "#00674C",
-            "fill-opacity": 0.5,
-            "fill-outline-color": "#006400",
-          },
-          layout: {
-            visibility: "visible",
-          },
-        });
-      }
-    } else {
-      if (map.getLayer("parks-layer")) {
-        map.removeLayer("parks-layer");
-      }
-      if (map.getSource("parks")) {
-        map.removeSource("parks");
-      }
-    }
-  }, [toggles.parks, parksData]);
-
-  useEffect(() => {
-    if (!mapInstanceRef.current) return;
-
-    const map = mapInstanceRef.current;
-
-    if (toggles.bikes) {
-      if (!bikesData) {
-        const fetchBikes = async () => {
-          try {
-            const res = await fetch("/api/bikes", { method: "POST" });
-            const geojson = await res.json();
-            if (geojson.features) {
-              setBikesData(geojson);
-            } else {
-              console.error("Invalid bikes GeoJSON data");
-            }
-          } catch (error) {
-            console.error("Failed to fetch bikes data:", error);
-          }
-        };
-        fetchBikes();
-      }
-
-      if (bikesData && !map.getSource("bikes")) {
-        map.addSource("bikes", {
-          type: "geojson",
-          data: bikesData,
-        });
-
-        map.addLayer({
-          id: "bikes-layer",
-          type: "symbol",
-          source: "bikes",
-          layout: {
-            "icon-image": "bike-icon",
-            "icon-size": 1,
-            "icon-allow-overlap": true,
-            visibility: "visible",
-          },
-        });
-      }
-    } else {
-      if (map.getLayer("bikes-layer")) {
-        map.removeLayer("bikes-layer");
-      }
-      if (map.getSource("bikes")) {
-        map.removeSource("bikes");
-      }
-    }
-  }, [toggles.bikes, bikesData]);
-
-  useEffect(() => {
-    if (!mapInstanceRef.current) return;
-
-    const map = mapInstanceRef.current;
-
-    if (toggles.ev) {
-      if (!evData) {
-        const fetchEVStations = async () => {
-          try {
-            const res = await fetch("/api/EV-charging", { method: "POST" });
-            const geojson = await res.json();
-            if (geojson.features) {
-              setEvData(geojson);
-            } else {
-              console.error("Invalid EV stations GeoJSON data");
-            }
-          } catch (error) {
-            console.error("Failed to fetch EV stations data:", error);
-          }
-        };
-        fetchEVStations();
-      }
-
-      if (evData && !map.getSource("ev-stations")) {
-        map.addSource("ev-stations", {
-          type: "geojson",
-          data: evData,
-        });
-
-        map.addLayer({
-          id: "ev-stations-layer",
-          type: "symbol",
-          source: "ev-stations",
-          layout: {
-            "icon-image": "ev-icon",
-            "icon-size": 1,
-            "icon-allow-overlap": true,
-            visibility: "visible",
-          },
-        });
-      }
-    } else {
-      if (map.getLayer("ev-stations-layer")) {
-        map.removeLayer("ev-stations-layer");
-      }
-      if (map.getSource("ev-stations")) {
-        map.removeSource("ev-stations");
-      }
-    }
-  }, [toggles.ev, evData]);
+    })
+    
+  }, [toggles]);
 
   useEffect(() => {
     if (!mapInstanceRef.current) return;
@@ -588,6 +486,7 @@ export default function Map() {
     const map = mapInstanceRef.current;
     if (navLineGeo) {
       const source = map.getSource('route');
+      
       if (source && 'setData' in source) {
         source.setData(navLineGeo);
       } else {
@@ -620,87 +519,6 @@ export default function Map() {
       }
     }
   }, [navLineGeo]);
-
-  useEffect(() => {
-    if (!mapInstanceRef.current) return;
-
-    const map = mapInstanceRef.current;
-    if (!airQualityData) {
-      const fetchAirQuality = async () => {
-        try {
-          const res = await fetch("/api/manhattan?data=air-quality", { method: "POST" });
-          const geojson = await res.json();
-          if (geojson.features) {
-            setAirQualityData(geojson);
-          } else {
-            console.error("Invalid air quality GeoJSON data");
-          }
-        } catch (error) {
-          console.error("Failed to fetch air quality data:", error);
-        }
-      };
-      fetchAirQuality();
-    }
-    if (toggles.air) {
-
-      if (airQualityData && !map.getSource("air-quality")) {
-        map.addSource("air-quality", {
-          type: "geojson",
-          data: airQualityData,
-        });
-
-        map.addLayer({
-          id: "air-quality-heatmap",
-          type: "heatmap",
-          source: "air-quality",
-          paint: {
-            "heatmap-weight": [
-              "interpolate",
-              ["linear"],
-              ["get", "aqi"],
-              0, 0,
-              5, 1
-            ],
-            "heatmap-color": [
-              "interpolate",
-              ["linear"],
-              ["heatmap-density"],
-              0, "rgba(0, 0, 255, 0)",
-              0.3, "rgb(0, 0, 255)",
-              0.5, "rgb(0, 255, 0)",
-              0.75, "rgb(255, 255, 0)",
-              1, "rgb(255, 0, 0)"
-            ],
-            "heatmap-radius": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              0, 1,
-              3, 25,
-              9, 50,
-              12, 75,
-              15, 100
-            ],
-            "heatmap-intensity": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              0, 1,
-              15, 3
-            ],
-            "heatmap-opacity": 0.8
-          }
-        });
-      }
-    } else {
-      if (map.getLayer("air-quality-heatmap")) {
-        map.removeLayer("air-quality-heatmap");
-      }
-      if (map.getSource("air-quality")) {
-        map.removeSource("air-quality");
-      }
-    }
-  }, [toggles.air, airQualityData]);
 
   useEffect(() => {
     const fetchWeather = async () => {
@@ -763,7 +581,7 @@ export default function Map() {
           <div
             className="flex flex-col gap-1 rounded-sm bg-[#00674CBF] p-2"
           >
-            {toggleNames.map(({ key, label }) => (
+            {mvpFeatures.map(({ key, label }) => (
               <div key={key} className="flex gap-1 items-center text-white text-sm px-2">
                 <span
                   style={{
@@ -839,15 +657,17 @@ export default function Map() {
             <Image src={startEndIcon} alt="Start and End Icon" width={32} height={100} />
             <div className="w-[330px] flex flex-col gap-3">
               <Input
-                placeholder="Start Location"
+                disabled={true}
+                placeholder="Start Location (Click on Map)"
                 value={startLocation}
-                onChange={(e) => setStartLocation(e.target.value)}
+                // onChange={(e) => setStartLocation(e.target.value)}
                 width="full"
               />
               <Input
-                placeholder="Enter Your Destination"
+                disabled={true}
+                placeholder="Your Destination (Click on Map)"
                 value={destination}
-                onChange={(e) => setDestination(e.target.value)}
+                // onChange={(e) => setDestination(e.target.value)}
                 width="full"
               />
               {isInValid && <div className="text-red-500 text-xs">Invaild position, the position is only available in Manhattan</div>}

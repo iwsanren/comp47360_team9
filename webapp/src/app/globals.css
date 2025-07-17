@@ -53,6 +53,10 @@ input:hover::placeholder {
   color: black;
 }
 
+input:disabled::placeholder {
+  color: var(--color-gray-700) !important;
+}
+
 .container {
   margin: auto;
   padding: 2em 2.5em 3em 2.5em;
