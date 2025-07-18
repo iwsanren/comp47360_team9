@@ -36,10 +36,10 @@ function getTransitTypeCO2Emissions(type: string, value: number) {
 
 export const transitEmissions = (routes: any) => {
     
-    const emissions = routes.reduce((res: number[], route: any) => {
-        const emission = route.legs[0].steps.reduce((value: number, step: any) => {
-            if (step.travel_mode == 'TRANSIT') {
-                value = value + getTransitTypeCO2Emissions(step.transit_details.line.vehicle.type, step.distance.value)
+    const emissions = routes?.reduce((res: number[], route: any) => {
+        const emission = route?.legs?.[0]?.steps?.reduce((value: number, step: any) => {
+            if (step?.travel_mode == 'TRANSIT') {
+                value = value + getTransitTypeCO2Emissions(step?.transit_details?.line?.vehicle?.type, step?.distance?.value)
             }
             return round(value, 1)
         }, 0)

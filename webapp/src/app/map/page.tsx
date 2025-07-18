@@ -4,9 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { BiSolidLeftArrow } from "react-icons/bi";
 import { FaBicycle, FaCar, FaTrain } from "react-icons/fa6";
 import { FaWalking, FaRecycle, FaExclamationCircle, FaArrowAltCircleDown } from "react-icons/fa";
-import { maxBy, minBy, uniq } from 'lodash';
+import { IconType } from "react-icons";
 import { Feature, Point, GeoJsonProperties } from 'geojson';
-import Image from "next/image";
 import polyline from "@mapbox/polyline";
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import { lineString, point } from '@turf/helpers';
@@ -14,21 +13,20 @@ import booleanIntersects from '@turf/boolean-intersects';
 import mapboxgl from "mapbox-gl";
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-import startEndIcon from "@/assets/images/start_end_icon.png";
-import switchStartEndIcon from "@/assets/images/switch_start_end_icon.png";
 import bikeIcon from "@/assets/images/bike_icon.png";
 import evIcon from "@/assets/images/ev_icon.png";
 import start from "@/assets/images/start.png";
 import dest from "@/assets/images/dest.png";
 import Icon from '@/components/Icon';
-import Button from "@/components/Button";
-import Input from '@/components/Input';
+import Toggle from "@/components/Toggle";
+import Heading from "@/components/Heading";
 import { WEATHER_CONDITION_ICONS } from '@/constants/icons';
-import { co2Emissions, transitEmissions } from "@/utils/formula";
 import decodeToGeoJSON from "@/utils/decodeToGeoJSON";
 
 import ShowWeatherModal from "./ShowWeatherModal";
 import DirectionModal from "./DirectionModal";
+import DirectionSection from "./DirectionSection";
+import PredictionSection from "./PredictionSection";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
@@ -47,12 +45,20 @@ interface Toggles {
   'air-quality': boolean;
 }
 
-interface Coordinates {
+export interface Coordinates {
   lng: number;
   lat: number;
 }
 
-const methods = [
+export interface TransportMethod {
+  method: string;
+  icon: IconType;
+  iconAlert: IconType;
+  color: string;
+  mesg: string;
+}
+
+const methods: TransportMethod[] = [
   { method: 'walking', icon: FaWalking, iconAlert: FaRecycle, color: '#0FD892', mesg: 'Free of emissions' }, 
   { method: 'bicycling', icon: FaBicycle, iconAlert: FaRecycle, color: '#0FD892', mesg: 'Fast and clean' },
   { method: 'driving', icon: FaCar, iconAlert: FaExclamationCircle, color: '#FF281B', mesg: 'Highest emissions' },
@@ -64,6 +70,29 @@ type MvpFeatures<T extends keyof Toggles> = {
   label: string,
   api: string,
   layer: any,
+}
+
+const busynessLayerSetting = {
+  type: "fill",
+  paint: {
+    'fill-color': [
+      'interpolate',
+      ['linear'],
+      ['get', 'busyness'],
+      // min, color
+      1, '#B7E4C7',    
+      100, '#95D5B2',   
+      200, '#FFE066', 
+      300, '#FAA307', 
+      400, '#F48C06', 
+      500, '#D00000', 
+    ],
+    'fill-color-transition': {
+      duration: 1000, 
+      delay: 0
+    },
+    'fill-opacity': 0.8
+  },
 }
 
 const mvpFeatures: MvpFeatures<keyof Toggles>[] = [
@@ -110,24 +139,7 @@ const mvpFeatures: MvpFeatures<keyof Toggles>[] = [
     key: 'busyness',
     api: '/manhattan?data=busyness',
     label: 'Busyness',
-    layer: {
-      type: "fill",
-      paint: {
-        'fill-color': [
-          'interpolate',
-          ['linear'],
-          ['get', 'busyness'],
-          // min, color
-          1, '#B7E4C7',    
-          100, '#95D5B2',   
-          200, '#FFE066', 
-          300, '#FAA307', 
-          400, '#F48C06', 
-          500, '#D00000', 
-        ],
-        'fill-opacity': 0.8
-      },
-    }
+    layer: busynessLayerSetting
   },
   {
     key: 'air-quality',
@@ -176,9 +188,6 @@ const mvpFeatures: MvpFeatures<keyof Toggles>[] = [
   }
 ] 
 
-
-// console.log(ML_API_URL)
-
 export default function Map() {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<mapboxgl.Map | null>(null);
@@ -204,7 +213,7 @@ export default function Map() {
   const [navigation, setNavigation] = useState<any>()
   const [featuresData, setFeatureData] = useState<any>({})
   const [isLoadingDirection, setIsLoadingDirection] = useState(false);
-
+  const [isPredictionMode, setPredictionMode] = useState(true);
 
   const navLineGeo = useMemo(() => navigation && decodeToGeoJSON(navigation?.overview_polyline?.points), [navigation])
 
@@ -239,6 +248,7 @@ export default function Map() {
       }, 0))
   )}), [allMethodPassedZones])
 
+  // fetch directions data
   useEffect(() => {
     const fetchDirection = async () => {
       setIsLoadingDirection(true);
@@ -255,7 +265,7 @@ export default function Map() {
         const data = await res.json();
         setDirectionData(data);
       } catch (err) {
-        console.error("Failed to fetch weather", err);
+        console.error("Failed to fetch direction", err);
       } finally {
         setIsLoadingDirection(false); 
       }
@@ -265,6 +275,7 @@ export default function Map() {
     }
   }, [startCoords, destCoords])
 
+  // load the map
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -289,6 +300,7 @@ export default function Map() {
     return () => map.remove();
   }, []);
 
+  // click on map
   useEffect(() => {
     if (!mapInstanceRef.current) return;
 
@@ -591,51 +603,7 @@ export default function Map() {
                 >
                   {label}
                 </span>
-                <div className="relative flex items-center">
-                  <div
-                    onClick={() => setToggles(prev => ({ ...prev, [key]: !prev[key] }))}
-                    className="relative cursor-pointer"
-                    style={{
-                      width: 52,
-                      height: 28,
-                      borderRadius: 24,
-                      backgroundColor: toggles[key] ? "#0FD892" : "#F0F0F0",
-                      transition: "background-color 0.3s",
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: 2,
-                        left: toggles[key] ? 26 : 2,
-                        width: 24,
-                        height: 24,
-                        borderRadius: "50%",
-                        backgroundColor: toggles[key] ? "#FFFFFF" : "#D9D9D9",
-                        transition: "left 0.3s",
-                      }}
-                    />
-                    <span
-                      style={{
-                        position: "absolute",
-                        top: 8,
-                        left: toggles[key] ? 7 : 28,
-                        width: toggles[key] ? 17 : 22,
-                        height: 12,
-                        fontSize: 12,
-                        fontWeight: 700,
-                        fontStyle: "normal",
-                        lineHeight: "12px",
-                        letterSpacing: "0%",
-                        color: toggles[key] ? "#FFFFFF" : "#A6A6A6",
-                        opacity: 1,
-                        transform: "rotate(0deg)",
-                      }}
-                    >
-                      {toggles[key] ? "ON" : "OFF"}
-                    </span>
-                  </div>
-                </div>
+                <Toggle onClick={() => setToggles(prev => ({ ...prev, [key]: !prev[key] }))} isActive={toggles[key]} />
               </div>
             ))}
           </div>
@@ -646,124 +614,37 @@ export default function Map() {
         className="absolute shadow-lg p-6"
         style={{ top: 55, left: 16, bottom: 12, borderRadius: 20, backgroundColor: "#FFFFFF" }}
       >
-        <h2 className="mb-4 font-bold text-[30px] leading-[32px] text-[#00674C]">Get Directions</h2>
-        <div className="flex flex-col gap-3">
-          <div className="flex gap-3 items-center pr-4">
-            <Image src={startEndIcon} alt="Start and End Icon" width={32} height={100} />
-            <div className="w-[330px] flex flex-col gap-3">
-              <Input
-                disabled={true}
-                placeholder="Start Location (Click on Map)"
-                value={startLocation}
-                width="full"
-              />
-              <Input
-                disabled={true}
-                placeholder="Your Destination (Click on Map)"
-                value={destination}
-                width="full"
-              />
-              {isInValid && <div className="text-red-500 text-xs">Invaild position, the position is only available in Manhattan</div>}
-            </div>
-            <Image
-              src={switchStartEndIcon}
-              alt="Switch Icon"
-              width={24}
-              height={24}
-              className="cursor-pointer"
-              onClick={() => {
-                setClickPoints(prev => {
-                  if (prev.length !== 2) return prev;
-                  const [first, second] = prev;
-                  const updated = [
-                    { ...first, properties: { icon: second.properties?.icon } },
-                    { ...second, properties: { icon: first.properties?.icon }},
-                  ];
-                  return updated;
-                })
-                
-                const temp = startLocation;
-                setStartLocation(destination);
-                setDestination(temp);
-                const tempCoords = startCoords;
-                setStartCoords(destCoords);
-                setDestCoords(tempCoords);
-              }}
-            />
-          </div>
-          {startCoords && destCoords && (
-            isLoadingDirection ? (
-             <div className="py-3">Loading...</div>
-          ) : (
-             <div className="flex flex-col gap-3">
-                {methods.map(({ method, color, icon, iconAlert, mesg }, i) => {
-                  const paths = routes?.[method]?.routes
-                  const maxTime = paths.length > 1 ? maxBy(paths, (n: any) => n.legs?.[0].duration.value) : paths[0]?.legs?.[0].duration.text
-                  const minTime = paths.length > 1 && minBy(paths, (n: any) => n.legs?.[0].duration.value)
-                  const maxEmissions = co2Emissions(paths.length > 1 ? maxBy(paths, (n: any) => n.legs?.[0].distance.value).legs?.[0].distance.value : paths?.[0].legs?.[0].distance.value)
-                  const minEmissions = co2Emissions(paths.length > 1 && minBy(paths, (n: any) => n.legs?.[0].distance.value).legs?.[0].distance.value)
-                  const transitCO2Arr = method == "transit" && uniq(transitEmissions(paths))
-                  const isActive = tool?.method === method
-                  const isEqual = minEmissions == maxEmissions
-                  return (
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        background: isActive ? color : 'white',
-                        boxShadow: '0px 2px 4px 0px #00000040',
-                        color: isActive ? 'white' : color,
-                      }}
-                      className={`py-2 px-3 rounded-lg cursor-pointer transition-all duration-250`}
-                      onClick={() => setTool({ method, greenScores: greenScoreforEachRoute[i], paths })}
-                      key={i}
-                    >
-                      <div className="flex gap-[10px] items-center">
-                        <Icon icon={icon} className="inherit" size="1.5rem" />
-                        <p className={`text-sm text-${isActive ? 'white' : 'black'}`}>{paths.length > 1 ? (Math.floor(minTime?.legs?.[0].duration.value / 60) + ' - ' + Math.floor(maxTime?.legs?.[0].duration.value / 60) + ' mins') : maxTime}</p>
-                      </div>
-                      <div
-                        className="flex items-center gap-2 w-[8.875rem]"
-                      >
-                        <Icon icon={iconAlert} className="inherit" size="1.25rem" />
-                        <div
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <span
-                            className={`font-bold`}
-                          >
-                            {method === 'driving' ? (minEmissions ?
-                             isEqual ? minEmissions : `${minEmissions} - ${maxEmissions}` : maxEmissions
-                            ) : transitCO2Arr ? transitCO2Arr.join(' - ') : 0} kg CO₂
-                            
-                          </span>
-                          <span className="text-xs leading-[1.5]">
-                            {mesg}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                )})}
-              </div>
-          ))}
-            <div className="flex justify-between mt-2">
-              <Button
-                onClick={handleClear}
-              >
-                Clear
-              </Button>
-              {tool && (
-                <Button onClick={() => setOpen(true)}>
-                  Show Directions
-                </Button>
-              )}
-            </div>
+        <div className="flex justify-between items-center mb-4">
+          <Heading className="text-green-800" level={2}>{isPredictionMode ? 'Predict Busyness' : 'Get Directions'}</Heading>
+          <Toggle onClick={() => setPredictionMode(prev => !prev)} isActive={isPredictionMode} />
         </div>
+        {isPredictionMode ? (
+          <PredictionSection
+            map={mapInstanceRef.current}
+            busynessLayerSetting={busynessLayerSetting}
+          />
+        ) : (
+          <DirectionSection
+            setClickPoints={setClickPoints}
+            setStartLocation={setStartLocation}
+            setStartCoords={setStartCoords}
+            setDestCoords={setDestCoords}
+            destCoords={destCoords}
+            startLocation={startLocation}
+            startCoords={startCoords}
+            setDestination={setDestination}
+            destination={destination}
+            isLoadingDirection={isLoadingDirection}
+            handleClear={handleClear}
+            tool={tool}
+            setOpen={setOpen}
+            methods={methods}
+            setTool={setTool}
+            routes={routes}
+            greenScoreforEachRoute={greenScoreforEachRoute}
+            isInValid={isInValid}
+          />
+        )}
         <div
           className="px-6 py-4"
           style={{

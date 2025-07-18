@@ -1,4 +1,6 @@
 @import "@fontsource/roboto";
+@import "@fontsource/roboto/400-italic.css";
+@import "@fontsource/roboto/700.css";  
 @import "tailwindcss";
 
 @theme {
@@ -55,6 +57,46 @@ input:hover::placeholder {
 
 input:disabled::placeholder {
   color: var(--color-gray-700) !important;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+/* Chrome / Safari / Edge */
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 8px;
+  background: var(--color-green-200);
+  border-radius: 9999px;
+}
+
+/* Firefox */
+input[type="range"]::-moz-range-track {
+  height: 8px;
+  background: var(--color-green-200);
+  border-radius: 9999px;
+}
+
+/* Chrome / Safari / Edge */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  background: var(--color-green-500);
+  margin-top: -8px;
+  cursor: pointer;
+}
+
+/* Firefox */
+input[type="range"]::-moz-range-thumb {
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  background: var(--color-green-500);
+  cursor: pointer;
 }
 
 .container {
