@@ -27,6 +27,7 @@ import ShowWeatherModal from "./ShowWeatherModal";
 import DirectionModal from "./DirectionModal";
 import DirectionSection from "./DirectionSection";
 import PredictionSection from "./PredictionSection";
+import Button from "@/components/Button";
 
 const key = 'busyness-prediction'
 
@@ -316,7 +317,7 @@ export default function Map() {
 
         // add to layer
         if (!map.getSource(feature.key)) {
-          map.addSource(feature.key, {
+          map?.addSource(feature.key, {
             type: 'geojson',
             data,
           });
@@ -718,19 +719,12 @@ export default function Map() {
               )}
             </div>
             <div className="relative group inline-block">
-              <button
+              <Button
                 className="py-1 px-6"
                 onClick={() => setShowModal(true)}
-                style={{
-                  width: 119,
-                  height: 43,
-                  borderRadius: "4px",
-                  backgroundColor: "#0FD892",
-                  color: "white",
-                }}
               >
                 Forecast
-              </button>
+              </Button>
               <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-[#00b386] text-white text-sm rounded py-1 px-2 z-50 whitespace-nowrap shadow-md">
                 ☁️ Clouds are gossiping again... 👀
               </div>
@@ -743,7 +737,10 @@ export default function Map() {
       </div>
 
       {showModal && (
-        <ShowWeatherModal current={current} hourly={hourly} setShowModal={setShowModal} />
+        <>
+          <div className="absolute left-0 right-0 top-0 bottom-0 bg-[rgba(0,0,0,0.5)] z-3" />
+          <ShowWeatherModal current={current} hourly={hourly} setShowModal={setShowModal} />
+        </>
       )}
 
     </div>

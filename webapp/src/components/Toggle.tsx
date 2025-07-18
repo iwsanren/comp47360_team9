@@ -8,7 +8,7 @@ interface ToggleProps {
 
 const Toggle = ({ onClick, isActive, onMouseEnter, onMouseLeave, children }: ToggleProps) => {
     return (
-         <div className="relative flex items-center z-5" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+         <div className="relative flex items-center z-2" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             <div
                 onClick={onClick}
                 className="relative cursor-pointer"
