@@ -12,37 +12,6 @@ interface PredictionSectionProps {
   busynessLayerSetting: any;
 }
 
-function animateBusyness(oldData, newData, duration = 1000) {
-  const start = performance.now();
-
-  function step(now) {
-    const progress = Math.min((now - start) / duration, 1);
-    const interpolated = {
-      ...newData,
-      features: newData.features.map((f, i) => {
-        const oldVal = oldData.features[i].properties.busyness;
-        const newVal = f.properties.busyness;
-        const currentVal = oldVal + (newVal - oldVal) * progress;
-
-        return {
-          ...f,
-          properties: {
-            ...f.properties,
-            busyness: currentVal,
-          },
-        };
-      }),
-    };
-
-    map.getSource("busyness").setData(interpolated);
-
-    if (progress < 1) requestAnimationFrame(step);
-  }
-
-  requestAnimationFrame(step);
-}
-
-
 const key = 'busyness-prediction'
 const zone = "America/New_York"; 
 

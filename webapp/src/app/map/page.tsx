@@ -213,7 +213,7 @@ export default function Map() {
   const [navigation, setNavigation] = useState<any>()
   const [featuresData, setFeatureData] = useState<any>({})
   const [isLoadingDirection, setIsLoadingDirection] = useState(false);
-  const [isPredictionMode, setPredictionMode] = useState(true);
+  const [isPredictionMode, setPredictionMode] = useState(false);
 
   const navLineGeo = useMemo(() => navigation && decodeToGeoJSON(navigation?.overview_polyline?.points), [navigation])
 
@@ -545,7 +545,9 @@ export default function Map() {
   const hourly = weatherData?.hourly?.list || [];
 
   const handleToggleSlide = () => {
-    setIsToggleOpen(!isToggleOpen);
+    if (!isPredictionMode) {
+      setIsToggleOpen(prev => !prev);
+    }
   };
 
   const handleClear = () => {
@@ -566,7 +568,7 @@ export default function Map() {
       <div className="absolute flex items-center top-[50%] transform translate-y-[-50%] right-0">
         <div
           onClick={handleToggleSlide}
-          className="cursor-pointer"
+          className={isPredictionMode ? `cursor-not-allowed opacity-50` : `cursor-pointer`}
           style={{
             borderTopLeftRadius: 4,
             borderBottomLeftRadius: 4,
@@ -577,14 +579,14 @@ export default function Map() {
         >
           <BiSolidLeftArrow
             style={{
-              transform: isToggleOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              transform: (isToggleOpen && !isPredictionMode) ? 'rotate(180deg)' : 'rotate(0deg)',
               transition: 'transform 0.3s',
             }}
             size=".75rem"
           />
         </div>
 
-        {isToggleOpen && (
+        {isToggleOpen && !isPredictionMode && (
           <div
             className="flex flex-col gap-1 rounded-sm bg-[#00674CBF] p-2"
           >
