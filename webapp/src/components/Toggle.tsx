@@ -1,21 +1,24 @@
 interface ToggleProps {
     onClick: () => void;
     isActive: boolean;
+    onMouseEnter?: () => void;
+    onMouseLeave?: () => void;
+    children?: React.ReactNode; 
 }
 
-const Toggle = ({ onClick, isActive }: ToggleProps) => {
+const Toggle = ({ onClick, isActive, onMouseEnter, onMouseLeave, children }: ToggleProps) => {
     return (
-         <div className="relative flex items-center">
+         <div className="relative flex items-center z-5" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             <div
-            onClick={onClick}
-            className="relative cursor-pointer"
-            style={{
-                width: 52,
-                height: 28,
-                borderRadius: 24,
-                backgroundColor: isActive ? "#0FD892" : "#F0F0F0",
-                transition: "background-color 0.3s",
-            }}
+                onClick={onClick}
+                className="relative cursor-pointer"
+                style={{
+                    width: 52,
+                    height: 28,
+                    borderRadius: 24,
+                    backgroundColor: isActive ? "#0FD892" : "#F0F0F0",
+                    transition: "background-color 0.3s",
+                }}
             >
             <div
                 style={{
@@ -49,6 +52,7 @@ const Toggle = ({ onClick, isActive }: ToggleProps) => {
                 {isActive ? "ON" : "OFF"}
             </span>
             </div>
+            {children}
         </div>
     )
 }

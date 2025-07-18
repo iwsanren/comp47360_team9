@@ -216,6 +216,7 @@ export default function Map() {
   const [featuresData, setFeatureData] = useState<any>({})
   const [isLoadingDirection, setIsLoadingDirection] = useState(false);
   const [isPredictionMode, setPredictionMode] = useState(false);
+  const [showDesc, setShowDesc] = useState(false);
 
   const navLineGeo = useMemo(() => navigation && decodeToGeoJSON(navigation?.overview_polyline?.points), [navigation])
 
@@ -657,8 +658,12 @@ export default function Map() {
                 return newToggles;
               });
             }}
+            onMouseEnter={() => setShowDesc(true)}
+            onMouseLeave={() => setShowDesc(false)}
             isActive={isPredictionMode}
-          />
+          >
+            {showDesc && <div className="absolute top-full left-[50%] -translate-x-1/2 translate-y-2 w-[180px] py-1 px-2 text-sm/[21px] bg-white rounded-sm drop-shadow-lg">Click this toggle to switch to {isPredictionMode ? 'direction' : 'predict'} model.</div>}
+          </Toggle>
         </div>
         {isPredictionMode ? (
           <PredictionSection
