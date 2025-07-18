@@ -28,6 +28,8 @@ import DirectionModal from "./DirectionModal";
 import DirectionSection from "./DirectionSection";
 import PredictionSection from "./PredictionSection";
 
+const key = 'busyness-prediction'
+
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
 const loadImage = [
@@ -295,6 +297,48 @@ export default function Map() {
       });
     })
 
+    const fetchAndAdd = async () => {
+      const tasks = mvpFeatures.map(async (feature) => {
+        // get the data
+        let data = featuresData[feature.key];
+        if (!data) {
+          try {
+            const res = await fetch(`/api${feature.api}`, { method: 'POST' });
+            data = await res.json();
+            if (!data?.features) throw new Error("Invalid GeoJSON");
+            setFeatureData((prev: any) => ({ ...prev, [feature.key]: data }));
+          } catch (e) {
+            console.error(`Failed to fetch ${feature.key}`, e);
+            return; // skip this one
+          }
+        }
+
+        // add to layer
+        if (!map.getSource(feature.key)) {
+          map.addSource(feature.key, {
+            type: 'geojson',
+            data,
+          });
+        }
+
+        if (!map.getLayer(`${feature.key}-layer`)) {
+          map.addLayer({
+            id: `${feature.key}-layer`,
+            source: feature.key,
+            ...feature.layer,
+            layout: {
+              ...feature.layer.layout,
+              visibility: 'none'
+            }
+          });
+        }
+      });
+
+      await Promise.all(tasks);
+    };
+
+    fetchAndAdd();
+
     mapInstanceRef.current = map;
 
     return () => map.remove();
@@ -384,6 +428,15 @@ export default function Map() {
     const map = mapInstanceRef.current;
 
     const addClickPoints = () => {
+      if (clickPoints.length === 0) {
+        if (map.getLayer("click-points-layer")) {
+          map.removeLayer("click-points-layer");
+        }
+        if (map.getSource("click-points")) {
+          map.removeSource("click-points");
+        }
+        return
+      }
       if (!map.getSource("click-points")) {
         map.addSource("click-points", {
           type: "geojson",
@@ -425,27 +478,11 @@ export default function Map() {
     };
   }, [clickPoints]);
 
+  // handle to show features
   useEffect(() => {
     if (!mapInstanceRef.current) return;
 
     const map = mapInstanceRef.current;
-
-    const fetchData = async ({ api, key }: { api: string, key: string }) => {
-      try {
-        const res = await fetch(`/api/${api}`, { method: "POST" });
-        const geojson = await res.json();
-        if (geojson.features) {
-          setFeatureData((prev: any) => ({
-            ...prev,
-            [key]: geojson,
-          }));
-        } else {
-          console.error("Invalid GeoJSON data");
-        }
-      } catch (error) {
-        console.error("Failed to fetch data:", error);
-      }
-    };
 
     const setLayerVisibility = (
       map: mapboxgl.Map,
@@ -459,38 +496,17 @@ export default function Map() {
 
     mvpFeatures.forEach((feature) => {
       const visibility = toggles[feature.key] ? "visible" : "none";
-      
-      if (!featuresData[feature.key]) {
-        fetchData({ api: feature.api, key: feature.key })
-      }
-
-      if (toggles[feature.key]) {
-        if (featuresData[feature.key] && !map.getSource(feature.key)) {
-          map.addSource(feature.key, {
-            type: "geojson",
-            data: featuresData[feature.key],
-          });
-
-          map.addLayer({
-            id: `${feature.key}-layer`,
-            source: feature.key,
-            ...feature.layer,
-            visibility
-          });
-        } else {
-          setLayerVisibility(map, `${feature.key}-layer`, visibility);
-        }
-      } else {
-        setLayerVisibility(map, `${feature.key}-layer`, visibility);
-      }
+      setLayerVisibility(map, `${feature.key}-layer`, visibility);
     })
     
   }, [toggles]);
 
+  // add path on map
   useEffect(() => {
     if (!mapInstanceRef.current) return;
 
     const map = mapInstanceRef.current;
+
     if (navLineGeo) {
       const source = map.getSource('route');
       
@@ -525,8 +541,11 @@ export default function Map() {
         map.removeSource("route");
       }
     }
+
+
   }, [navLineGeo]);
 
+  // fetch weather data
   useEffect(() => {
     const fetchWeather = async () => {
       try {
@@ -618,10 +637,32 @@ export default function Map() {
       >
         <div className="flex justify-between items-center mb-4">
           <Heading className="text-green-800" level={2}>{isPredictionMode ? 'Predict Busyness' : 'Get Directions'}</Heading>
-          <Toggle onClick={() => setPredictionMode(prev => !prev)} isActive={isPredictionMode} />
+          <Toggle
+            onClick={() => {
+              if (!mapInstanceRef.current) return
+              if (mapInstanceRef.current.getLayer(`${key}-layer`)) {
+                mapInstanceRef.current.removeLayer(`${key}-layer`);
+              }
+              if (mapInstanceRef.current.getSource(key)) {
+                mapInstanceRef.current.removeSource(key);
+              }
+              setPredictionMode(prev => !prev)
+              setClickPoints([])
+              handleClear()
+              setToggles(prev => {
+                const newToggles = Object.fromEntries(
+                  Object.keys(prev).map(key => [key, false])
+                ) as unknown as Toggles;
+
+                return newToggles;
+              });
+            }}
+            isActive={isPredictionMode}
+          />
         </div>
         {isPredictionMode ? (
           <PredictionSection
+            layerName={key}
             map={mapInstanceRef.current}
             busynessLayerSetting={busynessLayerSetting}
           />

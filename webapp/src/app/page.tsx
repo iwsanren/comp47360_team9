@@ -68,14 +68,14 @@ export default function Home() {
           style={{
             top: '400px',
             left: '100px',
-            width: '233px',
+            width: '236px',
             height: '43px',
             padding: '8px 24px',
           }}
         >
           <span
             style={{
-              width: '153px',
+              flex: '153px',
               height: '27px',
               fontWeight: 700,
               fontSize: '18px',

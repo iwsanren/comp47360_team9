@@ -12,6 +12,7 @@ import tan from "@/assets/images/tan.png";
 import prakhar from "@/assets/images/prakhar.jpeg";
 import martynas from "@/assets/images/martynas.jpeg";
 import billie from "@/assets/images/billie.jpeg";
+import Button from "@/components/Button";
 
 const team = [
   { 'name': 'Martynas', 'pic': martynas, title: 'Coordination lead', 'email': "martynas.kapocius@ucdconnect.ie" }, 
@@ -56,7 +57,7 @@ const infoObj = {
 const ContactPage = () => {
   const [isCompleted, setComplete] = useState<boolean>(false);
   const [isFailed, setFailed] = useState<boolean>(false);
-  const [isError, setError] = useState<boolean>(false);
+  const [isError, setError] = useState<boolean>(true);
   const [isLoading, setLoading] = useState<boolean>(false);
   const [info, setInfo] = useState<InfoType>(infoObj);
   const error = useMemo(() => {
@@ -162,7 +163,7 @@ const ContactPage = () => {
           ))}
           {isError && <p className="text-sm text-red-500">{error}</p>}
           <div className="label">
-            <button
+            <Button
               onClick={async () => {
                 setLoading(true)
                 const formData = new FormData()
@@ -187,18 +188,10 @@ const ContactPage = () => {
                   setInfo(infoObj)
                 }
               }}
-              type="submit"
-              disabled={isLoading || Boolean(error)}
-              className={`px-4 py-2 rounded text-white font-semibold 
-                ${
-                  (isError || isLoading)
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-green-600 hover:bg-green-700 cursor-pointer"
-                }
-              `}
+              isDisabled={isLoading || isError}
             >
               {isLoading ? 'Loding...' : 'Submit'}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

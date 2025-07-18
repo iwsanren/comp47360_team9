@@ -8,14 +8,14 @@ import fetchData from '@/utils/fetchData';
 import getNextHourInNY from '@/utils/getNextHourInNY';
 
 interface PredictionSectionProps {
+  layerName: string;
   map: mapboxgl.Map | null;
   busynessLayerSetting: any;
 }
 
-const key = 'busyness-prediction'
 const zone = "America/New_York"; 
 
-const PredictionSection = ({ map, busynessLayerSetting }: PredictionSectionProps) => {
+const PredictionSection = ({ layerName, map, busynessLayerSetting }: PredictionSectionProps) => {
   const [timestamp, setTime] = useState(getNextHourInNY());
   const [date, setDate] = useState(0)
   const [hour, setHour] = useState(0)
@@ -33,19 +33,18 @@ const PredictionSection = ({ map, busynessLayerSetting }: PredictionSectionProps
     if (!map) return
     setIsLoading(true)
     const predictionBusyness = await fetchData(`/api/manhattan?timestamp=${timestamp}`)
-    const source = map.getSource(key)
+    const source = map.getSource(layerName)
     if (predictionBusyness && source && 'setData' in source) {
-      // predictionBusyness.features.forEach((feature: any) => map.setPaintProperty(`${key}-layer`, "fill-color", feature.properties.busyness))    
       source.setData(predictionBusyness);
     } else {
-      map.addSource(key, {
+      map.addSource(layerName, {
         type: "geojson",
         data: predictionBusyness,
       });
 
       map.addLayer({
-        id: `${key}-layer`,
-        source: key,
+        id: `${layerName}-layer`,
+        source: layerName,
         ...busynessLayerSetting
       });
     }

@@ -137,7 +137,7 @@ const DirectionSection = ({
                 method == 'transit' && uniq(transitEmissions(paths));
               const isActive = tool?.method === method;
               const isEqual = minEmissions == maxEmissions;
-              return paths.length > 0 && (
+              return paths?.length > 0 && (
                 <div
                   style={{
                     display: 'flex',
