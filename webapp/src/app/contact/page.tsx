@@ -102,7 +102,7 @@ const ContactPage = () => {
                   {team ? (
                     <div className="mt-4 flex flex-wrap gap-4">
                       {team.map((member, i) => (
-                        <div className="w-[48.25%]" key={i}>
+                        <div className="w-full lg:w-[48.25%]" key={i}>
                           <div className="flex gap-1 items-center">
                             {member.pic ? (
                               <Image width={60} src={member?.pic} alt={member.name} className="team-member-photo w-[60px] h-[60px]" />
@@ -111,7 +111,7 @@ const ContactPage = () => {
                                 <Icon icon={CiUser} size="3.75rem" />
                               </div>
                             )}  
-                              <p className="font-bold text-xl">{member.name}</p>
+                              <p className="font-bold text-xl flex-1">{member.name}</p>
                           </div>
                           <div className="mt-2">
                             <p className="my-1 text-lg">{member.title}</p>

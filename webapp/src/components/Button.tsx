@@ -14,7 +14,7 @@ const Button = ({ children, isDisabled, className = "", ...props }: BtnProps) =>
 
   return <button
     disabled={isDisabled}
-    className={`font-bold bg-green-500 hover:bg-green-700 active:bg-green-700 rounded-sm py-2 px-6 text-white text-base/[1.5] lg:text-lg/[1.5] transition-all duration-250 ${disabled} ${className}`}
+    className={`font-bold bg-green-500 hover:bg-green-700 active:bg-green-700 rounded-sm py-1 px-3 lg:py-2 lg:px-6 text-white text-base/[1.5] lg:text-lg/[1.5] transition-all duration-250 ${disabled} ${className}`}
     {...props}
   >{children}</button>;
 };

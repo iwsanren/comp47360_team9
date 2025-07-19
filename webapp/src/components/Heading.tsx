@@ -19,7 +19,7 @@ const Heading = ({ level = 1, children, className = "" }: HeadingProps) => {
   const Tag = `h${level}` as keyof JSX.IntrinsicElements;
   const style = baseStyles[level];
 
-  return <Tag className={`font-bold leading-[1.5] ${style} ${className}`}>{children}</Tag>;
+  return <Tag className={`font-bold leading-[1.5] ${className} ${style}`}>{children}</Tag>;
 };
 
 export default Heading

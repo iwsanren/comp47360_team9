@@ -53,15 +53,17 @@ const DirectionSection = ({
   isInValid,
 }: DirectionSectionProps) => {
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex gap-3 items-center pr-4">
-        <Image
-          src={startEndIcon}
-          alt="Start and End Icon"
-          width={32}
-          height={100}
-        />
-        <div className="w-[330px] flex flex-col gap-3">
+    <div className="flex flex-col gap-4 lg:gap-3">
+      <div className="flex gap-3 items-center pr-[6px] lg:pr-4">
+        <div className="w-5 lg:w-8">
+          <Image
+            src={startEndIcon}
+            alt="Start and End Icon"
+            width={32}
+            height={100}
+          />
+        </div>
+        <div className="flex-1 lg:w-[330px] flex flex-col gap-3">
           <Input
             disabled={true}
             placeholder="Start Location (Click on Map)"
@@ -140,14 +142,10 @@ const DirectionSection = ({
               return paths?.length > 0 && (
                 <div
                   style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
                     background: isActive ? color : 'white',
-                    boxShadow: '0px 2px 4px 0px #00000040',
                     color: isActive ? 'white' : color,
                   }}
-                  className={`py-2 px-3 rounded-lg cursor-pointer transition-all duration-250`}
+                  className={`flex justify-between items-center drop-shadow-lg py-2 px-3 rounded-lg cursor-pointer transition-all duration-250`}
                   onClick={() =>
                     setTool({
                       method,
@@ -158,7 +156,7 @@ const DirectionSection = ({
                   key={i}
                 >
                   <div className="flex gap-[10px] items-center">
-                    <Icon icon={icon} className="inherit" size="1.5rem" />
+                    <Icon icon={icon} className={'inherit'} size="1.5rem" />
                     <p
                       className={`text-sm text-${isActive ? 'white' : 'black'}`}
                     >
@@ -171,7 +169,7 @@ const DirectionSection = ({
                     </p>
                   </div>
                   <div className="flex items-center gap-2 w-[8.875rem]">
-                    <Icon icon={iconAlert} className="inherit" size="1.25rem" />
+                    <Icon icon={iconAlert} className={'inherit'} size="1.25rem" />
                     <div
                       style={{
                         display: 'flex',
@@ -199,7 +197,7 @@ const DirectionSection = ({
             })}
           </div>
         ))}
-      <div className="flex justify-between mt-2">
+      <div className="flex justify-between">
         <Button onClick={handleClear}>Clear</Button>
         {tool && <Button onClick={() => setOpen(true)}>Show Directions</Button>}
       </div>
