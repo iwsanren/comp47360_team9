@@ -15,7 +15,7 @@ const Filter = ({ mvpFeatures, setToggles, toggles, className }: FilterProps) =>
       {mvpFeatures.map(({ key, label }: { key: string, label: string }) => (
         <div
           key={key}
-          className="flex gap-1 items-center text-white text-sm px-2"
+          className="flex gap-1 items-center text-white text-sm"
         >
           <span
             style={{
