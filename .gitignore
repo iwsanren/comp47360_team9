@@ -51,3 +51,8 @@ SETUP-NEXT-STEPS.md
 
 docs/*
 !docs/git_workflow.md
+!docs/AUTOMATION-GUIDE.md
+!docs/DEPLOYMENT-COMPLETE-GUIDE.md
+!docs/quick-setup-guide.md
+!docs/SCRIPTS-ANALYSIS.md
+!docs/DOCKER-SETUP-GUIDE.md
