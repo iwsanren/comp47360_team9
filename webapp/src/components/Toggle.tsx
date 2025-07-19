@@ -21,14 +21,14 @@ const Toggle = ({
     >
       <div
         onClick={onClick}
-        className={`relative cursor-pointer flex items-center p-[2px] gap-[2px] rounded-3xl w-[46px] lg:w-[52px] ${isActive && 'flex-row-reverse'}`}
+        className={`relative cursor-pointer flex items-center p-[2px] gap-[2px] rounded-3xl w-[48px] lg:w-[52px] ${isActive && 'flex-row-reverse'}`}
         style={{
           backgroundColor: isActive ? '#0FD892' : '#F0F0F0',
           transition: 'all 0.3s',
         }}
       >
         <div
-          className="w-4 h-4 lg:w-6 lg:h-6 rounded-full"
+          className="w-5 h-5 lg:w-6 lg:h-6 rounded-full"
           style={{
             backgroundColor: isActive ? '#FFFFFF' : '#D9D9D9',
             transition: 'all 0.3s',
