@@ -51,7 +51,7 @@ const PredictionSection = ({ layerName, map, busynessLayerSetting }: PredictionS
     setIsLoading(false)
   }
   return (
-    <div className='flex flex-col gap-12'>
+    <div className='gap-10 flex flex-col lg:gap-12'>
       <InputSlider
         label={label}
         max={timeGroups.length - 1}

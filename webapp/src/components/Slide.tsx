@@ -10,7 +10,6 @@ interface SlideProps {
 }
 
 const Slide = ({ children }: SlideProps) => {
-
   const settings = {
     infinite: false,
     arrows: false,
@@ -19,6 +18,14 @@ const Slide = ({ children }: SlideProps) => {
     slidesToScroll: 1,
     variableWidth: true,
     swipeToSlide: true,
+    responsive: [
+      {
+        breakpoint: 768,
+        settings: {
+          variableWidth: false,
+        }
+      },
+    ]
   };
   return (
     <div className="relative">

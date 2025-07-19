@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Icon from "@/components/Icon";
 import { WEATHER_CONDITION_ICONS } from "@/constants/icons";
+import Heading from "@/components/Heading";
 
 interface modalProps {
   setShowModal: React.Dispatch<React.SetStateAction<boolean | undefined>>;
@@ -36,15 +37,25 @@ const ShowWeatherModal = ({ setShowModal, current, hourly }: modalProps) => {
       }, []);
     return (
         <div
-          className="absolute shadow-xl py-6 px-8 overflow-y-auto z-30"
+          className="fixed
+            w-[calc(100vw-32px)]
+            h-[80dvh]
+            shadow-xl 
+            rounded-md
+            lg:w-[630px]
+            lg:absolute
+            py-3
+            px-4
+            lg:py-6
+            lg:px-8
+            overflow-y-auto
+            top-[50%]
+            left-[50%]
+            z-30
+            -translate-1/2
+          "
           style={{
-            width: 630,
-            height: 600,
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
             backgroundColor: "#E0EEE9",
-            borderRadius: 8,
           }}
         >
           <div className="flex justify-between items-center mb-4">
@@ -59,9 +70,9 @@ const ShowWeatherModal = ({ setShowModal, current, hourly }: modalProps) => {
           {current && (
             <div className="flex items-center gap-4 mb-4">
               <Icon size="3.75rem" icon={WEATHER_CONDITION_ICONS[current.weather[0].icon]} />
-              <h1 className="text-4xl font-bold">
+              <Heading className="lg:!text-5xl">
                 {current.main.temp.toFixed(1)}°F
-              </h1>
+              </Heading>
               <div className="ml-auto text-right text-gray-700 text-sm">
                 <p>Humidity: {current.main.humidity}%</p>
                 <p>Wind: {current.wind.speed} miles/h</p>
@@ -69,7 +80,7 @@ const ShowWeatherModal = ({ setShowModal, current, hourly }: modalProps) => {
               </div>
             </div>
           )}
-          <div className="grid grid-cols-6 gap-[10px]">
+          <div className="grid grid-cols-3 lg:grid-cols-6 gap-[10px]">
             {hourly.slice(0, 18).map((hour: any, idx: number) => (
               <div
                 key={idx}

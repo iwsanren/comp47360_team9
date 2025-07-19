@@ -236,7 +236,6 @@ def predict_all():
                     "Shape_Leng": row['Shape_Leng'],
                     "busyness": round(float(pred), 2),
                     "busyness_level": busyness_level,
-                    # "geom": row.get('geometry', ''),
                 },
                 "geometry": geometry,
             })

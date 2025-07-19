@@ -711,7 +711,7 @@ export default function Map() {
       </div>
 
       <div ref={mapRef} className="relative h-[555px] lg:min-h-[750px] lg:h-[100dvh] font-roboto">
-        <div className="lg:hidden absolute top-2 left-2 z-10">
+        <div className="lg:hidden absolute top-2 left-2 z-5">
           <Button onClick={() => setShowFilter(prev => !prev)} className={`${showFilter ? 'text-white bg-green-700' : '!text-green-800 bg-white'} `}>{showFilter && 'Close '}Filter</Button>
           {showFilter && (
             <Filter className="mt-2 bg-green-700" setToggles={setToggles} toggles={toggles} mvpFeatures={mvpFeatures} />
@@ -721,7 +721,7 @@ export default function Map() {
       
       {showModal && (
         <>
-          <div className="absolute left-0 right-0 top-0 bottom-0 bg-[rgba(0,0,0,0.5)] z-3" />
+          <div className="absolute left-0 right-0 top-0 bottom-0 bg-[rgba(0,0,0,0.5)] z-10" />
           <ShowWeatherModal current={current} hourly={hourly} setShowModal={setShowModal} />
         </>
       )}

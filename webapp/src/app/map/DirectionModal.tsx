@@ -96,7 +96,7 @@ const DirectionModal = ({ data, setOpen, setNavigation, navigation }: DirectionM
   }
   // console.log(data);
   return (
-    <div className="absolute left-0 right-0 top-0 bottom-0 rounded-lg bg-green-800 py-11 px-8 overflow-scroll z-10">
+    <div className="m-4 absolute left-0 right-0 top-0 bottom-0 rounded-lg bg-green-800 px-3 py-10 lg:py-11 lg:px-8 overflow-scroll z-10">
       <button
         onClick={() => {
           setOpen(false)
@@ -111,7 +111,7 @@ const DirectionModal = ({ data, setOpen, setNavigation, navigation }: DirectionM
           <div className="pr-3 h-[100%]" key={i}>
             <button
               onClick={() => setNavigation({ steps: legs?.[0]?.steps || [], overview_polyline, key: i })}
-              className={`cursor-pointer py-2 px-6 text-white h-[100%] ${
+              className={`w-full cursor-pointer py-2 px-3 lg:px-6 text-white h-[100%] ${
                 (navigation?.key === i) ? "bg-green-500" : "bg-green-900"
               } rounded-lg hover:bg-green-500 transition-all duration-250`}
             >
@@ -140,18 +140,18 @@ const DirectionModal = ({ data, setOpen, setNavigation, navigation }: DirectionM
           {steps?.map(({ distance, html_instructions }: RouteStep, i: number, arr: RouteStep[]) => (
             <div className="flex pb-5 gap-3 relative" key={i}>
               {i !== arr.length - 1 && (
-                <div className="absolute w-[2px] bg-green-700 left-[10.5px] top-4 bottom-[-4px]" />
+                <div className="absolute w-[2px] bg-green-700 left-[8.5px] lg:left-[10.5px] top-4 bottom-[-4px]" />
               )}
               {i === arr.length - 1 ? (
-                <Icon icon={FaMapMarkerAlt} size="1.5rem" className="text-green-300" />
+                <Icon icon={FaMapMarkerAlt} className="text-green-300 text-xl lg:text-2xl" />
               ) : (
                 <div
-                  className={`relative ml-1 mt-1 w-4 h-4 rounded-full border-solid border border-green-700 ${
+                  className={`relative ml-1 mt-1 w-3 h-3 lg:w-4 lg:h-4 rounded-full border-solid border border-green-700 ${
                     i ? "bg-green-700" : "bg-green-300"
                   }`}
                 />
               )}
-              <div className="text-white">
+              <div className="text-white flex-1">
                 <p className="text-base/[1.5] font-bold lg:text-lg/[1.5]">
                   {distance?.text || 'N/A'}
                 </p>

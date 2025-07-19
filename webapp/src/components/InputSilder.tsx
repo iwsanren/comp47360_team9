@@ -18,7 +18,7 @@ const InputSlider: React.FC<InputSliderProps> = ({
   onChange,
 }) => {
   return (
-    <div className="w-[426px] relative">
+    <div className="w-full lg:w-[426px] relative">
       <input
         type="range"
         min={min}
@@ -28,7 +28,7 @@ const InputSlider: React.FC<InputSliderProps> = ({
         onChange={e => onChange(Number(e.target.value))}
         className="w-full"
       />
-      <div className={`absolute inline-block text-sm/[21px] lg:text-base/[24px] top-full font-bold text-green-900 translate-y-2`} style={{ left: `${(value * 100) / max}%`, transform: value == min ? 'none' : (value == max ? 'translateX(-100%)' : 'translateX(-50%)')}}>
+      <div className={`absolute inline-block text-sm/[21px] lg:text-base/[24px] top-full font-bold text-green-900 lg:translate-y-2`} style={{ left: `${(value * 100) / max}%`, transform: value == min ? 'none' : (value == max ? 'translateX(-100%)' : 'translateX(-50%)')}}>
         {label}
       </div>
     </div>
