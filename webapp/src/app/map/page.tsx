@@ -615,10 +615,10 @@ export default function Map() {
       </div>
 
       <div
-        className="relative z-3 overflow-hidden lg:absolute lg:shadow-lg lg:left-4 lg:bottom-3 lg:rounded-[20px] lg:top-[55px] bg-white"
+        className="relative z-3 lg:absolute lg:shadow-lg lg:left-4 lg:bottom-3 lg:rounded-[20px] lg:top-[55px] bg-white"
       >
         <div
-          className="mt-[43px] relative bottom-0 left-0 right-0 pt-3 px-4 lg:px-6 lg:py-4 lg:absolute bg-green-200"
+          className="mt-[43px] lg:rounded-b-[20px] relative bottom-0 left-0 right-0 pt-3 px-4 lg:px-6 lg:py-4 lg:absolute bg-green-200"
         >
           <Text className="font-bold text-green-800">Current Weather</Text>
           <div className="flex items-center justify-between lg:mt-2">
