@@ -24,7 +24,7 @@ export default function Header() {
           <p className="pl-8 text-lg/[1.5]">LUNA</p>
         </div>
       </Link>
-      <div className="flex gap-8">
+      <div className="flex gap-4 lg:gap-8">
         {pages.map(({ label, link }) => (
           <Link href={link} className="text-white font-semibold relative z-30" key={label}>
             {label}

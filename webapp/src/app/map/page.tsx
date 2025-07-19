@@ -661,6 +661,7 @@ export default function Map() {
                 setPredictionMode(prev => !prev)
                 setClickPoints([])
                 handleClear()
+                setShowFilter(false)
                 setToggles(prev => {
                   const newToggles = Object.fromEntries(
                     Object.keys(prev).map(key => [key, false])
@@ -673,7 +674,7 @@ export default function Map() {
               onMouseLeave={() => setShowDesc(false)}
               isActive={isPredictionMode}
             >
-              {showDesc && <div className="absolute top-full left-[50%] -translate-x-1/2 translate-y-2 w-[180px] py-1 px-2 text-sm/[21px] bg-white rounded-sm drop-shadow-lg">Click this toggle to switch to {isPredictionMode ? 'direction' : 'predict'} model.</div>}
+              {showDesc && <div className="absolute top-full right-0 lg:left-[50%] lg:-translate-x-1/2 translate-y-2 w-[180px] py-1 px-2 text-sm/[21px] bg-white rounded-sm drop-shadow-lg">Click this toggle to switch to {isPredictionMode ? 'direction' : 'predict'} model.</div>}
             </Toggle>
           </div>
           {isPredictionMode ? (
@@ -712,7 +713,16 @@ export default function Map() {
 
       <div ref={mapRef} className="relative h-[555px] lg:min-h-[750px] lg:h-[100dvh] font-roboto">
         <div className="lg:hidden absolute top-2 left-2 z-5">
-          <Button onClick={() => setShowFilter(prev => !prev)} className={`${showFilter ? 'text-white bg-green-700' : '!text-green-800 bg-white'} `}>{showFilter && 'Close '}Filter</Button>
+          {!isPredictionMode && (
+            <Button
+              onClick={() => {
+                setShowFilter(prev => !prev)
+              }}
+              className={`${showFilter ? 'text-white bg-green-700' : '!text-green-800 bg-white'} `}
+            >
+              {showFilter && 'Close '}Filter
+            </Button>
+          )}
           {showFilter && (
             <Filter className="mt-2 bg-green-700" setToggles={setToggles} toggles={toggles} mvpFeatures={mvpFeatures} />
           )}

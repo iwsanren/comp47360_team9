@@ -39,6 +39,7 @@ const ShowWeatherModal = ({ setShowModal, current, hourly }: modalProps) => {
         <div
           className="fixed
             w-[calc(100vw-32px)]
+            max-w-[30em]
             h-[80dvh]
             shadow-xl 
             rounded-md
@@ -84,7 +85,7 @@ const ShowWeatherModal = ({ setShowModal, current, hourly }: modalProps) => {
             {hourly.slice(0, 18).map((hour: any, idx: number) => (
               <div
                 key={idx}
-                className="bg-white rounded-lg shadow-md text-center relative"
+                className="bg-white rounded-lg shadow-md text-center overflow-hidden relative"
               >
                 <div className="flex flex-col gap-[10px] py-[12px]">
                   <Icon size="2.5rem" style={{ margin: '0 auto' }} icon={WEATHER_CONDITION_ICONS[hour.weather[0].icon]} />
