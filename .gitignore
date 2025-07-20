@@ -49,5 +49,16 @@ DEPLOYMENT-COMPLETE-GUIDE.md
 NGINX-SETUP.md
 SETUP-NEXT-STEPS.md
 
+# Backup route files
+webapp/src/app/api/directions/route_backup.js
+webapp/src/app/api/directions/route_new.js
+
 docs/*
 !docs/git_workflow.md
+!docs/AUTOMATION-GUIDE.md
+!docs/DEPLOYMENT-COMPLETE-GUIDE.md
+!docs/quick-setup-guide.md
+!docs/SCRIPTS-ANALYSIS.md
+!docs/DOCKER-SETUP-GUIDE.md
+
+# *.txt

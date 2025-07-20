@@ -15,10 +15,21 @@ from shapely import wkt
 from shapely.geometry import mapping
 import jwt
 
+# Import request tracking utilities
+from utils.request_tracker import (
+    with_request_tracking, 
+    log_with_context, 
+    setup_logging, 
+    get_user_context
+)
+
 load_dotenv(override=True) # Load environment variables from .env file
 
 app = Flask(__name__)
 CORS(app)
+
+# Setup logging system
+setup_logging()
 
 # Loading trained model.
 model = joblib.load('./xgboost_taxi_model.joblib')
@@ -68,7 +79,9 @@ def classify_busyness_zone_hour(pred, zone_id, hour, day):
 
 # Root route to provide API info
 @app.route('/', methods=['GET'])
+@with_request_tracking
 def root():
+    log_with_context('info', 'Root endpoint accessed')
     return jsonify({
         "service": "Manhattan My Way ML API",
         "version": "1.0.0",
@@ -81,11 +94,15 @@ def root():
 
 # Health check endpoint
 @app.route('/health', methods=['GET'])
+@with_request_tracking
 def health_check():
     """Health check endpoint for monitoring and load balancing."""
     try:
+        log_with_context('info', 'Health check requested')
+        
         # Check if model is loaded
         if model is None:
+            log_with_context('error', 'Health check failed: Model not loaded')
             return jsonify({
                 'status': 'unhealthy',
                 'error': 'Model not loaded',
@@ -94,6 +111,7 @@ def health_check():
         
         # Check if required data files exist
         if zones_df is None or zone_stats is None:
+            log_with_context('error', 'Health check failed: Required data files not loaded')
             return jsonify({
                 'status': 'unhealthy',
                 'error': 'Required data files not loaded',
@@ -111,9 +129,17 @@ def health_check():
             'weather_api_configured': bool(WEATHER_API_KEY)
         }
         
+        log_with_context('info', 'Health check completed successfully', {
+            'zones_count': len(zones_df),
+            'stats_count': len(zone_stats)
+        })
+        
         return jsonify(health_data), 200
         
     except Exception as e:
+        log_with_context('error', f'Health check failed with exception: {str(e)}', {
+            'error_type': type(e).__name__
+        })
         return jsonify({
             'status': 'unhealthy',
             'error': str(e),
@@ -121,16 +147,20 @@ def health_check():
         }), 500
 
 @app.route('/predict-all', methods=['POST'])
+@with_request_tracking
 def predict_all():
     auth_header = request.headers.get('Authorization')
     
     if not auth_header or not auth_header.startswith('Bearer '):
+        log_with_context('warn', 'Prediction request missing or invalid authorization header')
         return {'error': 'Missing or invalid token'}, 401
     
     token = auth_header.split(' ')[1]
 
     try:
         decoded = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+        log_with_context('info', 'JWT token validated successfully')
+        
         # Current time and date features.
         time = request.args.get("timestamp") # Format: 1752490800
         if time is not None:
@@ -138,6 +168,12 @@ def predict_all():
         now = datetime.now(pytz.timezone("America/New_York"))
         if time is not None: 
             now = datetime.fromtimestamp(time, tz=timezone.utc)
+            
+        log_with_context('info', 'Processing prediction request', {
+            'timestamp_provided': time is not None,
+            'target_time': now.isoformat()
+        })
+            
         # Use this hour if minutes ≤ 30, else use next hour.
         pickup_hour = now.hour if now.minute <= 30 else (now.hour + 1) % 24
         day_of_week = now.weekday()
@@ -151,16 +187,39 @@ def predict_all():
             f"lat=40.728333&lon=-73.994167&appid={WEATHER_API_KEY}&units=metric"
         )
 
-        weather_data = requests.get(weather_url).json()
+        log_with_context('info', 'Fetching weather data', {
+            'api_endpoint': 'weather' if time is None else 'forecast/hourly'
+        })
+
+        weather_response = requests.get(weather_url)
+        if weather_response.status_code != 200:
+            log_with_context('error', 'Weather API request failed', {
+                'status_code': weather_response.status_code,
+                'response_text': weather_response.text[:200]
+            })
+            return jsonify({"error": "Failed to fetch weather data"}), 500
+
+        weather_data = weather_response.json()
 
         if time is not None:
             weather_data = next(filter(lambda x: x["dt"] == time, weather_data['list']), None)
+            if weather_data is None:
+                log_with_context('error', 'No weather data found for specified timestamp', {
+                    'requested_timestamp': time
+                })
+                return jsonify({"error": "No weather data for specified time"}), 400
 
         temp = weather_data['main']['temp']
         feels_like = weather_data['main']['feels_like']
         humidity = weather_data['main']['humidity']
         wind_speed = weather_data['wind']['speed']
         weather_main = weather_data['weather'][0]['main']
+
+        log_with_context('info', 'Weather data retrieved successfully', {
+            'temperature': temp,
+            'condition': weather_main,
+            'humidity': humidity
+        })
 
         # One-hot encoding weather conditions.
         weather_features = [
@@ -174,7 +233,12 @@ def predict_all():
 
         # Generating predictions for each zone.
         features = []
+        prediction_count = 0
+        
+        log_with_context('info', f'Starting predictions for {len(zones_df)} zones')
+        
         for _, row in zones_df.iterrows():
+            prediction_count += 1
            
             input_data = {
                 "pickup_hour": pickup_hour,
@@ -197,11 +261,20 @@ def predict_all():
             # Creating a DataFrame in correct order,
             input_df = pd.DataFrame([input_data])[MODEL_FEATURE_ORDER]
 
-            # Predicting and classifying zones.
-            pred = model.predict(input_df)[0]
-            busyness_level = classify_busyness_zone_hour(
-                pred, int(row['OBJECTID']), pickup_hour, day_of_week
-            )
+            try:
+                # Predicting and classifying zones.
+                pred = model.predict(input_df)[0]
+                busyness_level = classify_busyness_zone_hour(
+                    pred, int(row['OBJECTID']), pickup_hour, day_of_week
+                )
+            except Exception as e:
+                log_with_context('error', f'Prediction failed for zone {row["OBJECTID"]}', {
+                    'zone_id': int(row['OBJECTID']),
+                    'error': str(e)
+                })
+                # Use default values to continue processing
+                pred = 0.0
+                busyness_level = "normal"
 
             geometry = OrderedDict()
             
@@ -224,6 +297,7 @@ def predict_all():
                 geometry = mapping(geo)
             
             # Appending the results.
+            # Appending the results.
             features.append({
                 "type": "Feature",
                 "properties": {
@@ -240,27 +314,41 @@ def predict_all():
                 "geometry": geometry,
             })
 
-            geojson = {
-                "type": "FeatureCollection",
-                "properties": {
-                    "timestamp": now.strftime('%Y-%m-%d %H:%M'),
-                    "weather": weather_main,
-                    "is_holiday": bool(is_holiday),
-                },
-                "features": features
-            }
+        geojson = {
+            "type": "FeatureCollection",
+            "properties": {
+                "timestamp": now.strftime('%Y-%m-%d %H:%M'),
+                "weather": weather_main,
+                "is_holiday": bool(is_holiday),
+            },
+            "features": features
+        }
 
-        return Response(
+        log_with_context('info', 'Predictions completed successfully', {
+            'zones_processed': prediction_count,
+            'features_generated': len(features),
+            'weather_condition': weather_main
+        })
+
+        response = Response(
             json.dumps(geojson, ensure_ascii=False),
             mimetype='application/json'
         )
+        
+        return response
 
     except jwt.ExpiredSignatureError:
+        log_with_context('warn', 'JWT token expired')
         return jsonify({'error': 'Token expired'}), 403
     except jwt.InvalidTokenError:
+        log_with_context('warn', 'Invalid JWT token provided')
         return jsonify({'error': 'Invalid token'}), 403
     except Exception as e:
-        return jsonify({"error": str(e)})
+        log_with_context('error', f'Prediction request failed: {str(e)}', {
+            'error_type': type(e).__name__,
+            'user_context': get_user_context()
+        })
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

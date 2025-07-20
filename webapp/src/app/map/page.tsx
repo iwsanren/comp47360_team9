@@ -18,6 +18,7 @@ import evIcon from "@/assets/images/ev_icon.png";
 import start from "@/assets/images/start.png";
 import dest from "@/assets/images/dest.png";
 import Icon from '@/components/Icon';
+import { api, handleAPIError } from '@/utils/apiClient';
 import Toggle from "@/components/Toggle";
 import Heading from "@/components/Heading";
 import { WEATHER_CONDITION_ICONS } from '@/constants/icons';
@@ -260,19 +261,17 @@ export default function Map() {
     const fetchDirection = async () => {
       setIsLoadingDirection(true);
       try {
-        const res = await fetch('/api/directions', 
-          { 
-            method: 'POST', 
-            body: JSON.stringify({
-              origin: startCoords,
-              destination: destCoords,
-            }), 
-          }
-        )
-        const data = await res.json();
+        // Using the new API client
+        const { data } = await api.post('/api/directions', {
+          origin: startCoords,
+          destination: destCoords,
+        });
         setDirectionData(data);
       } catch (err) {
-        console.error("Failed to fetch direction", err);
+        const errorInfo = handleAPIError(err as Error, 'Fetch directions');
+        console.error("Failed to fetch direction", errorInfo);
+        // Can add user notification logic here
+        // toast.error(errorInfo.userMessage);
       } finally {
         setIsLoadingDirection(false); 
       }
