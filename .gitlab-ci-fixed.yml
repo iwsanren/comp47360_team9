@@ -6,7 +6,7 @@ stages:
   - quality-check
   - deploy
 
-# 代码质量检查阶段
+# code quality check
 quality_check:
   stage: quality-check
   tags:
