@@ -5,18 +5,19 @@ import Image from "next/image";
 import { CiLocationOn, CiPhone, CiTimer, CiUser } from "react-icons/ci";
 import { RiTeamLine } from "react-icons/ri";
 
+import Button from "@/components/Button";
 import Icon from '@/components/Icon';
 import Heading from "@/components/Heading";
 import Input from '@/components/Input';
 import tan from "@/assets/images/tan.png";
 import prakhar from "@/assets/images/prakhar.jpeg";
 import martynas from "@/assets/images/martynas.jpeg";
+import neasa from "@/assets/images/neasa.jpeg";
 import billie from "@/assets/images/billie.jpeg";
-import Button from "@/components/Button";
 
 const team = [
   { 'name': 'Martynas', 'pic': martynas, title: 'Coordination lead', 'email': "martynas.kapocius@ucdconnect.ie" }, 
-  { 'name': 'Neasa', title: 'Data lead', 'email': "neasa.nifhatharta2@ucdconnect.ie" },
+  { 'name': 'Neasa', 'pic': neasa, title: 'Data lead', 'email': "neasa.nifhatharta2@ucdconnect.ie" },
   { 'name': 'Zhaofang He', 'pic': billie, title: 'Maintenance', 'email': "zhaofang.he@ucdconnect.ie" },
   { 'name': 'Hsuan-Yu Tan', 'pic': tan, title: 'Backend lead', 'email': "hsuan-yu.tan@ucdconnect.ie" },
   { 'name': 'Prakhar', 'pic': prakhar, title: 'Frontend lead', 'email': "prakhar.dayal@ucdconnect.ie" },

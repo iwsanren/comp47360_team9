@@ -603,7 +603,7 @@ export default function Map() {
           <BiSolidLeftArrow
             style={{
               transform: (isToggleOpen && !isPredictionMode) ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.3s',
+              transition: 'transform 0.250s',
             }}
             size=".75rem"
           />

@@ -27,11 +27,13 @@ export default function AuthWrapper({ children }: Readonly<{
     // Trigger the validation request immediately on component mount
     validateToken()
 
-    // Then repeat the validation request every 59 minutes
-    const interval = setInterval(() => validateToken(), 59 * 60 * 1000); // 59 minutes
+    // Then repeat the validation request every 50 minutes
+    const interval = setInterval(() => validateToken(), 50 * 60 * 1000); // 50 minutes
 
     // Clear the interval when the component unmounts
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    }
 }, []);
 
   return <>{children}</>;

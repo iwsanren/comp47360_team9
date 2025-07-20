@@ -70,14 +70,14 @@ const ShowWeatherModal = ({ setShowModal, current, hourly }: modalProps) => {
           </div>
           {current && (
             <div className="flex items-center gap-4 mb-4">
-              <Icon size="3.75rem" icon={WEATHER_CONDITION_ICONS[current.weather[0].icon]} />
+              <Icon size="3.75rem" icon={WEATHER_CONDITION_ICONS[current?.weather?.[0]?.icon]} />
               <Heading className="lg:!text-5xl">
                 {current.main.temp.toFixed(1)}°F
               </Heading>
               <div className="ml-auto text-right text-gray-700 text-sm">
                 <p>Humidity: {current.main.humidity}%</p>
                 <p>Wind: {current.wind.speed} miles/h</p>
-                <p>Feel like: {current.main.feels_like.toFixed(1)}°F</p>
+                <p>Feels like: {current.main.feels_like.toFixed(1)}°F</p>
               </div>
             </div>
           )}
@@ -88,7 +88,7 @@ const ShowWeatherModal = ({ setShowModal, current, hourly }: modalProps) => {
                 className="bg-white rounded-lg shadow-md text-center overflow-hidden relative"
               >
                 <div className="flex flex-col gap-[10px] py-[12px]">
-                  <Icon size="2.5rem" style={{ margin: '0 auto' }} icon={WEATHER_CONDITION_ICONS[hour.weather[0].icon]} />
+                  <Icon size="2.5rem" style={{ margin: '0 auto' }} icon={WEATHER_CONDITION_ICONS[hour?.weather?.[0]?.icon]} />
                   <div
                     style={{
                       fontWeight: 700,
