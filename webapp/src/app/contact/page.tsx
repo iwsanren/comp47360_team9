@@ -191,7 +191,7 @@ const ContactPage = () => {
               }}
               isDisabled={isLoading || isError}
             >
-              {isLoading ? 'Loding...' : 'Submit'}
+              {isLoading ? 'Loading...' : 'Submit'}
             </Button>
           </div>
         </div>
