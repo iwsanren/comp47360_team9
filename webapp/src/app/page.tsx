@@ -4,92 +4,66 @@ import Image from 'next/image'
 import Link from "next/link";
 import { BsArrowRight } from "react-icons/bs";
 
-import manhattan from '@/assets/images/manhattan.jpg'
+import bg from '@/assets/images/bg.png'
+import bg_mobile from '@/assets/images/bg_mobile.png'
 import Heading from '@/components/Heading';
+import Button from '@/components/Button';
+import Text from '@/components/Text';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 export default function Home() {
+  const isMobile = useIsMobile()
   return (
-    <main className="relative h-screen w-full font-roboto">
+    <main className="relative flex flex-col justify-center h-screen w-full font-roboto">
       {/* Background image */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute left-0 top-0 right-0 bottom-0">
         <Image
-          src={manhattan}
+          src={isMobile ? bg_mobile : bg}
           alt="Manhattan Background"
           fill
-          style={{ objectFit: 'cover' }}
+          style={{ objectFit: isMobile ? 'unset' : 'cover' }}
           priority
         />
-        <div className="absolute inset-0 bg-black opacity-30" />
       </div>
 
       {/* Centered Content */}
-      <div className="container relative z-10 h-full">
+      <div className="container absolute flex flex-col gap-4 text-white lg:gap-0 lg:top-[214px] lg:left-[100px] z-10">
         {/* Manhattan My Way - h1 */}
-        <Heading
-          className="absolute lg:top-[214px] lg:left-[100px] text-white"
-        >
+        <Heading className="drop-shadow-lg">
           Manhattan My Way
         </Heading>
 
         {/* Subheading */}
-        <h3
-          className="text-white font-bold text-[30px] leading-[45px]"
-          style={{
-            position: 'absolute',
-            top: '304px',
-            left: '100px',
-            height: '45px',
-          }}
-        >
+        <Heading className="drop-shadow-lg" level={3}>
           Greener choices. Smarter routes. Prediction. Manhattan, your way.
-        </h3>
+        </Heading>
 
         {/* Description */}
-        <p
-          className="text-white font-bold italic text-[18px] leading-[27px]"
-          style={{
-            position: 'absolute',
-            top: '360px',
-            left: '100px',
-          }}
-        >
+        <p className="font-bold italic text-[18px] leading-[27px] drop-shadow-lg">
           Discover your most efficient and sustainable route.
         </p>
 
         {/* CTA Button */}
         <Link
           href="/map"
-          className="absolute text-white font-semibold bg-[#0FD892] hover:bg-[#0AAC82] rounded-sm shadow-md transition flex items-center gap-2"
-          style={{
-            top: '400px',
-            left: '100px',
-            width: '236px',
-            height: '43px',
-            padding: '8px 24px',
-          }}
+          className="mt-4"
         >
-          <span
-            style={{
-              flex: '153px',
-              height: '27px',
-              fontWeight: 700,
-              fontSize: '18px',
-              lineHeight: '27px',
-              letterSpacing: '0%',
-              color: '#FFFFFF',
-            }}
-          >
-            Explore Manhattan
-          </span>
-          <BsArrowRight
-            style={{
-              
-              top: '1.25px',
-              left: '1.5px',
-              width: '26',
-              height: '22',
-            }}
-          />
+          <Button>
+            <div className="flex items-center gap-2">
+              <Text.Bold
+              >
+                Explore Manhattan
+              </Text.Bold>
+              <BsArrowRight
+                style={{
+                  top: '1.25px',
+                  left: '1.5px',
+                  width: '26',
+                  height: '22',
+                }}
+              />
+            </div>
+          </Button>
         </Link>
       </div>
     </main>
