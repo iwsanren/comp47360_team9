@@ -5,6 +5,7 @@ import Link from "next/link";
 import { BsArrowRight } from "react-icons/bs";
 
 import manhattan from '@/assets/images/manhattan.jpg'
+import Heading from '@/components/Heading';
 
 export default function Home() {
   return (
@@ -22,19 +23,13 @@ export default function Home() {
       </div>
 
       {/* Centered Content */}
-      <div className="relative z-10 h-full">
+      <div className="container relative z-10 h-full">
         {/* Manhattan My Way - h1 */}
-        <h1
-          className="text-white font-bold text-[60px] leading-[90px]"
-          style={{
-            position: 'absolute',
-            top: '214px',
-            left: '100px',
-            width: '517px',
-          }}
+        <Heading
+          className="absolute lg:top-[214px] lg:left-[100px] text-white"
         >
           Manhattan My Way
-        </h1>
+        </Heading>
 
         {/* Subheading */}
         <h3

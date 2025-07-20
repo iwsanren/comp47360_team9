@@ -93,7 +93,7 @@ const DirectionSection = ({
               ];
               return updated;
             });
-
+            setTool(undefined)
             const temp = startLocation;
             setStartLocation(destination);
             setDestination(temp);
