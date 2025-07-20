@@ -2,7 +2,7 @@ import { DateTime } from 'luxon';
 import { useEffect, useMemo, useState } from 'react';
 
 import Button from '@/components/Button';
-import InputSlider from '@/components/InputSilder';
+import InputSlider from '@/components/InputSlider';
 import generateHourlyGroups from '@/utils/generateHourlyGroups';
 import fetchData from '@/utils/fetchData';
 import getNextHourInNY from '@/utils/getNextHourInNY';
