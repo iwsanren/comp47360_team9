@@ -17,6 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code and data
 COPY app.py *.csv *.joblib ./
+COPY utils/ ./utils/
 
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash app \

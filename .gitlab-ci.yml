@@ -6,7 +6,7 @@ stages:
   - quality-check
   - deploy
 
-# 代码质量检查阶段
+# code quality check
 quality_check:
   stage: quality-check
   tags:
@@ -21,7 +21,7 @@ quality_check:
     - test -f "docker-compose.yml" && echo "✅ Docker compose config exists"
     - echo "✅ Quality checks completed"
   only:
-    - merge_requests
+    - feature/request-id-logging
     - develop
     - main
 
@@ -33,30 +33,39 @@ deploy_staging:
     - docker --version
     - docker-compose --version
   script:
-    - echo "Cleaning Docker cache before build..."
+    - echo "🚀 Building and deploying to staging..."
+    - echo "🧹 Cleaning Docker cache before build..."
     - docker system prune -af || true
-    - echo "Docker cache cleaned successfully"
-    - echo "Building and deploying to staging..."
+    - echo "✅ Docker cache cleaned successfully"
+    - echo "📁 Setting up deployment directory..."
     - mkdir -p /tmp/team9-deploy/staging
-    - rsync -av --exclude='.git' --exclude='.gitlab' ./ /tmp/team9-deploy/staging/
+    - rsync -av --exclude='.git' --exclude='.gitlab' --exclude='node_modules' ./ /tmp/team9-deploy/staging/
     - cd /tmp/team9-deploy/staging
-    - echo "Creating .env file..."
+    - echo "⚙️ Creating .env file..."
     - echo "OPENWEATHER_API_KEY=$OPENWEATHER_API_KEY" > .env
     - echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> .env
     - echo "NEXT_PUBLIC_MAPBOX_API_KEY=$NEXT_PUBLIC_MAPBOX_API_KEY" >> .env
     - echo "JWT_SECRET=$JWT_SECRET" >> .env
     - echo "NODE_ENV=development" >> .env
     - echo "FLASK_ENV=production" >> .env
+    - echo "🐳 Stopping existing containers..."
     - docker-compose down || true
+    - echo "🔨 Building containers with request tracking..."
     - docker-compose build --no-cache
+    - echo "▶️ Starting containers..."
     - docker-compose up -d
+    - echo "📊 Container status:"
     - docker-compose ps
-    - docker-compose logs --tail=20
+    - echo "📋 Recent logs:"
+    - docker-compose logs --tail=30
+    - echo "✅ Staging deployment completed!"
+    - echo "🌐 Access at: http://137.43.49.26:3030"
   environment:
     name: staging
     url: http://137.43.49.26:3030
   only:
     - develop
+    - feature/request-id-logging
 
 deploy_production:
   stage: deploy

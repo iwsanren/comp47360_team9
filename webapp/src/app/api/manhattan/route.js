@@ -60,7 +60,7 @@ export async function POST(req) {
                 );
                 const data = await res.json();
 
-                // 更新 properties
+                // Update properties
                 feature.properties.aqi = data.list[0].main.aqi;
                 feature.properties.air_pollution = data;
               })
