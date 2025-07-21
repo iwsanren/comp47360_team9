@@ -1,7 +1,16 @@
 #!/bin/bash
 
 # HTTPS Setup Script - Standalone mode with better error handling
-# This version tries to resolve DNS issues first
+# This version tries to r# Start certbot with DNS challenge
+certbot certonly \
+    --manual \
+    --manual-public-ip-logging-ok \
+    --preferred-challenges dns \
+    --email $EMAIL \
+    --agree-tos \
+    --no-eff-email \
+    --keep-until-expiring \
+    -d $DOMAIN issues first
 
 DOMAIN="lunaroutes.duckdns.org"
 EMAIL="hzfang0421@gmail.com"

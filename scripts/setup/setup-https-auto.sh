@@ -28,7 +28,7 @@ pip3 install certbot-dns-duckdns
 echo "🔑 Creating DuckDNS credentials..."
 mkdir -p /etc/letsencrypt
 cat > /etc/letsencrypt/duckdns.ini << EOF
-dns_duckdns_token = $DUCKDNS_TOKEN
+dns_duckdns_token=$DUCKDNS_TOKEN
 EOF
 
 # Set secure permissions
