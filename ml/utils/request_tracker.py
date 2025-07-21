@@ -7,7 +7,7 @@ import uuid
 import logging
 import time
 from datetime import datetime
-from flask import request, g
+from flask import request, g, has_request_context
 from functools import wraps
 import json
 
@@ -115,7 +115,12 @@ class RequestTrackingFormatter(logging.Formatter):
             return json.dumps(record.log_data, ensure_ascii=False)
         
         # Otherwise use standard format
-        request_id = getattr(g, 'request_id', 'unknown') if hasattr(g, 'request_id') else 'unknown'
+        # request_id = getattr(g, 'request_id', 'unknown') if hasattr(g, 'request_id') else 'unknown'
+        
+        if has_request_context():
+            request_id = getattr(g, 'request_id', 'unknown')
+        else:
+            request_id = 'unknown'
         
         formatted = super().format(record)
         return f"[{request_id}] {formatted}"

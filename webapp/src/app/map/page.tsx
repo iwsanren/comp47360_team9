@@ -76,6 +76,7 @@ export type MvpFeatures<T extends keyof Toggles> = {
   label: string,
   api: string,
   layer: any,
+  showDetail?: boolean
 }
 
 const busynessLayerSetting = {
@@ -140,6 +141,7 @@ const mvpFeatures: MvpFeatures<keyof Toggles>[] = [
       },
       type: "symbol"
     },
+    showDetail: true
   },
   {
     key: 'busyness',
@@ -242,6 +244,7 @@ export default function Map() {
     return paths
   }, [routes]);
 
+  // console.log(featuresData.bikes)
   // find the zones where the routes will pass.
   const allMethodPassedZones = useMemo(() => allMethodsRouteCoords.map(((routeCoords: any) => routeCoords?.map((r: any) => lineString(r))
     .map((route: any) => featuresData.busyness.features?.filter((feature: any) =>
@@ -318,7 +321,7 @@ export default function Map() {
         }
 
         // add to layer
-        if (!map.getSource(feature.key)) {
+        if (!map?.getSource(feature.key)) {
           map?.addSource(feature.key, {
             type: 'geojson',
             data,
@@ -335,6 +338,38 @@ export default function Map() {
               visibility: 'none'
             }
           });
+        }
+
+        if (feature.showDetail) {
+          const popup = new mapboxgl.Popup({
+            closeButton: false,
+          });
+
+          map.on("mouseenter", `${feature.key}-layer`, (e: any) => {
+            map.getCanvas().style.cursor = "pointer";
+
+            const coordinates = e.features[0].geometry.coordinates;
+            const props = e.features[0].properties;
+
+            // example: show a popup
+            popup.setLngLat(coordinates)
+                 .setHTML(`<div class=""><strong>${props.name}</strong><br/>Available Bikes: ${props.bikes_available}<br/>Available Docks: ${props.docks_available}</div>`)
+                 .addTo(map);
+          });
+
+          map.on("mouseleave", `${feature.key}-layer`, () => {
+            map.getCanvas().style.cursor = "";
+            popup.remove();
+          });
+
+          // // ➕ click event
+          // map.on("click", `${feature.key}-layer`, (e: any) => {
+          //   const coordinates = e.features[0].geometry.coordinates;
+          //   const props = e.features[0].properties;
+
+          //   // 例如觸發詳細頁 modal 或 console log
+          //   console.log("Clicked station:", props.station_id);
+          // });
         }
       });
 
