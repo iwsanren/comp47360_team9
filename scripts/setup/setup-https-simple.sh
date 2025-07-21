@@ -66,13 +66,51 @@ if netstat -tlnp | grep :80; then
     fi
 fi
 
-# Obtain SSL certificate with verbose output
-echo "🔐 Obtaining SSL certificate (this may take a few minutes)..."
-certbot certonly --standalone \
-    --email $EMAIL \
-    --agree-tos \
-    --no-eff-email \
-    --verbose \
+#!/bin/bash
+
+# HTTPS Setup Script - Simple approach using certbot with DNS TXT method
+# This version uses a more reliable approach
+
+DOMAIN="lunaroutes.duckdns.org"
+EMAIL="hzfang0421@gmail.com"
+
+echo "🔒 Setting up HTTPS and SSL certificate..."
+
+# Check if running as root
+if [ "$EUID" -ne 0 ]; then
+    echo "❌ Please run this script with root privileges"
+    exit 1
+fi
+
+# Install dependencies
+echo "📦 Installing Certbot..."
+apt update
+apt install -y certbot python3-certbot-nginx
+
+# Check domain resolution
+echo "� Checking domain resolution..."
+nslookup $DOMAIN 8.8.8.8
+
+# Stop Nginx to avoid conflicts
+echo "⏹️ Temporarily stopping Nginx..."
+systemctl stop nginx
+
+# Use DNS manual method with clear instructions
+echo "🔐 Starting certificate request process..."
+echo ""
+echo "ℹ️  This process will require you to add a DNS TXT record."
+echo "   Please have your DuckDNS dashboard ready."
+echo ""
+
+# Start certbot with DNS challenge
+certbot certonly 
+    --manual 
+    --manual-public-ip-logging-ok 
+    --preferred-challenges dns 
+    --email $EMAIL 
+    --agree-tos 
+    --no-eff-email 
+    --keep-until-expiring 
     -d $DOMAIN
 
 # Check if certificate was successfully obtained

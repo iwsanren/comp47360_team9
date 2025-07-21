@@ -45,7 +45,7 @@ systemctl stop nginx
 # Obtain SSL certificate using DuckDNS plugin
 echo "🔐 Obtaining SSL certificate using DuckDNS plugin..."
 certbot certonly \
-    --dns-duckdns \
+    --authenticator dns-duckdns \
     --dns-duckdns-credentials /etc/letsencrypt/duckdns.ini \
     --dns-duckdns-propagation-seconds 60 \
     --email $EMAIL \
