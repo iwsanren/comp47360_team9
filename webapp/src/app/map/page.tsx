@@ -295,6 +295,8 @@ export default function Map() {
       zoom: 12,
     });
 
+    map.getCanvas().style.cursor = "pointer";
+
     loadImage.forEach(({ icon, key }) => {
       map.loadImage(icon.src, (error, image) => {
         if (error) throw error;
@@ -342,34 +344,18 @@ export default function Map() {
 
         if (feature.showDetail) {
           const popup = new mapboxgl.Popup({
-            closeButton: false,
+            closeButton: true,
           });
 
-          map.on("mouseenter", `${feature.key}-layer`, (e: any) => {
-            map.getCanvas().style.cursor = "pointer";
-
+          // ➕ click event
+          map.on("click", `${feature.key}-layer`, (e: any) => {
             const coordinates = e.features[0].geometry.coordinates;
             const props = e.features[0].properties;
-
-            // example: show a popup
             popup.setLngLat(coordinates)
                  .setHTML(`<div class=""><strong>${props.name}</strong><br/>Available Bikes: ${props.bikes_available}<br/>Available Docks: ${props.docks_available}</div>`)
                  .addTo(map);
+
           });
-
-          map.on("mouseleave", `${feature.key}-layer`, () => {
-            map.getCanvas().style.cursor = "";
-            popup.remove();
-          });
-
-          // // ➕ click event
-          // map.on("click", `${feature.key}-layer`, (e: any) => {
-          //   const coordinates = e.features[0].geometry.coordinates;
-          //   const props = e.features[0].properties;
-
-          //   // 例如觸發詳細頁 modal 或 console log
-          //   console.log("Clicked station:", props.station_id);
-          // });
         }
       });
 
@@ -451,7 +437,7 @@ export default function Map() {
       }
     };
 
-    if (featuresData.busyness && clickPoints.length != 2) {
+    if (featuresData.busyness && clickPoints.length != 2 && !toggles.bikes) {
       map.on('click', handleClick);
     }
 
@@ -459,7 +445,7 @@ export default function Map() {
       map.off('click', handleClick);
     };
 
-  }, [featuresData.busyness, clickPoints, startCoords, destCoords])
+  }, [featuresData.busyness, clickPoints, startCoords, destCoords, toggles.bikes])
 
   // add start point and dest point icon
   useEffect(() => {

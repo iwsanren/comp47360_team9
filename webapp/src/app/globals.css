@@ -173,12 +173,22 @@ input[type="range"]::-moz-range-thumb {
   height: 100%;
 }
 
-.mapboxgl-popup-content {
+.mapboxgl-popup .mapboxgl-popup-content {
   border-radius: 8px;
   border: 1px soild var(--color-green-700);
-  padding: 0.5rem;
+  padding: 1.5rem 0.5rem 0.5rem 0.5rem;
   font-size: 14px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+.mapboxgl-popup .mapboxgl-popup-close-button {
+  top: 2px;
+  right: 6px;
+  font-size: 20px;
+}
+
+.mapboxgl-popup .mapboxgl-popup-close-button:hover {
+  background: transparent;
 }
 
 @media (max-width: 768px) {
