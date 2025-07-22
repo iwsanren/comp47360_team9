@@ -12,6 +12,7 @@ interface modalProps {
 
 const ShowWeatherModal = ({ setShowModal, current, hourly }: modalProps) => {
     const [manhattanTime, setManhattanTime] = useState<string>("");
+    const [isFlipped, setFlipped] = useState<number[]>([]);
     // console.log(manhattanTime)
     // Time update
       useEffect(() => {
@@ -89,37 +90,54 @@ const ShowWeatherModal = ({ setShowModal, current, hourly }: modalProps) => {
           <div className="grid grid-cols-3 lg:grid-cols-6 gap-[10px]">
             {hourly ? hourly.slice(0, 18).map((hour: any, idx: number) => (
               <div
+                className="card-container"
+                onClick={() => 
+                  setFlipped(prev => {
+                    if(prev.includes(idx)) {
+                      return prev.filter((item) => item !== idx);
+                    } else {
+                      return [...prev, idx];
+                    }
+                  })
+                }
                 key={idx}
-                className="bg-white rounded-lg shadow-md text-center overflow-hidden relative"
               >
-                <div className="flex flex-col gap-[10px] py-[12px]">
-                  <Icon size="2.5rem" style={{ margin: '0 auto' }} icon={WEATHER_CONDITION_ICONS[hour?.weather?.[0]?.icon]} />
-                  <div
-                    style={{
-                      fontWeight: 700,
-                      fontSize: 18,
-                      lineHeight: 1.5,
-                      letterSpacing: 0,
-                      color: "#000000",
-                      textAlign: 'center'
-                    }}
-                  >
-                    {hour.main.temp.toFixed(1)}°F
+                <div
+                  className={`card text-center relative ${isFlipped.includes(idx) ? 'flipped' : ''}`}
+                >
+                  <div className="card-front bg-white flex flex-col">
+                    <div className="flex flex-col gap-[10px] py-[12px]">
+                      <Icon size="2.5rem" style={{ margin: '0 auto' }} icon={WEATHER_CONDITION_ICONS[hour?.weather?.[0]?.icon]} />
+                      <div
+                        style={{
+                          fontWeight: 700,
+                          fontSize: 18,
+                          lineHeight: 1.5,
+                          letterSpacing: 0,
+                          color: "#000000",
+                          textAlign: 'center'
+                        }}
+                      >
+                        {hour.main.temp.toFixed(1)}°F
+                      </div>
+                    </div>
+                    <div
+                      className="flex-1 text-sm text-white w-full px-[12px] py-[6px] bg-green-500"
+                    >
+                      {new Date(hour.dt * 1000).toLocaleTimeString("en-US", {
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                        timeZone: "America/New_York",
+                      })}
+                    </div>
+                  </div>
+                  <div className="card-back flex flex-col gap-2 p-1 bg-white text-black text-xs/[1.5]">
+                    <p>Humidity: <br />{hour?.main?.humidity}%</p>
+                    <p>Wind: <br />{hour?.wind?.speed} miles/h</p>
+                    <p>Feels like: <br />{hour?.main?.feels_like.toFixed(1)}°F</p>
                   </div>
                 </div>
-                <p
-                  className="text-sm text-white w-full px-[12px] py-[6px]"
-                  style={{
-                    backgroundColor: "#0FD892",
-                  }}
-                >
-                  {new Date(hour.dt * 1000).toLocaleTimeString("en-US", {
-                    hour: "numeric",
-                    minute: "2-digit",
-                    hour12: true,
-                    timeZone: "America/New_York",
-                  })}
-                </p>
               </div>
             )) : (
               <div>Loading...</div>
