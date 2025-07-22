@@ -20,16 +20,27 @@ echo "🔐 Using acme.sh with manual DNS verification..."
 # Stop nginx
 systemctl stop nginx
 
-# Issue certificate with manual DNS
+# Make sure we're running as root or use sudo properly
+if [ "$EUID" -ne 0 ]; then
+    echo "This script must be run as root"
+    exit 1
+fi
+
+# Source the acme.sh environment
+source /root/.acme.sh/acme.sh.env 2>/dev/null || true
+
+# Issue certificate with manual DNS - force interactive mode
+echo "🔐 Requesting SSL certificate for $DOMAIN..."
 /root/.acme.sh/acme.sh --issue --dns -d $DOMAIN \
-  --yes-I-know-dns-manual-mode-enough-go-ahead-please
+  --yes-I-know-dns-manual-mode-enough-go-ahead-please \
+  --force
 
 echo ""
-echo "📋 Instructions:"
-echo "1. Add the TXT record shown above to DuckDNS"
-echo "2. Wait 2-3 minutes"
-echo "3. Run the renew command to complete:"
-echo "   /root/.acme.sh/acme.sh --renew -d $DOMAIN"
+echo "📋 After acme.sh shows the TXT record:"
+echo "1. Add the TXT record to DuckDNS using:"
+echo "   curl \"https://www.duckdns.org/update?domains=lunaroutes&token=4d903bad-44bf-4bd5-b6db-7b3688271c0c&txt=[TXT_VALUE]\""
+echo "2. Wait 2-3 minutes for DNS propagation"
+echo "3. Press Enter in the acme.sh prompt to continue"
 
 # After manual verification, install cert
 if [ -f "/root/.acme.sh/$DOMAIN/$DOMAIN.cer" ]; then
