@@ -567,7 +567,6 @@ export default function Map() {
       }
     }
 
-
   }, [navLineGeo]);
 
   // fetch weather data
@@ -646,7 +645,7 @@ export default function Map() {
               {current ? (
                 <>
                   <div className="text-[2.5em] lg:text-6xl">
-                    <Icon icon={WEATHER_CONDITION_ICONS[current.weather[0].icon]} />
+                    <Icon icon={WEATHER_CONDITION_ICONS[current?.weather?.[0]?.icon]} />
                   </div>
                   <Heading className="lg:!text-5xl">{current.main.temp.toFixed(1)}°F</Heading>
                 </>

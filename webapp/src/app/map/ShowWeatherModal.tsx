@@ -70,7 +70,7 @@ const ShowWeatherModal = ({ setShowModal, current, hourly }: modalProps) => {
               ✕
             </button>
           </div>
-          {current && (
+          {current ? (
             <div className="flex items-center gap-4 mb-4">
               <Icon size="3.75rem" icon={WEATHER_CONDITION_ICONS[current?.weather?.[0]?.icon]} />
               <Heading className="lg:!text-5xl">
@@ -82,9 +82,11 @@ const ShowWeatherModal = ({ setShowModal, current, hourly }: modalProps) => {
                 <p>Feels like: {current.main.feels_like.toFixed(1)}°F</p>
               </div>
             </div>
+          ) : (
+            <div>Loading...</div>
           )}
           <div className="grid grid-cols-3 lg:grid-cols-6 gap-[10px]">
-            {hourly.slice(0, 18).map((hour: any, idx: number) => (
+            {hourly ? hourly.slice(0, 18).map((hour: any, idx: number) => (
               <div
                 key={idx}
                 className="bg-white rounded-lg shadow-md text-center overflow-hidden relative"
@@ -118,7 +120,9 @@ const ShowWeatherModal = ({ setShowModal, current, hourly }: modalProps) => {
                   })}
                 </p>
               </div>
-            ))}
+            )) : (
+              <div>Loading...</div>
+            )}
           </div>
         </div>
     )

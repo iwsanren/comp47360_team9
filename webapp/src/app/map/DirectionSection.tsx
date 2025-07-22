@@ -7,6 +7,7 @@ import Button from '@/components/Button';
 import Icon from '@/components/Icon';
 import Input from '@/components/Input';
 import { co2Emissions, transitEmissions } from '@/utils/formula';
+import formatMinutesToDecimalHour from '@/utils/formatMinutesToDecimalHour';
 
 import { Coordinates, TransportMethod } from './page';
 
@@ -174,10 +175,10 @@ const DirectionSection = ({
                       className={`text-sm text-${isActive ? 'white' : 'black'}`}
                     >
                       {paths?.length > 1
-                        ? Math.floor(minTime?.legs?.[0].duration.value / 60) +
-                          ' - ' +
-                          Math.floor(maxTime?.legs?.[0].duration.value / 60) +
-                          ' mins'
+                        ? formatMinutesToDecimalHour(
+                            Math.floor(minTime?.legs?.[0].duration.value / 60),
+                            Math.floor(maxTime?.legs?.[0].duration.value / 60)
+                          )
                         : maxTime}
                     </p>
                   </div>
