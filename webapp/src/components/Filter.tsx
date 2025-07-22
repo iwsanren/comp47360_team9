@@ -17,19 +17,11 @@ interface TogglesModuleProps {
 
 const TogglesModule = ({ label, onClick, isActive }: TogglesModuleProps) => (
   <div className="flex gap-1 items-center text-white text-sm">
-    <span
-      style={{
-        fontWeight: 700,
-        fontStyle: 'normal',
-        fontSize: '12px',
-        lineHeight: '18px',
-        letterSpacing: '0%',
-        textAlign: 'right',
-        flex: 1,
-      }}
+    <div
+      className="font-bold text-xs/[1.5] text-right flex-1 text-nowrap"
     >
       {label}
-    </span>
+    </div>
     <Toggle
       onClick={onClick}
       isActive={isActive}
@@ -45,7 +37,7 @@ const Filter = ({
 }: FilterProps) => {
   return (
     <div
-      className={`flex flex-col gap-1 rounded-sm bg-[#00674CBF] p-2 ${className}`}
+      className={`flex flex-col gap-1 rounded-sm bg-[#00674CBF] p-2 transition-all duration-250 ease-in-out ${className}`}
     >
       <TogglesModule
         label="Active all features"

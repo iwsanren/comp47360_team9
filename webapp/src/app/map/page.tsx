@@ -628,8 +628,8 @@ export default function Map() {
           />
         </div>
 
-        {isToggleOpen && !isPredictionMode && (
-          <Filter setToggles={setToggles} toggles={toggles} mvpFeatures={mvpFeatures} />
+        {!isPredictionMode && (
+          <Filter className={isToggleOpen ? 'w-[187px]' : 'w-0 !p-0'} setToggles={setToggles} toggles={toggles} mvpFeatures={mvpFeatures} />
         )}
       </div>
 
