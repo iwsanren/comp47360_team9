@@ -46,7 +46,7 @@ const ShowWeatherModal = ({ setShowModal, current, hourly }: modalProps) => {
             lg:w-[630px]
             lg:max-w-[unset]
             lg:absolute
-            lg: h-auto
+            lg:h-auto
             py-3
             px-4
             lg:py-6

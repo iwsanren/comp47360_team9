@@ -26,7 +26,7 @@ export default function Header() {
       </Link>
       <div className="flex gap-4 lg:gap-8">
         {pages.map(({ label, link }) => (
-          <Link href={link} className="text-white font-semibold relative z-30" key={label}>
+          <Link href={link} className="text-white font-semibold relative z-30 hover:underline" key={label}>
             {label}
           </Link>
         ))}
