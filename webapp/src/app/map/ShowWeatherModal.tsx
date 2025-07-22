@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import Icon from "@/components/Icon";
 import { WEATHER_CONDITION_ICONS } from "@/constants/icons";
 import Heading from "@/components/Heading";
