@@ -1,15 +1,29 @@
 import React from 'react';
-import Image from 'next/image';
-import { maxBy, minBy, uniq } from 'lodash';
-import { HiOutlineSwitchVertical } from 'react-icons/hi';
+import { maxBy, minBy, range, uniq } from 'lodash';
+import { FaLocationArrow } from 'react-icons/fa6';
+import { HiOutlineSwitchVertical, HiLocationMarker } from 'react-icons/hi';
 
 import Button from '@/components/Button';
 import Icon from '@/components/Icon';
 import Input from '@/components/Input';
-import startEndIcon from '@/assets/images/start_end_icon.png';
 import { co2Emissions, transitEmissions } from '@/utils/formula';
 
 import { Coordinates, TransportMethod } from './page';
+
+const userInputs = [
+  {
+    placeholder: 'Start Location (Click on Map)',
+    icon: FaLocationArrow,
+    bg: 'bg-gray-700',
+    size: 'text-sm lg:text-[1.25rem]'
+  },
+  {
+    placeholder: 'Your Destination (Click on Map)',
+    icon: HiLocationMarker,
+    bg: 'bg-green-500',
+    size: 'text-base lg:text-[1.375rem]'
+  },
+]
 
 interface DirectionSectionProps {
   setClickPoints: React.Dispatch<React.SetStateAction<any[]>>;
@@ -55,27 +69,26 @@ const DirectionSection = ({
   return (
     <div className="flex flex-col gap-4 lg:gap-3">
       <div className="flex gap-3 items-center pr-[6px] lg:pr-4">
-        <div className="w-5 lg:w-8">
-          <Image
-            src={startEndIcon}
-            alt="Start and End Icon"
-            width={32}
-            height={100}
-          />
-        </div>
-        <div className="flex-1 lg:w-[330px] flex flex-col gap-3">
-          <Input
-            disabled={true}
-            placeholder="Start Location (Click on Map)"
-            value={startLocation}
-            width="full"
-          />
-          <Input
-            disabled={true}
-            placeholder="Your Destination (Click on Map)"
-            value={destination}
-            width="full"
-          />
+        <div className="relative flex-1 lg:w-[330px] flex flex-col gap-3">
+          <div className="flex flex-col gap-1 absolute top-[50%] left-2 lg:left-[14px] -translate-y-1/2">
+            {range(3).map((num) => (
+              <div className="w-1 h-1 bg-gray-500 rounded-full" key={num} />
+            ))}
+          </div>
+          {userInputs.map((userInput, i) => (
+            <div className="flex items-center gap-3" key={userInput.placeholder}>
+              <div className={`flex items-center justify-center w-5 h-5 lg:w-8 lg:h-8 ${userInput.bg} rounded-full`}>
+                <Icon icon={userInput.icon} className={`${userInput.size} text-white`} />
+              </div>
+              <Input
+                className="flex-1"
+                disabled={true}
+                placeholder={userInput.placeholder}
+                value={i ? destination : startLocation}
+                width="full"
+              />
+            </div>
+          ))}
           {isInValid && (
             <div className="text-red-500 text-xs">
               Invaild position, the position is only available in Manhattan
