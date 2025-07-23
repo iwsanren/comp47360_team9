@@ -274,8 +274,6 @@ export default function Map() {
     return paths
   }, [routes]);
 
-  // console.log(featuresData.evStations.features.filter((d: any) => !d.properties.name && !d.properties.operator))
-
   // find the zones where the routes will pass.
   const allMethodPassedZones = useMemo(() => allMethodsRouteCoords.map(((routeCoords: any) => routeCoords?.map((r: any) => lineString(r))
     .map((route: any) => (isPredictionMode ? featuresData?.predictedBusyness?.features : featuresData.busyness.features)?.filter((feature: any) =>
@@ -724,12 +722,14 @@ export default function Map() {
           },
         });
       }
-
       // Show the layer after data is loaded
     } catch (err) {
       console.error("Prediction load failed:", err);
     } finally {
       // Always turn off loading state
+      if (map.getLayer("click-points-layer")) {
+        map.moveLayer("click-points-layer");
+      }
       setIsLoading(false);
     }
   };
