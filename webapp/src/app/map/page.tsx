@@ -543,6 +543,8 @@ export default function Map() {
             "icon-allow-overlap": true,
           },
         });
+
+        map.moveLayer("click-points-layer");
       } else {
         const source = map.getSource("click-points") as mapboxgl.GeoJSONSource;;
         if (source) {
@@ -551,17 +553,21 @@ export default function Map() {
             features: clickPoints,
           });
         }
+        // prevent layer from being covered
+        if (map.getLayer("click-points-layer")) {
+          map.moveLayer("click-points-layer");
+        }
       }
     };
 
-    if (!map.loaded()) {
-      map.on("load", addClickPoints);
+    if (!map?.isStyleLoaded()) {
+      map?.once("style.load", addClickPoints);
     } else {
       addClickPoints();
     }
 
     return () => {
-      map.off("load", addClickPoints);
+      map?.off("load", addClickPoints);
     };
   }, [clickPoints]);
 
@@ -839,7 +845,7 @@ export default function Map() {
               startCoords={startCoords}
               setDestination={setDestination}
               destination={destination}
-              isLoadingDirection={isLoadingDirection}
+              isLoadingDirection={isLoadingDirection || isLoading}
               tool={tool}
               methods={methods}
               setTool={setTool}
@@ -850,7 +856,7 @@ export default function Map() {
             <div className="flex justify-between">
               <Button onClick={handleClear}>Clear</Button>
               {isPredictionMode && !featuresData.predictedBusyness && (
-                <Button onClick={handleShowPrediction}>Get Prediction</Button>
+                <Button isDisabled={isLoading} onClick={handleShowPrediction}>Get Prediction</Button>
               )} 
               {(isPredictionMode ? (tool && featuresData.predictedBusyness && !isLoading) : tool) && (
                 <Button onClick={() => setOpen(true)}>Show Directions</Button>
