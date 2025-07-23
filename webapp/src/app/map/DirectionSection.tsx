@@ -88,7 +88,7 @@ const DirectionSection = ({
           ))}
           {isInValid && (
             <div className="text-red-500 text-xs">
-              Invaild position, the position is only available in Manhattan
+              Invalid position, the position is only available in Manhattan
             </div>
           )}
         </div>
