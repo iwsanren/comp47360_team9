@@ -3,7 +3,6 @@ import { maxBy, minBy, range, uniq } from 'lodash';
 import { FaLocationArrow } from 'react-icons/fa6';
 import { HiOutlineSwitchVertical, HiLocationMarker } from 'react-icons/hi';
 
-import Button from '@/components/Button';
 import Icon from '@/components/Icon';
 import Input from '@/components/Input';
 import { co2Emissions, transitEmissions } from '@/utils/formula';
@@ -37,9 +36,7 @@ interface DirectionSectionProps {
   setDestination: React.Dispatch<React.SetStateAction<string>>;
   destination: string;
   isLoadingDirection: boolean | undefined;
-  handleClear: () => void;
   tool: any;
-  setOpen: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   methods: TransportMethod[];
   setTool: React.Dispatch<React.SetStateAction<any>>;
   routes: any;
@@ -58,9 +55,7 @@ const DirectionSection = ({
   setDestination,
   destination,
   isLoadingDirection,
-  handleClear,
   tool,
-  setOpen,
   methods,
   setTool,
   routes,
@@ -69,8 +64,9 @@ const DirectionSection = ({
 }: DirectionSectionProps) => {
   return (
     <div className="flex flex-col gap-4 lg:gap-3">
+
       <div className="flex gap-3 items-center pr-[6px] lg:pr-4">
-        <div className="relative flex-1 lg:w-[330px] flex flex-col gap-3">
+        <div className="relative flex-1 flex flex-col gap-3">
           <div className="flex flex-col gap-1 absolute top-[50%] left-2 lg:left-[14px] -translate-y-1/2">
             {range(3).map((num) => (
               <div className="w-1 h-1 bg-gray-500 rounded-full" key={num} />
@@ -82,7 +78,7 @@ const DirectionSection = ({
                 <Icon icon={userInput.icon} className={`${userInput.size} text-white`} />
               </div>
               <Input
-                className="flex-1"
+                className="flex-1 lg:w-[330px]"
                 disabled={true}
                 placeholder={userInput.placeholder}
                 value={i ? destination : startLocation}
@@ -107,7 +103,6 @@ const DirectionSection = ({
               ];
               return updated;
             });
-            setTool(undefined)
             const temp = startLocation;
             setStartLocation(destination);
             setDestination(temp);
@@ -211,10 +206,6 @@ const DirectionSection = ({
             })}
           </div>
         ))}
-      <div className="flex justify-between">
-        <Button onClick={handleClear}>Clear</Button>
-        {tool && <Button onClick={() => setOpen(true)}>Show Directions</Button>}
-      </div>
     </div>
   );
 };

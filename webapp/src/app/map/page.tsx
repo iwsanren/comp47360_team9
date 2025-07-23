@@ -18,21 +18,34 @@ import evIcon from "@/assets/images/ev_icon.png";
 import start from "@/assets/images/start.png";
 import dest from "@/assets/images/dest.png";
 import Icon from '@/components/Icon';
-import { api, handleAPIError } from '@/utils/apiClient';
+import Button from "@/components/Button";
+import Text from "@/components/Text";
+import Filter from "@/components/Filter";
 import Toggle from "@/components/Toggle";
 import Heading from "@/components/Heading";
 import { WEATHER_CONDITION_ICONS } from '@/constants/icons';
 import decodeToGeoJSON from "@/utils/decodeToGeoJSON";
+import { api, handleAPIError } from '@/utils/apiClient';
+import getNextHourInNY from "@/utils/getNextHourInNY";
 
 import ShowWeatherModal from "./ShowWeatherModal";
 import DirectionModal from "./DirectionModal";
 import DirectionSection from "./DirectionSection";
 import PredictionSection from "./PredictionSection";
-import Button from "@/components/Button";
-import Text from "@/components/Text";
-import Filter from "@/components/Filter";
+import fetchData from "@/utils/fetchData";
+
 
 const key = 'busyness-prediction'
+
+const clearPredictedBusynessLayer = (map: mapboxgl.Map | null) => {
+  if(!map) return
+  if (map.getLayer(`${key}-layer`)) {
+      map.removeLayer(`${key}-layer`);
+  }
+  if (map.getSource(key)) {
+    map.removeSource(key);
+  }
+}
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
@@ -65,10 +78,10 @@ export interface TransportMethod {
 }
 
 const methods: TransportMethod[] = [
-  { method: 'walking', icon: FaWalking, iconAlert: FaRecycle, color: '#0FD892', mesg: 'Free of emissions' }, 
-  { method: 'bicycling', icon: FaBicycle, iconAlert: FaRecycle, color: '#0FD892', mesg: 'Fast and clean' },
-  { method: 'driving', icon: FaCar, iconAlert: FaExclamationCircle, color: '#FF281B', mesg: 'Highest emissions' },
-  { method: 'transit', icon: FaTrain, iconAlert: FaArrowAltCircleDown, color: '#FFC800', mesg: 'A few emissions' },
+  { method: 'walking', icon: FaWalking, iconAlert: FaRecycle, color: '#009E73', mesg: 'Free of emissions' }, 
+  { method: 'bicycling', icon: FaBicycle, iconAlert: FaRecycle, color: '#009E73', mesg: 'Fast and clean' },
+  { method: 'driving', icon: FaCar, iconAlert: FaExclamationCircle, color: '#D55E00', mesg: 'Highest emissions' },
+  { method: 'transit', icon: FaTrain, iconAlert: FaArrowAltCircleDown, color: '#E69F00', mesg: 'A few emissions' },
 ]
 
 export type MvpFeatures<T extends keyof Toggles> = {
@@ -79,7 +92,7 @@ export type MvpFeatures<T extends keyof Toggles> = {
   showDetail?: boolean
 }
 
-const busynessLayerSetting = {
+const busynessLayerSetting: any = {
   type: "fill",
   paint: {
     'fill-color': [
@@ -224,6 +237,8 @@ export default function Map() {
   const [isPredictionMode, setPredictionMode] = useState(false);
   const [showDesc, setShowDesc] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
+  const [timestamp, setTime] = useState(getNextHourInNY());
+  const [isLoading, setIsLoading] = useState<boolean>()
 
   const navLineGeo = useMemo(() => navigation && decodeToGeoJSON(navigation?.overview_polyline?.points), [navigation])
 
@@ -244,12 +259,11 @@ export default function Map() {
     return paths
   }, [routes]);
 
-  // console.log(featuresData.bikes)
   // find the zones where the routes will pass.
   const allMethodPassedZones = useMemo(() => allMethodsRouteCoords.map(((routeCoords: any) => routeCoords?.map((r: any) => lineString(r))
-    .map((route: any) => featuresData.busyness.features?.filter((feature: any) =>
+    .map((route: any) => (isPredictionMode ? featuresData?.predictedBusyness?.features : featuresData.busyness.features)?.filter((feature: any) =>
     booleanIntersects(feature, route))
-  ))), [allMethodsRouteCoords, featuresData.busyness])
+  ))), [allMethodsRouteCoords, featuresData.busyness, featuresData?.predictedBusyness?.features, isPredictionMode])
 
   const greenScoreforEachRoute = useMemo(() => (allMethodPassedZones || []).map((methodRoutedata: any) => {
     return (
@@ -259,30 +273,34 @@ export default function Map() {
       }, 0))
   )}), [allMethodPassedZones])
 
+  const fetchDirection = async () => {
+    setIsLoadingDirection(true);
+    try {
+      // Using the new API client
+      const { data } = await api.post('/api/directions', {
+        origin: startCoords,
+        destination: destCoords,
+        isPredictionMode,
+        timestamp,
+      });
+      setDirectionData(data);
+    } catch (err) {
+      const errorInfo = handleAPIError(err as Error, 'Fetch directions');
+      console.error("Failed to fetch direction", errorInfo);
+      // Can add user notification logic here
+      // toast.error(errorInfo.userMessage);
+    } finally {
+      setIsLoadingDirection(false); 
+    }
+  };
+
   // fetch directions data
   useEffect(() => {
-    const fetchDirection = async () => {
-      setIsLoadingDirection(true);
-      try {
-        // Using the new API client
-        const { data } = await api.post('/api/directions', {
-          origin: startCoords,
-          destination: destCoords,
-        });
-        setDirectionData(data);
-      } catch (err) {
-        const errorInfo = handleAPIError(err as Error, 'Fetch directions');
-        console.error("Failed to fetch direction", errorInfo);
-        // Can add user notification logic here
-        // toast.error(errorInfo.userMessage);
-      } finally {
-        setIsLoadingDirection(false); 
-      }
-    };
-    if (startCoords && destCoords) {
+    if (startCoords && destCoords && !isPredictionMode) {
+      setTool(undefined)
       fetchDirection()
     }
-  }, [startCoords, destCoords])
+  }, [startCoords, destCoords, isPredictionMode])
 
   // load the map
   useEffect(() => {
@@ -602,6 +620,59 @@ export default function Map() {
     setClickPoints([])
     setTool('')
     setNavigation(undefined)
+    setFeatureData((prev: any) => ({ ...prev, predictedBusyness: false}))
+    clearPredictedBusynessLayer(mapInstanceRef.current)
+  };
+
+  const handleShowPrediction = async () => {
+    const map = mapInstanceRef.current
+    fetchDirection()
+    if (!map) return;
+    setFeatureData((prev: any) => ({ ...prev, predictedBusyness: false }));
+    setIsLoading(true);
+    try {
+      const predictedBusyness = await fetchData(`/api/manhattan?timestamp=${timestamp}`);
+      setFeatureData((prev: any) => ({ ...prev, predictedBusyness }));
+
+      const source = map.getSource(key);
+      const layerId = `${key}-layer`;
+
+      if (predictedBusyness && source && 'setData' in source) {
+        // If the source exists, update its data
+        source.setData(predictedBusyness);
+      } else {
+        // If source doesn't exist, add it
+        if (!source) {
+          map.addSource(key, {
+            type: "geojson",
+            data: predictedBusyness,
+          });
+        }
+
+        // If layer already exists, remove it to avoid duplication
+        if (map.getLayer(layerId)) {
+          map.removeLayer(layerId);
+        }
+
+        // Add the layer but keep it hidden while loading
+        map.addLayer({
+          id: layerId,
+          source: key,
+          layout: {
+            visibility: 'none', // Initially hidden during loading
+          },
+          ...busynessLayerSetting,
+        });
+      }
+
+      // Show the layer after data is loaded
+      map.setLayoutProperty(layerId, 'visibility', 'visible');
+    } catch (err) {
+      console.error("Prediction load failed:", err);
+    } finally {
+      // Always turn off loading state
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -667,18 +738,12 @@ export default function Map() {
         </div>
         <div className="p-4 lg:p-6">
           <div className="flex justify-between items-center mb-4 ">
-            <Heading className="text-green-800" level={2}>{isPredictionMode ? 'Predict Busyness' : 'Get Directions'}</Heading>
+            <Heading className="text-green-800" level={2}>{isPredictionMode ? 'Prediction Mode' : 'Get Directions'}</Heading>
             <Toggle
+              isDisabled={isLoading}
               onClick={() => {
-                if (!mapInstanceRef.current) return
-                if (mapInstanceRef.current.getLayer(`${key}-layer`)) {
-                  mapInstanceRef.current.removeLayer(`${key}-layer`);
-                }
-                if (mapInstanceRef.current.getSource(key)) {
-                  mapInstanceRef.current.removeSource(key);
-                }
+                clearPredictedBusynessLayer(mapInstanceRef.current)
                 setPredictionMode(prev => !prev)
-                setClickPoints([])
                 handleClear()
                 setShowFilter(false)
                 setToggles(prev => {
@@ -696,13 +761,17 @@ export default function Map() {
               {showDesc && <div className="absolute top-full right-0 lg:left-[50%] lg:-translate-x-1/2 translate-y-2 w-[180px] py-1 px-2 text-sm/[21px] bg-white rounded-sm drop-shadow-lg">Click this toggle to switch to {isPredictionMode ? 'direction' : 'predict'} model.</div>}
             </Toggle>
           </div>
-          {isPredictionMode ? (
-            <PredictionSection
-              layerName={key}
-              map={mapInstanceRef.current}
-              busynessLayerSetting={busynessLayerSetting}
-            />
-          ) : (
+          <div className="flex flex-col gap-4 lg:gap-3">
+            {isPredictionMode && (
+              <PredictionSection
+                setTime={setTime}
+                timestamp={timestamp}
+                layerName={key}
+                map={mapInstanceRef.current}
+                busynessLayerSetting={busynessLayerSetting}
+                setFeatureData={setFeatureData}
+              />
+            )}
             <DirectionSection
               setClickPoints={setClickPoints}
               setStartLocation={setStartLocation}
@@ -714,16 +783,23 @@ export default function Map() {
               setDestination={setDestination}
               destination={destination}
               isLoadingDirection={isLoadingDirection}
-              handleClear={handleClear}
               tool={tool}
-              setOpen={setOpen}
               methods={methods}
               setTool={setTool}
               routes={routes}
               greenScoreforEachRoute={greenScoreforEachRoute}
               isInValid={isInValid}
             />
-          )}
+            <div className="flex justify-between">
+              <Button onClick={handleClear}>Clear</Button>
+              {isPredictionMode && !featuresData.predictedBusyness && (
+                <Button onClick={handleShowPrediction}>Get Prediction</Button>
+              )} 
+              {(isPredictionMode ? (tool && featuresData.predictedBusyness && !isLoading) : tool) && (
+                <Button onClick={() => setOpen(true)}>Show Directions</Button>
+              )}
+            </div>
+          </div>
           {isOpen && (
             <DirectionModal data={tool} setOpen={setOpen} setNavigation={setNavigation} navigation={navigation} />
           )}

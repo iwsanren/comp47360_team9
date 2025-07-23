@@ -4,18 +4,20 @@ interface ToggleProps {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   children?: React.ReactNode;
+  isDisabled?: boolean;
 }
 
 const Toggle = ({
   onClick,
   isActive,
+  isDisabled,
   onMouseEnter,
   onMouseLeave,
   children,
 }: ToggleProps) => {
   return (
     <div
-      className="relative z-2"
+      className={`relative z-2 ${isDisabled && 'pointer-events-none opacity-50'}`}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >

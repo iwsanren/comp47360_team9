@@ -96,7 +96,7 @@ const DirectionModal = ({ data, setOpen, setNavigation, navigation }: DirectionM
   }
   // console.log(data);
   return (
-    <div className="m-4 absolute left-0 right-0 top-0 bottom-0 rounded-lg bg-green-800 px-3 py-10 lg:py-11 lg:px-8 overflow-scroll z-10">
+    <div className="m-4 absolute left-0 right-0 top-0 bottom-0 rounded-lg bg-green-800 px-3 py-10 lg:m-0 lg:py-11 lg:px-8 overflow-scroll z-10">
       <button
         onClick={() => {
           setOpen(false)

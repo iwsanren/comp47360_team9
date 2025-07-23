@@ -35,7 +35,7 @@ export async function POST(req) {
       return sendErrorResponse(requestId, 'Invalid token', 403);
     }
 
-    const { origin, destination } = await req.json();
+    const { origin, destination, isPredictionMode, timestamp } = await req.json();
     
     // Log request parameters
     logWithContext(requestId, 'info', 'Processing directions request', {
@@ -45,8 +45,8 @@ export async function POST(req) {
     });
 
     const promises = modes.map(async (mode) => {
-      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin?.lat},${origin?.lng}&destination=${destination?.lat},${destination?.lng}&mode=${mode}&alternatives=true&key=${API_KEY}`;
-      
+      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin?.lat},${origin?.lng}&destination=${destination?.lat},${destination?.lng}&mode=${mode}&alternatives=true${isPredictionMode ? `&departure_time=${timestamp}` : ''}&key=${API_KEY}`;
+
       logWithContext(requestId, 'info', `Fetching directions for mode: ${mode}`);
       
       const res = await fetch(url);

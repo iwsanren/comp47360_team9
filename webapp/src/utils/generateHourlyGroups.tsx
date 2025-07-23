@@ -7,7 +7,7 @@ const generateHourlyGroups = () => {
 
   const result: Record<string, string[]> = {};
 
-  for (let i = 0; i < 48; i++) {
+  for (let i = 0; i < 47; i++) {
     const hour = nextHour.plus({ hours: i });
     const dateKey = `${hour.month}/${hour.day}`;
     const hourStr = hour.toFormat("HH:00");

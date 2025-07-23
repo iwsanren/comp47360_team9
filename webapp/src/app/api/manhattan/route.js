@@ -22,7 +22,7 @@ export async function POST(req) {
       const { searchParams } = new URL(req.url);
       const data = searchParams.get("data");
       const timestamp = searchParams.get("timestamp");
-      
+
       try {
         const res = await fetch(timestamp ? `${ML_API_URL}?timestamp=${timestamp}` : ML_API_URL, 
           {
@@ -51,13 +51,21 @@ export async function POST(req) {
           return NextResponse.json(geojsonData);
         } else {
           if (timestamp) {
+            await Promise.all(
+              geojson.features.map(async (feature) => {
+                const res = await fetch(`http://api.openweathermap.org/data/2.5/air_pollution/forecast?lat=${feature.properties.centroid_lat}&lon=${feature.properties.centroid_lon}&appid=${API_KEY}`);
+                const data = await res.json();
+                const d = data.list.find(info => info.dt == timestamp) // get future aqi data
+                feature.properties.aqi = d.main.aqi;
+                feature.properties.air_pollution = d;
+                feature.properties.dt = d.dt
+              })
+            );
             return NextResponse.json(geojson);
           } else {
             await Promise.all(
               geojson.features.map(async (feature) => {
-                const res = await fetch(
-                  `http://api.openweathermap.org/data/2.5/air_pollution?lat=${feature.properties.centroid_lat}&lon=${feature.properties.centroid_lon}&appid=${API_KEY}`
-                );
+                const res = await fetch(`http://api.openweathermap.org/data/2.5/air_pollution?lat=${feature.properties.centroid_lat}&lon=${feature.properties.centroid_lon}&appid=${API_KEY}`);
                 const data = await res.json();
 
                 // Update properties
