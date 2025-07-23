@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 interface ToggleProps {
   onClick: () => void;
   isActive: boolean;
@@ -11,15 +13,14 @@ const Toggle = ({
   onClick,
   isActive,
   isDisabled,
-  onMouseEnter,
-  onMouseLeave,
   children,
 }: ToggleProps) => {
+  const [showDesc, setShowDesc] = useState(false)
   return (
     <div
       className={`relative z-2 ${isDisabled && 'pointer-events-none opacity-50'}`}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      onMouseEnter={() => setShowDesc(true)}
+      onMouseLeave={() => setShowDesc(false)}
     >
       <div
         onClick={onClick}
@@ -46,7 +47,7 @@ const Toggle = ({
           {isActive ? 'ON' : 'OFF'}
         </div>
       </div>
-      {children}
+      {showDesc && children}
     </div>
   );
 };

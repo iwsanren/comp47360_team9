@@ -42,6 +42,7 @@ const clearPredictedBusynessLayer = (map: mapboxgl.Map | null) => {
   if(!map) return
   if (map.getLayer(`${key}-layer`)) {
       map.removeLayer(`${key}-layer`);
+      map.removeLayer(`${key}-border-layer`);
   }
   if (map.getSource(key)) {
     map.removeSource(key);
@@ -75,14 +76,15 @@ export interface TransportMethod {
   icon: IconType;
   iconAlert: IconType;
   color: string;
+  blindColor: string;
   mesg: string;
 }
 
 const methods: TransportMethod[] = [
-  { method: 'walking', icon: FaWalking, iconAlert: FaRecycle, color: '#009E73', mesg: 'Free of emissions' }, 
-  { method: 'bicycling', icon: FaBicycle, iconAlert: FaRecycle, color: '#009E73', mesg: 'Fast and clean' },
-  { method: 'driving', icon: FaCar, iconAlert: FaExclamationCircle, color: '#D55E00', mesg: 'Highest emissions' },
-  { method: 'transit', icon: FaTrain, iconAlert: FaArrowAltCircleDown, color: '#E69F00', mesg: 'A few emissions' },
+  { method: 'walking', icon: FaWalking, iconAlert: FaRecycle, color: '#0fd892', blindColor: '#009E73', mesg: 'Free of emissions' }, 
+  { method: 'bicycling', icon: FaBicycle, iconAlert: FaRecycle, color: '#0fd892', blindColor: '#009E73', mesg: 'Fast and clean' },
+  { method: 'driving', icon: FaCar, iconAlert: FaExclamationCircle, color: '#ff281b', blindColor: '#D55E00', mesg: 'Highest emissions' },
+  { method: 'transit', icon: FaTrain, iconAlert: FaArrowAltCircleDown, color: '#FFC800', blindColor: '#E69F00', mesg: 'A few emissions' },
 ]
 
 export type MvpFeatures<T extends keyof Toggles> = {
@@ -249,7 +251,6 @@ export default function Map() {
   const [featuresData, setFeatureData] = useState<any>({})
   const [isLoadingDirection, setIsLoadingDirection] = useState(false);
   const [isPredictionMode, setPredictionMode] = useState(false);
-  const [showDesc, setShowDesc] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [timestamp, setTime] = useState(getNextHourInNY());
   const [isLoading, setIsLoading] = useState<boolean>()
@@ -374,6 +375,21 @@ export default function Map() {
               visibility: 'none'
             }
           });
+
+          if (feature.layer.type === 'fill') {
+            map.addLayer({
+              id: `${feature.key}-border-layer`,
+              type: 'line',
+              source: feature.key,
+              paint: {
+                'line-color': 'black',
+                'line-width': 1.5
+              },
+              layout: {
+                visibility: 'none'
+              }
+            });
+          }
         }
 
         if (feature.details) {
@@ -570,6 +586,9 @@ export default function Map() {
     mvpFeatures.forEach((feature) => {
       const visibility = toggles[feature.key] ? "visible" : "none";
       setLayerVisibility(map, `${feature.key}-layer`, visibility);
+      if (feature.layer.type === 'fill') {
+        setLayerVisibility(map, `${feature.key}-border-layer`, visibility);
+      }
     })
     
   }, [toggles]);
@@ -684,19 +703,29 @@ export default function Map() {
           map.removeLayer(layerId);
         }
 
+        if (map.getLayer(`${key}-border-layer`)) {
+          map.removeLayer(layerId);
+        }
+
         // Add the layer but keep it hidden while loading
         map.addLayer({
           id: layerId,
           source: key,
-          layout: {
-            visibility: 'none', // Initially hidden during loading
-          },
           ...busynessLayerSetting,
+        });
+
+        map.addLayer({
+          id: `${key}-border-layer`,
+          type: 'line',
+          source: key,
+          paint: {
+            'line-color': 'black',
+            'line-width': 1.5
+          },
         });
       }
 
       // Show the layer after data is loaded
-      map.setLayoutProperty(layerId, 'visibility', 'visible');
     } catch (err) {
       console.error("Prediction load failed:", err);
     } finally {
@@ -784,11 +813,9 @@ export default function Map() {
                   return newToggles;
                 });
               }}
-              onMouseEnter={() => setShowDesc(true)}
-              onMouseLeave={() => setShowDesc(false)}
               isActive={isPredictionMode}
             >
-              {showDesc && <div className="absolute top-full right-0 lg:left-[50%] lg:-translate-x-1/2 translate-y-2 w-[180px] py-1 px-2 text-sm/[21px] bg-white rounded-sm drop-shadow-lg">Click this toggle to switch to {isPredictionMode ? 'direction' : 'predict'} model.</div>}
+              <div className="absolute top-full right-0 lg:left-[50%] lg:-translate-x-1/2 translate-y-2 w-[180px] py-1 px-2 text-sm/[21px] bg-white rounded-sm drop-shadow-lg">Click this toggle to switch to {isPredictionMode ? 'direction' : 'predict'} model.</div>
             </Toggle>
           </div>
           <div className="flex flex-col gap-4 lg:gap-3">

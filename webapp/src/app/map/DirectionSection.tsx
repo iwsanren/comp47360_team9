@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { maxBy, minBy, range, uniq } from 'lodash';
 import { FaLocationArrow } from 'react-icons/fa6';
@@ -7,6 +9,7 @@ import Icon from '@/components/Icon';
 import Input from '@/components/Input';
 import { co2Emissions, transitEmissions } from '@/utils/formula';
 import formatMinutesToDecimalHour from '@/utils/formatMinutesToDecimalHour';
+import { useMode } from "@/contexts/ModeProvider";
 
 import { Coordinates, TransportMethod } from './page';
 
@@ -62,6 +65,7 @@ const DirectionSection = ({
   greenScoreforEachRoute,
   isInValid,
 }: DirectionSectionProps) => {
+  const { mode } = useMode();
   return (
     <div className="flex flex-col gap-4 lg:gap-3">
 
@@ -124,7 +128,7 @@ const DirectionSection = ({
           <div className="py-3">Loading...</div>
         ) : (
           <div className="flex flex-col gap-3">
-            {methods.map(({ method, color, icon, iconAlert, mesg }, i) => {
+            {methods.map(({ method, color, blindColor, icon, iconAlert, mesg }, i) => {
               const paths = routes?.[method]?.routes;
               const maxTime =
                 paths?.length > 1
@@ -151,8 +155,8 @@ const DirectionSection = ({
               return paths?.length > 0 && (
                 <div
                   style={{
-                    background: isActive ? color : 'white',
-                    color: isActive ? 'white' : color,
+                    background: isActive ? (mode ? blindColor : color) : 'white',
+                    color: isActive ? 'white' : (mode ? blindColor : color),
                   }}
                   className={`flex justify-between items-center drop-shadow-lg py-2 px-3 rounded-lg cursor-pointer transition-all duration-250`}
                   onClick={() =>
