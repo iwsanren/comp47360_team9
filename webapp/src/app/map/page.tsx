@@ -59,7 +59,7 @@ const loadImage = [
 
 export interface Toggles {
   parks: boolean;
-  'ev-stations': boolean;
+  'evStations': boolean;
   bikes: boolean;
   busyness: boolean;
   'air-quality': boolean;
@@ -90,7 +90,7 @@ export type MvpFeatures<T extends keyof Toggles> = {
   label: string,
   api: string,
   layer: any,
-  showDetail?: boolean
+  details?: any,
 }
 
 const busynessLayerSetting: any = {
@@ -128,10 +128,13 @@ const mvpFeatures: MvpFeatures<keyof Toggles>[] = [
         "fill-opacity": 0.5,
         "fill-outline-color": "#006400",
       },
-    } 
+    },
+    details: [
+      { key: 'name' },
+    ]
   },
   {
-    key: 'ev-stations',
+    key: 'evStations',
     api: '/EV-charging',
     label: "EV Charging Stations",
     layer: {
@@ -142,6 +145,12 @@ const mvpFeatures: MvpFeatures<keyof Toggles>[] = [
       },
       type: "symbol"
     },
+    details: [
+      { key: 'name' },
+      { key: 'operator' },
+      { key: 'access' },
+      { key: 'capacity' },
+    ]
   },
   {
     key: 'bikes',
@@ -155,7 +164,11 @@ const mvpFeatures: MvpFeatures<keyof Toggles>[] = [
       },
       type: "symbol"
     },
-    showDetail: true
+    details: [
+      { key: 'name' },
+      { label: 'Available Bikes', key: 'bikes_available' },
+      { label: 'Available Docks', key: 'docks_available' },
+    ]
   },
   {
     key: 'busyness',
@@ -217,7 +230,7 @@ export default function Map() {
   const [showModal, setShowModal] = useState<boolean>();
   const [toggles, setToggles] = useState<Toggles>({
     parks: false,
-    'ev-stations': false,
+    evStations: false,
     bikes: false,
     busyness: false,
     'air-quality': false,
@@ -260,7 +273,8 @@ export default function Map() {
     return paths
   }, [routes]);
 
-  // console.log(featuresData.predictedBusyness)
+  // console.log(featuresData.evStations.features.filter((d: any) => !d.properties.name && !d.properties.operator))
+
   // find the zones where the routes will pass.
   const allMethodPassedZones = useMemo(() => allMethodsRouteCoords.map(((routeCoords: any) => routeCoords?.map((r: any) => lineString(r))
     .map((route: any) => (isPredictionMode ? featuresData?.predictedBusyness?.features : featuresData.busyness.features)?.filter((feature: any) =>
@@ -362,17 +376,31 @@ export default function Map() {
           });
         }
 
-        if (feature.showDetail) {
+        if (feature.details) {
           const popup = new mapboxgl.Popup({
             closeButton: true,
           });
 
           // ➕ click event
           map.on("click", `${feature.key}-layer`, (e: any) => {
+            const isTypeFill = feature.layer.type === 'fill'
             const coordinates = e.features[0].geometry.coordinates;
             const props = e.features[0].properties;
-            popup.setLngLat(coordinates)
-                 .setHTML(`<div class=""><strong>${props.name}</strong><br/>Available Bikes: ${props.bikes_available}<br/>Available Docks: ${props.docks_available}</div>`)
+            const infoList = feature.details
+              .map(({ key, label }: { key: string; label: string }) => {
+                const value = props[key as keyof typeof props];
+                if (key === 'name' && value) {
+                  return `<div><b>${value}</b></div>`;
+                }
+                if (value) {
+                  return `<div class="capitalize">${label || key}: ${value}</div>`;
+                }
+                return null;
+              })
+            .filter(Boolean);
+            const contentHTML = infoList.length > 0 ? infoList.join('') : `<div>No available information</div>`;
+            popup.setLngLat(isTypeFill ? e.lngLat : coordinates)
+                 .setHTML(`<div class="flex flex-col gap-1">${contentHTML}</div>`)
                  .addTo(map);
 
           });
@@ -457,7 +485,7 @@ export default function Map() {
       }
     };
 
-    if (featuresData.busyness && clickPoints.length != 2 && !toggles.bikes) {
+    if (featuresData.busyness && clickPoints.length != 2 && !toggles.bikes && !toggles.parks && !toggles.evStations) {
       map.on('click', handleClick);
     }
 
@@ -465,7 +493,7 @@ export default function Map() {
       map.off('click', handleClick);
     };
 
-  }, [featuresData.busyness, clickPoints, startCoords, destCoords, toggles.bikes])
+  }, [featuresData.busyness, clickPoints, startCoords, destCoords, toggles.bikes, toggles.parks, toggles.evStations])
 
   // add start point and dest point icon
   useEffect(() => {
