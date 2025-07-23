@@ -19,7 +19,7 @@ const generateHourlyGroups = () => {
     result[dateKey].push(hourStr);
   }
 
-  return Object.entries(result);
+  return result;
 }
 
 export default generateHourlyGroups

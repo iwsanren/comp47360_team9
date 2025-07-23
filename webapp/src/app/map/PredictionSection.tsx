@@ -3,9 +3,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Timestamp } from 'next/dist/server/lib/cache-handlers/types';
 
 // import Button from '@/components/Button';
-import InputSlider from '@/components/InputSlider';
 import generateHourlyGroups from '@/utils/generateHourlyGroups';
-import fetchData from '@/utils/fetchData';
+import Select from '@/components/Select';
 
 
 interface PredictionSectionProps {
@@ -20,25 +19,27 @@ interface PredictionSectionProps {
 const zone = "America/New_York"; 
 
 const PredictionSection = ({
-    layerName,
-    map,
-    busynessLayerSetting,
     setTime,
-    timestamp,
-    setFeatureData
   }: PredictionSectionProps) => {
-  const [date, setDate] = useState(0)
-  const [hour, setHour] = useState(0)
-  const [isLoading, setIsLoading] = useState<boolean>()
-  const timeGroups = generateHourlyGroups()
-  const [label, times] = useMemo(() => timeGroups[date], [timeGroups, date])
+  const timeGroups = useMemo(() => generateHourlyGroups(), [])
+  const [date, setDate] = useState<string | undefined>()
+  const [hour, setHour] = useState<string | undefined>()
+  const dates = useMemo(() => Object.keys(timeGroups), [timeGroups])
   useEffect(() => {
-    setHour(0)
-  }, [date])
+    setDate(Object.keys(timeGroups)?.[0])
+  }, [timeGroups])
+
   useEffect(() => {
-    const ManhattanTime = DateTime.fromFormat(`${label} ${times[hour]}`, 'M/d HH:mm', { zone }).toUTC().toSeconds();
+    if (date) {
+      setHour(timeGroups?.[date]?.[0])
+    }
+  }, [timeGroups, date])
+
+  useEffect(() => {
+    const ManhattanTime = DateTime.fromFormat(`${date} ${hour}`, 'M/d HH:mm', { zone }).toUTC().toSeconds();
     setTime(ManhattanTime)
-  }, [label, times, hour])
+  }, [date, hour])
+
   // const handleShowPrediction = async () => {
   //   if (!map) return;
 
@@ -88,8 +89,10 @@ const PredictionSection = ({
   //   }
   // };
   return (
-    <div className='gap-10 flex flex-col lg:gap-12 lg:mb-8'>
-      <InputSlider
+    <div className='flex gap-4 mb-4'>
+      <Select onChange={setDate} label="Date" options={dates} value={date} />
+      {date && <Select onChange={setHour} label="Time" options={timeGroups[date]} value={hour} />}
+      {/* <InputSlider
         label={label}
         max={timeGroups.length - 1}
         value={date}
@@ -100,7 +103,7 @@ const PredictionSection = ({
         max={times.length - 1}
         value={hour}
         onChange={setHour}
-      />
+      /> */}
       {/* <div>
         <Button
           isDisabled={isLoading}

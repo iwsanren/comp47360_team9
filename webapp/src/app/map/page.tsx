@@ -27,12 +27,13 @@ import { WEATHER_CONDITION_ICONS } from '@/constants/icons';
 import decodeToGeoJSON from "@/utils/decodeToGeoJSON";
 import { api, handleAPIError } from '@/utils/apiClient';
 import getNextHourInNY from "@/utils/getNextHourInNY";
+import fetchData from "@/utils/fetchData";
 
 import ShowWeatherModal from "./ShowWeatherModal";
 import DirectionModal from "./DirectionModal";
 import DirectionSection from "./DirectionSection";
 import PredictionSection from "./PredictionSection";
-import fetchData from "@/utils/fetchData";
+import Legend from "./Legend";
 
 
 const key = 'busyness-prediction'
@@ -259,6 +260,7 @@ export default function Map() {
     return paths
   }, [routes]);
 
+  // console.log(featuresData.predictedBusyness)
   // find the zones where the routes will pass.
   const allMethodPassedZones = useMemo(() => allMethodsRouteCoords.map(((routeCoords: any) => routeCoords?.map((r: any) => lineString(r))
     .map((route: any) => (isPredictionMode ? featuresData?.predictedBusyness?.features : featuresData.busyness.features)?.filter((feature: any) =>
@@ -805,7 +807,7 @@ export default function Map() {
           )}
         </div>
       </div>
-
+      
       <div ref={mapRef} className="relative h-[555px] lg:min-h-[750px] lg:h-[100dvh] font-roboto">
         <div className="lg:hidden absolute top-2 left-2 z-5">
           {!isPredictionMode && (
@@ -823,7 +825,9 @@ export default function Map() {
           )}
         </div>
       </div>
-      
+      {(featuresData.predictedBusyness || toggles.busyness)&& (
+        <Legend />
+      )}
       {showModal && (
         <>
           <div className="absolute left-0 right-0 top-0 bottom-0 bg-[rgba(0,0,0,0.5)] z-10" />
