@@ -282,10 +282,28 @@ export default function Map() {
 
   const greenScoreforEachRoute = useMemo(() => (allMethodPassedZones || []).map((methodRoutedata: any) => {
     return (
-      methodRoutedata?.map((zones: any) => zones?.reduce((res: number, d: any) => {
-        res = res + +d.properties.aqi + +d.properties.busyness
-        return res
-      }, 0))
+      methodRoutedata?.map((zones: any) => {
+        const { aqiSum, busySum } = zones.reduce(
+          (acc: any, zone: any) => {
+            const aqi = +zone?.properties?.aqi || 1;
+            const busy = +zone?.properties?.normalised_busyness || 0;
+
+            acc.aqiSum += (aqi - 1) / 4; // AQI: 1~5 → 0~1
+            acc.busySum += busy;         // Busyness: 0~1
+            return acc;
+          },
+          { aqiSum: 0, busySum: 0 }
+        );
+        const count = zones.length;
+        const aqi_normalised = aqiSum / count;
+        const busy_normalised = busySum / count;
+
+        const pollutionScore =
+          aqi_normalised * 0.15 +
+          busy_normalised * 0.35;
+
+        return pollutionScore;
+      })
   )}), [allMethodPassedZones])
 
   const fetchDirection = async () => {
@@ -625,7 +643,7 @@ export default function Map() {
           paint: {
             'line-color': '#3887be',
             'line-width': 5,
-            'line-opacity': 0.75
+            'line-opacity': 1
           }
         });
       }

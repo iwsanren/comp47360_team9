@@ -7,7 +7,7 @@ export const co2Emissions = (value: number) => {
     return round(meterToMiles(value) * 0.270, 1) // use Yellow taxi data 
 }
 
-function getTransitTypeCO2Emissions(type: string, value: number) {
+export function getTransitTypeCO2Emissions(type: string, value: number) {
   switch (type) {
     case "BUS":
       return round(meterToMiles(value) * 0.177, 1);
@@ -32,6 +32,10 @@ function getTransitTypeCO2Emissions(type: string, value: number) {
     default:
       return 0;
   }
+}
+
+export const finalGreenScore = (greenScore) => {
+  return (1 - greenScore) * 100;
 }
 
 export const transitEmissions = (routes: any) => {

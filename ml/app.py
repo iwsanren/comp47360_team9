@@ -239,6 +239,7 @@ def predict_all():
         
         for _, row in zones_df.iterrows():
             prediction_count += 1
+            zone_id = int(row['OBJECTID'])
            
             input_data = {
                 "pickup_hour": pickup_hour,
@@ -252,7 +253,7 @@ def predict_all():
                 "feels_like": feels_like,
                 "centroid_lat": row['centroid_lat'],
                 "centroid_lon": row['centroid_lon'],
-                "PULocationID": int(row['OBJECTID']),
+                "PULocationID": zone_id,
                 "Shape_Area": row['Shape_Area'],
                 "Shape_Leng": row['Shape_Leng'],
             }
@@ -265,16 +266,33 @@ def predict_all():
                 # Predicting and classifying zones.
                 pred = model.predict(input_df)[0]
                 busyness_level = classify_busyness_zone_hour(
-                    pred, int(row['OBJECTID']), pickup_hour, day_of_week
+                    pred, zone_id, pickup_hour, day_of_week
                 )
+                 # Calculating normalised busyness with clamping.
+                match = zone_stats[
+                    (zone_stats["PULocationID"] == zone_id) &
+                    (zone_stats["pickup_hour"] == pickup_hour) &
+                    (zone_stats["day_of_week"] == day_of_week)
+                ]
+                if not match.empty:
+                    min_val = match.iloc[0]["min"]
+                    max_val = match.iloc[0]["max"]
+                    if max_val > min_val:
+                        normalised_busyness = (pred - min_val) / (max_val - min_val)
+                        normalised_busyness = max(0.0, min(1.0, normalised_busyness))  # clamping to [0, 1]
+                    else:
+                        normalised_busyness = 0.5
+                else:
+                    normalised_busyness = 0.5
             except Exception as e:
                 log_with_context('error', f'Prediction failed for zone {row["OBJECTID"]}', {
-                    'zone_id': int(row['OBJECTID']),
+                    'zone_id': zone_id,
                     'error': str(e)
                 })
                 # Use default values to continue processing
                 pred = 0.0
                 busyness_level = "normal"
+                normalised_busyness = 0
 
             geometry = OrderedDict()
             
@@ -301,7 +319,7 @@ def predict_all():
             features.append({
                 "type": "Feature",
                 "properties": {
-                    "PULocationID": int(row['OBJECTID']),
+                    "PULocationID": zone_id,
                     "zone": row.get('zone', ''),
                     "borough": row.get('borough', ''),
                     "centroid_lat": row['centroid_lat'],
@@ -310,6 +328,7 @@ def predict_all():
                     "Shape_Leng": row['Shape_Leng'],
                     "busyness": round(float(pred), 2),
                     "busyness_level": busyness_level,
+                    "normalised_busyness": round(float(normalised_busyness), 3)
                 },
                 "geometry": geometry,
             })
@@ -329,6 +348,8 @@ def predict_all():
             'features_generated': len(features),
             'weather_condition': weather_main
         })
+
+        # print(geojson)
 
         response = Response(
             json.dumps(geojson, ensure_ascii=False),
