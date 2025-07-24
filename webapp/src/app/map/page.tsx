@@ -263,6 +263,8 @@ export default function Map() {
 
   const navLineGeo = useMemo(() => navigation && decodeToGeoJSON(navigation?.overview_polyline?.points), [navigation])
 
+  // console.log(featuresData.predictedBusyness)
+
   const allMethodsRouteCoords = useMemo(() => {
     const paths: number[][][][] = []
     methods.forEach(({ method }) => {
@@ -450,7 +452,6 @@ export default function Map() {
       });
 
       await Promise.all(tasks);
-      setIsMapLoading(false); 
     };
 
     if (!map.isStyleLoaded()) {
@@ -461,8 +462,6 @@ export default function Map() {
 
     return () => map.remove();
   }, []);
-
-  console.log()
 
   // click on map
   useEffect(() => {
@@ -776,7 +775,7 @@ export default function Map() {
     <div>
       {isMapLoading && (
         <div className="fixed flex flex-col gap-3 bg-white w-[calc(100vw-32px)] lg:w-[630px] top-[50%] left-[50%] p-4 -translate-1/2 rounded-md border z-10">
-          <div className="absolute right-2 top-2 z-2" onClick={() => setIsMapLoading(false)}>
+          <div className="absolute right-2 top-2 z-2 cursor-pointer" onClick={() => setIsMapLoading(false)}>
             <Icon icon={IoMdClose} size="1.5rem" className="!text-black" />
           </div>
           <div className="flex items-center justify-center gap-3">
