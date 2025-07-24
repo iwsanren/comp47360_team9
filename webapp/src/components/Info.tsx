@@ -1,10 +1,10 @@
 import { useState } from 'react';
 
 type InfoProps = {
-    isActive: boolean;
-    children: React.ReactNode;
-    currentColor: string;
-}
+  isActive: boolean;
+  children: React.ReactNode;
+  currentColor: string;
+};
 
 const Info = ({ children, isActive, currentColor }: InfoProps) => {
   const [showInfo, setShowInfo] = useState<boolean>(false);
@@ -15,17 +15,15 @@ const Info = ({ children, isActive, currentColor }: InfoProps) => {
         background: isActive ? 'white' : currentColor,
         color: isActive ? currentColor : 'white',
       }}
-      onClick={(e) => e.stopPropagation()}
+      onClick={e => e.stopPropagation()}
       onMouseEnter={() => setShowInfo(true)}
       onMouseLeave={() => setShowInfo(false)}
     >
       i
       {showInfo && (
-        <>
-            <div className="w-[164px] p-2 pt-4 text-xs/[1.5] top-full -right-4 translate-y-1 bg-white rounded-md text-black absolute z-5">
-            {children}
-            </div>
-        </>
+        <div className="w-[164px] p-2 pt-4 text-xs/[1.5] top-full -right-4 translate-y-1 bg-white rounded-sm text-black absolute z-5">
+          {children}
+        </div>
       )}
     </div>
   );
