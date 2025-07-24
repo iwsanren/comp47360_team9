@@ -3,17 +3,15 @@ import osmtogeojson from 'osmtogeojson';
 
 export async function POST() {
   try {
-    const areaName = "Manhattan"
     // 2. Overpass API query
     const overpassQuery = `
       [out:json][timeout:25];
-      area["name"="${areaName}"]["boundary"="administrative"]->.a;
+      area["name"="Manhattan"]["boundary"="administrative"]->.a;
       (
         node["amenity"="charging_station"](area.a);
         way["amenity"="charging_station"](area.a);
-        relation["amenity"="charging_station"](area.a);
       );
-      out geom;
+      out center;
     `;
 
     // 3. transfer Query to URL safe format

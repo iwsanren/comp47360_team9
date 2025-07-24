@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
+
 import { sendErrorResponse } from '@/middleware/requestTracker';
 import { logWithContext, generateRequestId } from '@/utils/requestTracker';
 
@@ -49,7 +50,7 @@ export async function POST(req) {
 
 async function weatherHandler(req, requestId) {
   const { cookies } = await import('next/headers');
-  const token = cookies().get('token')?.value;
+  const token = cookies()?.get('token')?.value;
 
   if (!token) {
     return sendErrorResponse(requestId, 'Missing token', 401);
@@ -123,7 +124,7 @@ async function weatherHandler(req, requestId) {
         apiKeyConfigured: !!API_KEY
       });
     }
-  } catch (error) {
+  } catch {
     return sendErrorResponse(requestId, 'Invalid or expired token', 403, {
       tokenProvided: !!token
     });

@@ -6,13 +6,15 @@ export async function POST() {
 
     // Overpass QL query: parks in the specified area
     const overpassQuery = `
-        [out:json][timeout:25];
-        area[name="Manhattan"][boundary=administrative]->.a;
-        (
-        way["leisure"="park"](area.a);
-        relation["leisure"="park"](area.a);
-        );
-        out geom;
+      [out:json][timeout:25];
+      area[name="Manhattan"][boundary=administrative]->.a;
+      (
+      way["leisure"="park"](area.a);
+      relation["leisure"="park"](area.a);
+      );
+      out body;
+      >;
+      out skel qt;
     `;
 
     const encodedQuery = encodeURIComponent(overpassQuery);

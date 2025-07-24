@@ -447,12 +447,10 @@ export default function Map() {
       });
 
       await Promise.all(tasks);
+      setIsMapLoading(false); 
     };
 
-    map.on('load', async () => {
-      await fetchAndAdd();
-      setIsMapLoading(false); 
-    });
+    fetchAndAdd();
 
     return () => map.remove();
   }, []);
@@ -766,7 +764,7 @@ export default function Map() {
     }
   };
   return (
-    <>
+    <div className={isMapLoading ? 'bg-green-700' : ''}>
       {isMapLoading && (
         <div className="absolute flex flex-col gap-3 bg-white lg:w-[630px] top-[50%] left-[50%] p-4 -translate-1/2 rounded-md border z-10">
           <div className="flex items-center justify-center gap-3">
@@ -787,7 +785,7 @@ export default function Map() {
           </ol>
         </div>
       )}
-        <div className="relative duration-250" style={{ pointerEvents: isMapLoading ? 'none' : 'auto', opacity: isMapLoading ? 0 : 1 }}>
+        <div className={`relative duration-250`} style={{ pointerEvents: isMapLoading ? 'none' : 'auto', opacity: isMapLoading ? 0 : 1 }}>
           <div className="hidden lg:flex absolute items-center top-[50%] transform translate-y-[-50%] right-0 z-3">
             <div
               onClick={handleToggleSlide}
@@ -942,6 +940,6 @@ export default function Map() {
           )}
 
         </div>
-    </>
+    </div>
   );
 }
