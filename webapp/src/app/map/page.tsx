@@ -78,12 +78,13 @@ export interface TransportMethod {
   color: string;
   blindColor: string;
   mesg: string;
+  info?: string;
 }
 
 const methods: TransportMethod[] = [
   { method: 'walking', icon: FaWalking, iconAlert: FaRecycle, color: '#0fd892', blindColor: '#009E73', mesg: 'Free of emissions' }, 
-  { method: 'bicycling', icon: FaBicycle, iconAlert: FaRecycle, color: '#0fd892', blindColor: '#009E73', mesg: 'Fast and clean' },
-  { method: 'driving', icon: FaCar, iconAlert: FaExclamationCircle, color: '#ff281b', blindColor: '#D55E00', mesg: 'Highest emissions' },
+  { method: 'bicycling', icon: FaBicycle, iconAlert: FaRecycle, color: '#0fd892', blindColor: '#009E73', mesg: 'Fast and clean', info: 'The CO₂ emissions generated is calculated by using a normal bike.' },
+  { method: 'driving', icon: FaCar, iconAlert: FaExclamationCircle, color: '#ff281b', blindColor: '#D55E00', mesg: 'Highest emissions', info: 'The CO₂ emissions generated is calculated by using a petrol car.' },
   { method: 'transit', icon: FaTrain, iconAlert: FaArrowAltCircleDown, color: '#FFC800', blindColor: '#E69F00', mesg: 'A few emissions' },
 ]
 

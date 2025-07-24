@@ -12,6 +12,7 @@ import formatMinutesToDecimalHour from '@/utils/formatMinutesToDecimalHour';
 import { useMode } from "@/contexts/ModeProvider";
 
 import { Coordinates, TransportMethod } from './page';
+import Info from '@/components/Info';
 
 const userInputs = [
   {
@@ -128,7 +129,7 @@ const DirectionSection = ({
           <div className="py-3">Loading...</div>
         ) : (
           <div className="flex flex-col gap-3">
-            {methods.map(({ method, color, blindColor, icon, iconAlert, mesg }, i) => {
+            {methods.map(({ method, color, blindColor, icon, iconAlert, mesg, info }, i, { length }) => {
               const paths = routes?.[method]?.routes;
               const maxTime =
                 paths?.length > 1
@@ -152,11 +153,13 @@ const DirectionSection = ({
                 method == 'transit' && uniq(transitEmissions(paths));
               const isActive = tool?.method === method;
               const isEqual = minEmissions == maxEmissions;
+              const currentColor = mode ? blindColor : color
               return paths?.length > 0 && (
                 <div
                   style={{
-                    background: isActive ? (mode ? blindColor : color) : 'white',
-                    color: isActive ? 'white' : (mode ? blindColor : color),
+                    background: isActive ? currentColor : 'white',
+                    color: isActive ? 'white' : currentColor,
+                    zIndex: length - i
                   }}
                   className={`flex justify-between items-center drop-shadow-lg py-2 px-3 rounded-lg cursor-pointer transition-all duration-250`}
                   onClick={() =>
@@ -183,14 +186,8 @@ const DirectionSection = ({
                   </div>
                   <div className="flex items-center gap-2 w-[8.875rem]">
                     <Icon icon={iconAlert} className={'inherit'} size="1.25rem" />
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <span className={`font-bold`}>
+                    <div>
+                      <div className={`font-bold inline-block relative`}>
                         {method === 'driving'
                           ? minEmissions
                             ? isEqual
@@ -201,8 +198,13 @@ const DirectionSection = ({
                           ? transitCO2Arr.join(' - ')
                           : 0}{' '}
                         kg CO₂
-                      </span>
-                      <span className="text-xs leading-[1.5]">{mesg}</span>
+                        {info && (
+                          <Info currentColor={currentColor} isActive={isActive}>
+                            {info}
+                          </Info>
+                        )}
+                      </div>
+                      <div className="text-xs/[1.5]">{mesg}</div>
                     </div>
                   </div>
                 </div>
