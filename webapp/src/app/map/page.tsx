@@ -888,7 +888,7 @@ export default function Map() {
         </div>
       </div>
       
-      <div ref={mapRef} className="relative h-[555px] lg:min-h-[750px] lg:h-[100dvh] font-roboto">
+      <div ref={mapRef} className="relative h-[555px] lg:min-h-[850px] lg:h-[100dvh] font-roboto">
         <div className="lg:hidden absolute top-2 left-2 z-5">
           {!isPredictionMode && (
             <Button
