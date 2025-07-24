@@ -864,7 +864,7 @@ export default function Map() {
                   }}
                   isActive={isPredictionMode}
                 >
-                  <div className="absolute top-full right-0 lg:left-[50%] lg:-translate-x-1/2 translate-y-2 w-[180px] py-1 px-2 text-sm/[21px] bg-white rounded-sm drop-shadow-lg">Click this toggle to switch to {isPredictionMode ? 'direction' : 'predict'} model.</div>
+                  <div className="absolute top-full right-0 lg:left-[50%] lg:-translate-x-1/2 translate-y-2 w-[180px] py-1 px-2 text-sm/[21px] bg-white rounded-sm drop-shadow-lg">Switch to {isPredictionMode ? 'Direction' : 'Prediction'} Mode</div>
                 </Toggle>
               </div>
               <div className="flex flex-col gap-4 lg:gap-3">
