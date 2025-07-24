@@ -774,7 +774,7 @@ export default function Map() {
   };
   return (
     <div>
-      {!isMapLoading && (
+      {isMapLoading && (
         <div className="fixed flex flex-col gap-3 bg-white w-[calc(100vw-32px)] lg:w-[630px] top-[50%] left-[50%] p-4 -translate-1/2 rounded-md border z-10">
           <div className="absolute right-2 top-2 z-2" onClick={() => setIsMapLoading(false)}>
             <Icon icon={IoMdClose} size="1.5rem" className="!text-black" />
