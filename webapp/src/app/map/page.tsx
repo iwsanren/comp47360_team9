@@ -284,7 +284,7 @@ export default function Map() {
   const greenScoreforEachRoute = useMemo(() => (allMethodPassedZones || []).map((methodRoutedata: any) => {
     return (
       methodRoutedata?.map((zones: any) => {
-        const { aqiSum, busySum } = zones.reduce(
+        const { aqiSum, busySum } = (zones || []).reduce(
           (acc: any, zone: any) => {
             const aqi = +zone?.properties?.aqi || 1;
             const busy = +zone?.properties?.normalised_busyness || 0;
@@ -295,7 +295,7 @@ export default function Map() {
           },
           { aqiSum: 0, busySum: 0 }
         );
-        const count = zones.length;
+        const count = zones?.length;
         const aqi_normalised = aqiSum / count;
         const busy_normalised = busySum / count;
 
