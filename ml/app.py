@@ -41,6 +41,10 @@ zones_df = pd.read_csv('./manhattan_taxi_zones.csv')
 zone_stats = pd.read_csv('./zone_hourly_busyness_stats.csv')
 zone_stats["PULocationID"] = zone_stats["PULocationID"].astype(int)
 
+# Threshold and correction factor for high activity predictions as taxi model underpredicts.
+HIGH_THRESHOLD = 200
+CORRECTION_FACTOR = 1.412
+
 # Feature order required by the model.
 MODEL_FEATURE_ORDER = [
     "pickup_hour", "day_of_week", "is_weekend", "is_holiday", "is_peak_hour",
@@ -262,8 +266,23 @@ def predict_all():
             input_df = pd.DataFrame([input_data])[MODEL_FEATURE_ORDER]
 
             try:
-                # Predicting and classifying zones.
-                pred = model.predict(input_df)[0]
+                # Predicting and applying correction if needed
+                pred_raw = model.predict(input_df)[0]
+                actual_zone_stats = zone_stats[
+                    (zone_stats["PULocationID"] == int(row['OBJECTID'])) &
+                    (zone_stats["pickup_hour"] == pickup_hour) &
+                    (zone_stats["day_of_week"] == day_of_week)
+                ]
+
+                # Fallback.
+                true_val = actual_zone_stats["mean"].values[0] if not actual_zone_stats.empty else None
+
+                # Applying correction if underpredicted and above threshold.
+                if true_val is not None and pred_raw < true_val and true_val >= HIGH_THRESHOLD:
+                    pred = pred_raw * CORRECTION_FACTOR
+                else:
+                    pred = pred_raw
+
                 busyness_level = classify_busyness_zone_hour(
                     pred, int(row['OBJECTID']), pickup_hour, day_of_week
                 )
