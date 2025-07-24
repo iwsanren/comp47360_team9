@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { BiSolidLeftArrow } from "react-icons/bi";
 import { FaBicycle, FaCar, FaTrain } from "react-icons/fa6";
 import { FaWalking, FaRecycle, FaExclamationCircle, FaArrowAltCircleDown, FaLeaf } from "react-icons/fa";
+import { IoMdClose } from "react-icons/io";
 import { IconType } from "react-icons";
 import { Feature, Point, GeoJsonProperties } from 'geojson';
 import polyline from "@mapbox/polyline";
@@ -24,6 +25,7 @@ import Filter from "@/components/Filter";
 import Toggle from "@/components/Toggle";
 import Heading from "@/components/Heading";
 import { WEATHER_CONDITION_ICONS } from '@/constants/icons';
+import { evStations, parks } from "@/constants/mapData";
 import decodeToGeoJSON from "@/utils/decodeToGeoJSON";
 import { api, handleAPIError } from '@/utils/apiClient';
 import getNextHourInNY from "@/utils/getNextHourInNY";
@@ -34,7 +36,6 @@ import DirectionModal from "./DirectionModal";
 import DirectionSection from "./DirectionSection";
 import PredictionSection from "./PredictionSection";
 import Legend from "./Legend";
-
 
 const key = 'busyness-prediction'
 
@@ -249,7 +250,10 @@ export default function Map() {
   const [isOpen, setOpen] = useState<boolean>();
   const [clickPoints, setClickPoints] = useState<Feature<Point, GeoJsonProperties>[]>([]);
   const [navigation, setNavigation] = useState<any>()
-  const [featuresData, setFeatureData] = useState<any>({})
+  const [featuresData, setFeatureData] = useState<any>({
+    parks,
+    evStations,
+  })
   const [isLoadingDirection, setIsLoadingDirection] = useState(false);
   const [isPredictionMode, setPredictionMode] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
@@ -368,16 +372,15 @@ export default function Map() {
       const tasks = mvpFeatures.map(async (feature) => {
         // get the data
         let data = featuresData[feature.key];
-        if (!data) {
-          try {
-            const res = await fetch(`/api${feature.api}`, { method: 'POST' });
-            data = await res.json();
-            if (!data?.features) throw new Error("Invalid GeoJSON");
-            setFeatureData((prev: any) => ({ ...prev, [feature.key]: data }));
-          } catch (e) {
-            console.error(`Failed to fetch ${feature.key}`, e);
-            return; // skip this one
-          }
+
+        try {
+          const res = await fetch(`/api${feature.api}`, { method: 'POST' });
+          data = await res.json();
+          if (!data?.features) throw new Error("Invalid GeoJSON");
+          setFeatureData((prev: any) => ({ ...prev, [feature.key]: data }));
+        } catch (e) {
+          console.error(`Failed to fetch ${feature.key}`, e);
+          return; // skip this one
         }
 
         // add to layer
@@ -450,10 +453,16 @@ export default function Map() {
       setIsMapLoading(false); 
     };
 
-    fetchAndAdd();
+    if (!map.isStyleLoaded()) {
+      map.once('load', fetchAndAdd);
+    } else {
+      fetchAndAdd();
+    }
 
     return () => map.remove();
   }, []);
+
+  console.log()
 
   // click on map
   useEffect(() => {
@@ -765,8 +774,11 @@ export default function Map() {
   };
   return (
     <div>
-      {isMapLoading && (
-        <div className="absolute flex flex-col gap-3 bg-white lg:w-[630px] top-[50%] left-[50%] p-4 -translate-1/2 rounded-md border z-10">
+      {!isMapLoading && (
+        <div className="fixed flex flex-col gap-3 bg-white w-[calc(100vw-32px)] lg:w-[630px] top-[50%] left-[50%] p-4 -translate-1/2 rounded-md border z-10">
+          <div className="absolute right-2 top-2 z-2" onClick={() => setIsMapLoading(false)}>
+            <Icon icon={IoMdClose} size="1.5rem" className="!text-black" />
+          </div>
           <div className="flex items-center justify-center gap-3">
             <Heading level={2} className="text-green-700">Welcome to Manhattan My Way</Heading>
             <Icon icon={FaLeaf} className="text-2xl text-green-500" />   
@@ -785,7 +797,7 @@ export default function Map() {
           </ol>
         </div>
       )}
-        <div className={`relative duration-250`} style={{ pointerEvents: featuresData.busyness ? 'none' : 'auto' }}>
+        <div className={`relative duration-250`} style={{ pointerEvents: featuresData.busyness ? 'auto' : 'none' }}>
           <div className="hidden lg:flex absolute items-center top-[50%] transform translate-y-[-50%] right-0 z-3">
             <div
               onClick={handleToggleSlide}
