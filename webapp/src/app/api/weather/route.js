@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
+import { cookies } from 'next/headers';
 
 import { sendErrorResponse } from '@/middleware/requestTracker';
 import { logWithContext, generateRequestId } from '@/utils/requestTracker';
@@ -49,7 +50,6 @@ export async function POST(req) {
 }
 
 async function weatherHandler(req, requestId) {
-  const { cookies } = await import('next/headers');
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
 

@@ -22,7 +22,7 @@ export async function POST(req) {
   const startTime = Date.now();
 
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
     
     if (!token) {
