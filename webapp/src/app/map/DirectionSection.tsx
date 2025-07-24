@@ -165,6 +165,7 @@ const DirectionSection = ({
                   onClick={() =>
                     setTool({
                       method,
+                      icon,
                       greenScores: greenScoreforEachRoute[i],
                       paths,
                     })
