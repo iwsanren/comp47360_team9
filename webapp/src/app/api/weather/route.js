@@ -49,7 +49,8 @@ export async function POST(req) {
 
 async function weatherHandler(req, requestId) {
   const { cookies } = await import('next/headers');
-  const token = cookies().get('token')?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
 
   if (!token) {
     return sendErrorResponse(requestId, 'Missing token', 401);
