@@ -34,7 +34,7 @@ export function getTransitTypeCO2Emissions(type: string, value: number) {
   }
 }
 
-export const finalGreenScore = (greenScore) => {
+export const finalGreenScore = (greenScore: number) => {
   return (1 - greenScore) * 100;
 }
 
