@@ -40,7 +40,7 @@ const Filter = ({
       className={`flex flex-col gap-1 rounded-sm bg-[#00674CBF] p-2 transition-all duration-250 ease-in-out ${className}`}
     >
       <TogglesModule
-        label="Active all features"
+        label="Activate All Features"
         isActive={Object.values(toggles).every(d => d)}
         onClick={() => {
           setToggles((prev: any) => {

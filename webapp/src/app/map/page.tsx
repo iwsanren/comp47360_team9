@@ -919,6 +919,134 @@ export default function Map() {
               <DirectionModal data={tool} setOpen={setOpen} setNavigation={setNavigation} navigation={navigation} />
             )}
           </div>
+
+          <div
+            className="relative z-3 lg:absolute lg:shadow-lg lg:left-4 lg:bottom-3 lg:rounded-[20px] lg:top-[55px] bg-white"
+          >
+            <div
+              className="mt-[43px] lg:rounded-b-[20px] relative bottom-0 left-0 right-0 pt-3 px-4 lg:px-6 lg:py-4 lg:absolute bg-green-200"
+            >
+              <Text className="font-bold text-green-800">Current Weather</Text>
+              <div className="flex items-center justify-between lg:mt-2">
+                <div className="flex items-center gap-3 lg:gap-4">
+                  {current ? (
+                    <>
+                      <div className="text-[2.5em] lg:text-6xl">
+                        <Icon icon={WEATHER_CONDITION_ICONS[current?.weather?.[0]?.icon]} />
+                      </div>
+                      <Heading className="lg:!text-5xl">{current.main.temp.toFixed(1)}°F</Heading>
+                    </>
+                  ) : (
+                    <span>Loading...</span>
+                  )}
+                </div>
+                <div className="relative group inline-block">
+                  <Button
+                    onClick={() => setShowModal(true)}
+                  >
+                    Forecast
+                  </Button>
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-[#00b386] text-white text-sm rounded py-1 px-2 z-50 whitespace-nowrap shadow-md">
+                    ☁️ Clouds are gossiping again... 👀
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="p-4 lg:p-6">
+              <div className="flex justify-between items-center mb-4 ">
+                <Heading className="text-green-800" level={2}>{isPredictionMode ? 'Prediction Mode' : 'Get Directions'}</Heading>
+                <Toggle
+                  isDisabled={isLoading}
+                  onClick={() => {
+                    clearPredictedBusynessLayer(mapInstanceRef.current)
+                    setPredictionMode(prev => !prev)
+                    handleClear()
+                    setShowFilter(false)
+                    setToggles(prev => {
+                      const newToggles = Object.fromEntries(
+                        Object.keys(prev).map(key => [key, false])
+                      ) as unknown as Toggles;
+
+                      return newToggles;
+                    });
+                  }}
+                  isActive={isPredictionMode}
+                >
+                  <div className="absolute top-full right-0 lg:left-[50%] lg:-translate-x-1/2 translate-y-2 w-[180px] py-1 px-2 text-sm/[21px] bg-white rounded-sm drop-shadow-lg">Switch to {isPredictionMode ? 'Direction' : 'Prediction'} Mode</div>
+                </Toggle>
+              </div>
+              <div className="flex flex-col gap-4 lg:gap-3">
+                {isPredictionMode && (
+                  <PredictionSection
+                    setTime={setTime}
+                    timestamp={timestamp}
+                    layerName={key}
+                    map={mapInstanceRef.current}
+                    busynessLayerSetting={busynessLayerSetting}
+                    setFeatureData={setFeatureData}
+                  />
+                )}
+                <DirectionSection
+                  setClickPoints={setClickPoints}
+                  setStartLocation={setStartLocation}
+                  setStartCoords={setStartCoords}
+                  setDestCoords={setDestCoords}
+                  destCoords={destCoords}
+                  startLocation={startLocation}
+                  startCoords={startCoords}
+                  setDestination={setDestination}
+                  destination={destination}
+                  isLoadingDirection={isLoadingDirection || isLoading}
+                  tool={tool}
+                  methods={methods}
+                  setTool={setTool}
+                  routes={routes}
+                  greenScoreforEachRoute={greenScoreforEachRoute}
+                  isInValid={isInValid}
+                />
+                <div className="flex justify-between">
+                  <Button onClick={handleClear}>Clear</Button>
+                  {isPredictionMode && !featuresData.predictedBusyness && (
+                    <Button isDisabled={isLoading} onClick={handleShowPrediction}>Get Prediction</Button>
+                  )} 
+                  {(isPredictionMode ? (tool && featuresData.predictedBusyness && !isLoading) : tool) && (
+                    <Button onClick={() => setOpen(true)}>Show Directions</Button>
+                  )}
+                </div>
+              </div>
+              {isOpen && (
+                <DirectionModal data={tool} setOpen={setOpen} setNavigation={setNavigation} navigation={navigation} />
+              )}
+            </div>
+          </div>
+          
+          <div ref={mapRef} className="relative h-[555px] lg:min-h-[850px] lg:h-[100dvh] font-roboto">
+            <div className="lg:hidden absolute top-2 left-2 z-5">
+              {!isPredictionMode && (
+                <Button
+                  onClick={() => {
+                    setShowFilter(prev => !prev)
+                  }}
+                  className={`${showFilter ? 'text-white bg-green-700' : '!text-green-800 bg-white'} `}
+                >
+                  {showFilter && 'Close '}Filter
+                </Button>
+              )}
+              {showFilter && (
+                <Filter className="mt-2 bg-green-700" setToggles={setToggles} toggles={toggles} mvpFeatures={mvpFeatures} />
+              )}
+            </div>
+          </div>
+          {(featuresData.predictedBusyness || toggles.busyness)&& (
+            <Legend />
+          )}
+          {showModal && (
+            <>
+              <div className="absolute left-0 right-0 top-0 bottom-0 bg-[rgba(0,0,0,0.5)] z-10" />
+              <ShowWeatherModal current={current} hourly={hourly} setShowModal={setShowModal} />
+            </>
+          )}
+
         </div>
         
         <div ref={mapRef} className="relative h-[555px] lg:min-h-[850px] lg:h-[100dvh] font-roboto">
