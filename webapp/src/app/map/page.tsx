@@ -263,8 +263,6 @@ export default function Map() {
 
   const navLineGeo = useMemo(() => navigation && decodeToGeoJSON(navigation?.overview_polyline?.points), [navigation])
 
-  console.log(featuresData.busyness)
-
   const allMethodsRouteCoords = useMemo(() => {
     const paths: number[][][][] = []
     methods.forEach(({ method }) => {
