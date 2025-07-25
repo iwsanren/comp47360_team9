@@ -259,24 +259,31 @@ def predict_all():
         return jsonify({"error": "Failed to fetch weather data"}), 500
     
     weather_data = weather_response.json()
-    weather_main = weather_data["weather"][0]["main"]
-    weather_dict = {
-        f"weather_{w}": int(weather_main == w)
-        for w in ["Rain", "Clouds", "Clear", "Snow", "Mist", "Haze", "Smoke", "Drizzle", "Fog", "Thunderstorm"]
-    }
-
+    
     if time is not None:
-        weather_data = next(filter(lambda x: x["dt"] == time, weather_data['list']), None)
-        if weather_data is None:
+        # For forecast data, find the specific time entry first
+        forecast_data = next(filter(lambda x: x["dt"] == time, weather_data['list']), None)
+        if forecast_data is None:
             log_with_context('error', 'No weather data found for specified timestamp', {
                 'requested_timestamp': time
             })
             return jsonify({"error": "No weather data for specified time"}), 400
+        weather_entry = forecast_data
+    else:
+        # For current weather data, use the main object
+        weather_entry = weather_data
+    
+    # Extract weather condition from the appropriate data structure
+    weather_main = weather_entry["weather"][0]["main"]
+    weather_dict = {
+        f"weather_{w}": int(weather_main == w)
+        for w in ["Rain", "Clouds", "Clear", "Snow", "Mist", "Haze", "Smoke", "Drizzle", "Fog", "Thunderstorm"]
+    }
         
-    temp = weather_data['main']['temp']
-    feels_like = weather_data['main']['feels_like']
-    humidity = weather_data['main']['humidity']
-    wind_speed = weather_data['wind']['speed']
+    temp = weather_entry['main']['temp']
+    feels_like = weather_entry['main']['feels_like']
+    humidity = weather_entry['main']['humidity']
+    wind_speed = weather_entry['wind']['speed']
 
     taxi_preds = {}
 
