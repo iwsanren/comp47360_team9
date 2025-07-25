@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { BiSolidLeftArrow } from "react-icons/bi";
 import { FaBicycle, FaCar, FaTrain } from "react-icons/fa6";
 import { FaWalking, FaRecycle, FaExclamationCircle, FaArrowAltCircleDown, FaLeaf } from "react-icons/fa";
+import { IoMdClose } from "react-icons/io";
 import { IconType } from "react-icons";
 import { Feature, Point, GeoJsonProperties } from 'geojson';
 import polyline from "@mapbox/polyline";
@@ -24,6 +25,7 @@ import Filter from "@/components/Filter";
 import Toggle from "@/components/Toggle";
 import Heading from "@/components/Heading";
 import { WEATHER_CONDITION_ICONS } from '@/constants/icons';
+import { evStations, parks } from "@/constants/mapData";
 import decodeToGeoJSON from "@/utils/decodeToGeoJSON";
 import { api, handleAPIError } from '@/utils/apiClient';
 import getNextHourInNY from "@/utils/getNextHourInNY";
@@ -34,7 +36,6 @@ import DirectionModal from "./DirectionModal";
 import DirectionSection from "./DirectionSection";
 import PredictionSection from "./PredictionSection";
 import Legend from "./Legend";
-
 
 const key = 'busyness-prediction'
 
@@ -102,7 +103,7 @@ const busynessLayerSetting: any = {
     'fill-color': [
       'interpolate',
       ['linear'],
-      ['get', 'busyness'],
+      ['get', 'combined_busyness'],
       // min, color
       1, '#B7E4C7',    
       100, '#95D5B2',   
@@ -249,7 +250,10 @@ export default function Map() {
   const [isOpen, setOpen] = useState<boolean>();
   const [clickPoints, setClickPoints] = useState<Feature<Point, GeoJsonProperties>[]>([]);
   const [navigation, setNavigation] = useState<any>()
-  const [featuresData, setFeatureData] = useState<any>({})
+  const [featuresData, setFeatureData] = useState<any>({
+    parks,
+    evStations,
+  })
   const [isLoadingDirection, setIsLoadingDirection] = useState(false);
   const [isPredictionMode, setPredictionMode] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
@@ -368,16 +372,15 @@ export default function Map() {
       const tasks = mvpFeatures.map(async (feature) => {
         // get the data
         let data = featuresData[feature.key];
-        if (!data) {
-          try {
-            const res = await fetch(`/api${feature.api}`, { method: 'POST' });
-            data = await res.json();
-            if (!data?.features) throw new Error("Invalid GeoJSON");
-            setFeatureData((prev: any) => ({ ...prev, [feature.key]: data }));
-          } catch (e) {
-            console.error(`Failed to fetch ${feature.key}`, e);
-            return; // skip this one
-          }
+
+        try {
+          const res = await fetch(`/api${feature.api}`, { method: 'POST' });
+          data = await res.json();
+          if (!data?.features) throw new Error("Invalid GeoJSON");
+          setFeatureData((prev: any) => ({ ...prev, [feature.key]: data }));
+        } catch (e) {
+          console.error(`Failed to fetch ${feature.key}`, e);
+          return; // skip this one
         }
 
         // add to layer
@@ -447,10 +450,13 @@ export default function Map() {
       });
 
       await Promise.all(tasks);
-      setIsMapLoading(false); 
     };
 
-    fetchAndAdd();
+    if (!map.isStyleLoaded()) {
+      map.once('load', fetchAndAdd);
+    } else {
+      fetchAndAdd();
+    }
 
     return () => map.remove();
   }, []);
@@ -766,49 +772,151 @@ export default function Map() {
   return (
     <div>
       {isMapLoading && (
-        <div className="absolute flex flex-col gap-3 bg-white lg:w-[630px] top-[50%] left-[50%] p-4 -translate-1/2 rounded-md border z-10">
+        <div className="fixed flex flex-col gap-3 bg-white w-[calc(100vw-32px)] lg:w-[630px] top-[50%] left-[50%] p-4 -translate-1/2 rounded-md border z-10">
+          <div className="absolute right-2 top-2 z-2 cursor-pointer" onClick={() => setIsMapLoading(false)}>
+            <Icon icon={IoMdClose} size="1.5rem" className="!text-black" />
+          </div>
           <div className="flex items-center justify-center gap-3">
             <Heading level={2} className="text-green-700">Welcome to Manhattan My Way</Heading>
             <Icon icon={FaLeaf} className="text-2xl text-green-500" />   
           </div>
-          <Text.Bold>This interactive map helps you explore the most environmentally friendly routes across Manhattan. </Text.Bold>
+          <Text.Bold>This interactive map helps you explore the most environmentally friendly routes across Manhattan.</Text.Bold>
           <ol className="list-decimal ml-6">
             <li><Text>Select a start and end point to generate multiple route options.</Text></li>
             <li><Text>Each route is evaluated based on:</Text>
               <ul className="list-disc ml-6">
-                <li><Text><strong>CO₂ emissions</strong> (lower is better)</Text></li>
-                <li><Text><strong>Air quality index (AQI)</strong> (1–5 scale)</Text></li>
-                <li><Text><strong>Traffic busyness</strong> (normalized from 0 to 1)</Text></li>
+                <li><Text.Bold>CO₂ emissions</Text.Bold></li>
+                <li><Text.Bold>Air quality index</Text.Bold></li>
+                <li><Text.Bold>busyness</Text.Bold></li>
               </ul>
             </li>
-            <li><Text>You’ll see a <strong>Green Score</strong> (0–100) for each route—higher means greener.</Text></li>
+            <li><Text>You will receive a <strong>Green Score</strong> (0–100) for each route. The higher the score, the greener the route.</Text></li>
           </ol>
         </div>
       )}
-        <div className={`relative duration-250`} style={{ pointerEvents: featuresData.busyness ? 'none' : 'auto' }}>
-          <div className="hidden lg:flex absolute items-center top-[50%] transform translate-y-[-50%] right-0 z-3">
-            <div
-              onClick={handleToggleSlide}
-              className={isPredictionMode ? `cursor-not-allowed opacity-50` : `cursor-pointer`}
+      <div className={`relative duration-250 overflow-hidden`} style={{ pointerEvents: featuresData.busyness ? 'auto' : 'none' }}>
+        <div className="hidden lg:flex absolute items-center top-[50%] transform translate-y-[-50%] right-0 z-3">
+          <div
+            onClick={handleToggleSlide}
+            className={isPredictionMode ? `cursor-not-allowed opacity-50` : `cursor-pointer`}
+            style={{
+              borderTopLeftRadius: 4,
+              borderBottomLeftRadius: 4,
+              backgroundColor: "#00674CBF",
+              padding: '1.125rem 0.125rem',
+              color: 'white',
+            }}
+          >
+            <BiSolidLeftArrow
               style={{
-                borderTopLeftRadius: 4,
-                borderBottomLeftRadius: 4,
-                backgroundColor: "#00674CBF",
-                padding: '1.125rem 0.125rem',
-                color: 'white',
+                transform: (isToggleOpen && !isPredictionMode) ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.25s',
               }}
-            >
-              <BiSolidLeftArrow
-                style={{
-                  transform: (isToggleOpen && !isPredictionMode) ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.25s',
-                }}
-                size=".75rem"
-              />
-            </div>
+              size=".75rem"
+            />
+          </div>
 
-            {!isPredictionMode && (
-              <Filter className={isToggleOpen ? 'w-[187px]' : 'w-0 !p-0'} setToggles={setToggles} toggles={toggles} mvpFeatures={mvpFeatures} />
+          {!isPredictionMode && (
+            <Filter className={isToggleOpen ? 'w-[187px]' : 'w-0 !p-0'} setToggles={setToggles} toggles={toggles} mvpFeatures={mvpFeatures} />
+          )}
+        </div>
+
+        <div
+          className="relative z-3 lg:absolute lg:shadow-lg lg:left-4 lg:bottom-3 lg:rounded-[20px] lg:top-[55px] bg-white"
+        >
+          <div
+            className="mt-[43px] lg:rounded-b-[20px] relative bottom-0 left-0 right-0 pt-3 px-4 lg:px-6 lg:py-4 lg:absolute bg-green-200"
+          >
+            <Text className="font-bold text-green-800">Current Weather</Text>
+            <div className="flex items-center justify-between lg:mt-2">
+              <div className="flex items-center gap-3 lg:gap-4">
+                {current ? (
+                  <>
+                    <div className="text-[2.5em] lg:text-6xl">
+                      <Icon icon={WEATHER_CONDITION_ICONS[current?.weather?.[0]?.icon]} />
+                    </div>
+                    <Heading className="lg:!text-5xl">{current.main.temp.toFixed(1)}°F</Heading>
+                  </>
+                ) : (
+                  <span>Loading...</span>
+                )}
+              </div>
+              <div className="relative group inline-block">
+                <Button
+                  onClick={() => setShowModal(true)}
+                >
+                  Forecast
+                </Button>
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-[#00b386] text-white text-sm rounded py-1 px-2 z-50 whitespace-nowrap shadow-md">
+                  ☁️ Clouds are gossiping again... 👀
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="p-4 lg:p-6">
+            <div className="flex justify-between items-center mb-4 ">
+              <Heading className="text-green-800" level={2}>{isPredictionMode ? 'Prediction Mode' : 'Get Directions'}</Heading>
+              <Toggle
+                isDisabled={isLoading}
+                onClick={() => {
+                  clearPredictedBusynessLayer(mapInstanceRef.current)
+                  setPredictionMode(prev => !prev)
+                  handleClear()
+                  setShowFilter(false)
+                  setToggles(prev => {
+                    const newToggles = Object.fromEntries(
+                      Object.keys(prev).map(key => [key, false])
+                    ) as unknown as Toggles;
+
+                    return newToggles;
+                  });
+                }}
+                isActive={isPredictionMode}
+              >
+                <div className="absolute top-full right-0 lg:left-[50%] lg:-translate-x-1/2 translate-y-2 w-[180px] py-1 px-2 text-sm/[21px] bg-white rounded-sm drop-shadow-lg">Switch to {isPredictionMode ? 'direction' : 'predict'} model.</div>
+              </Toggle>
+            </div>
+            <div className="flex flex-col gap-4 lg:gap-3">
+              {isPredictionMode && (
+                <PredictionSection
+                  setTime={setTime}
+                  timestamp={timestamp}
+                  layerName={key}
+                  map={mapInstanceRef.current}
+                  busynessLayerSetting={busynessLayerSetting}
+                  setFeatureData={setFeatureData}
+                />
+              )}
+              <DirectionSection
+                setClickPoints={setClickPoints}
+                setStartLocation={setStartLocation}
+                setStartCoords={setStartCoords}
+                setDestCoords={setDestCoords}
+                destCoords={destCoords}
+                startLocation={startLocation}
+                startCoords={startCoords}
+                setDestination={setDestination}
+                destination={destination}
+                isLoadingDirection={isLoadingDirection || isLoading}
+                tool={tool}
+                methods={methods}
+                setTool={setTool}
+                routes={routes}
+                greenScoreforEachRoute={greenScoreforEachRoute}
+                isInValid={isInValid}
+              />
+              <div className="flex justify-between">
+                <Button onClick={handleClear}>Clear</Button>
+                {isPredictionMode && !featuresData.predictedBusyness && (
+                  <Button isDisabled={isLoading} onClick={handleShowPrediction}>Get Prediction</Button>
+                )} 
+                {(isPredictionMode ? (tool && featuresData.predictedBusyness && !isLoading) : tool) && (
+                  <Button onClick={() => setOpen(true)}>Show Directions</Button>
+                )}
+              </div>
+            </div>
+            {isOpen && (
+              <DirectionModal data={tool} setOpen={setOpen} setNavigation={setNavigation} navigation={navigation} />
             )}
           </div>
 
@@ -940,6 +1048,34 @@ export default function Map() {
           )}
 
         </div>
+        
+        <div ref={mapRef} className="relative h-[555px] lg:min-h-[850px] lg:h-[100dvh] font-roboto">
+          <div className="lg:hidden absolute top-2 left-2 z-5">
+            {!isPredictionMode && (
+              <Button
+                onClick={() => {
+                  setShowFilter(prev => !prev)
+                }}
+                className={`${showFilter ? 'text-white bg-green-700' : '!text-green-800 bg-white'} `}
+              >
+                {showFilter && 'Close '}Filter
+              </Button>
+            )}
+            {showFilter && (
+              <Filter className="mt-2 bg-green-700" setToggles={setToggles} toggles={toggles} mvpFeatures={mvpFeatures} />
+            )}
+          </div>
+        </div>
+        {(featuresData.predictedBusyness || toggles.busyness)&& (
+          <Legend />
+        )}
+        {showModal && (
+          <>
+            <div className="absolute left-0 right-0 top-0 bottom-0 bg-[rgba(0,0,0,0.5)] z-10" />
+            <ShowWeatherModal current={current} hourly={hourly} setShowModal={setShowModal} />
+          </>
+        )}
+      </div>
     </div>
   );
 }

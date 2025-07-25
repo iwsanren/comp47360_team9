@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { round, sortBy } from 'lodash';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
+import { IconType } from 'react-icons';
 import Image from 'next/image';
 
 import Icon from '@/components/Icon';
@@ -46,6 +47,7 @@ interface DirectionData {
   method: string;
   paths: RoutePath[];
   greenScores: number[];
+  icon: IconType;
 }
 
 interface NavigationData {
@@ -186,7 +188,10 @@ const DirectionModal = ({
       </Slide>
       {steps && (
         <div className="pt-6">
-          <Text className="text-white mb-2">Steps</Text>
+          <div className="flex items-center gap-2 mb-2">
+            <Icon icon={data.icon} size="1.5em" className="!text-white" />
+            <Text className="text-white">Steps</Text>
+          </div>
           {steps?.map(
             (
               { distance, html_instructions }: RouteStep,

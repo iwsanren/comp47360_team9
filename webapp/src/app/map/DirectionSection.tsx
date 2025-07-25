@@ -7,12 +7,12 @@ import { HiOutlineSwitchVertical, HiLocationMarker } from 'react-icons/hi';
 
 import Icon from '@/components/Icon';
 import Input from '@/components/Input';
+import Info from '@/components/Info';
 import { co2Emissions, transitEmissions } from '@/utils/formula';
 import formatMinutesToDecimalHour from '@/utils/formatMinutesToDecimalHour';
 import { useMode } from "@/contexts/ModeProvider";
 
 import { Coordinates, TransportMethod } from './page';
-import Info from '@/components/Info';
 
 const userInputs = [
   {
@@ -165,6 +165,7 @@ const DirectionSection = ({
                   onClick={() =>
                     setTool({
                       method,
+                      icon,
                       greenScores: greenScoreforEachRoute[i],
                       paths,
                     })

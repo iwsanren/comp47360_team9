@@ -1,0 +1,1472 @@
+{
+  "type": "FeatureCollection",
+  "generator": "overpass-turbo",
+  "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.",
+  "timestamp": "2025-07-22T16:11:19Z",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/1109101186",
+        "access": "private",
+        "amenity": "charging_station",
+        "capacity": "1",
+        "name": "Stacja ładowania autobusów elektrycznych",
+        "operator": "MZK Gorzów Wlkp."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              15.2340184,
+              52.7632251
+            ],
+            [
+              15.2340253,
+              52.7632137
+            ],
+            [
+              15.2340624,
+              52.763222
+            ],
+            [
+              15.2340554,
+              52.7632334
+            ],
+            [
+              15.2340184,
+              52.7632251
+            ]
+          ]
+        ]
+      },
+      "id": "way/1109101186"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/1235905457",
+        "amenity": "charging_station",
+        "generator:method": "photovoltaic",
+        "generator:output:electricity": "yes",
+        "generator:source": "solar",
+        "generator:type": "solar_photovoltaic_panel",
+        "operator": "NYC Department of Parks and Recreation"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -73.9773366,
+              40.7959314
+            ],
+            [
+              -73.9773191,
+              40.7959026
+            ],
+            [
+              -73.9772392,
+              40.7959304
+            ],
+            [
+              -73.9772567,
+              40.7959592
+            ],
+            [
+              -73.9773366,
+              40.7959314
+            ]
+          ]
+        ]
+      },
+      "id": "way/1235905457"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/1292955115",
+        "access": "yes",
+        "amenity": "charging_station",
+        "capacity": "4",
+        "covered": "no",
+        "fee": "yes",
+        "name": "Blue Earth Plaza Charging Station"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -96.5594908,
+              39.1759018
+            ],
+            [
+              -96.5594178,
+              39.1759015
+            ],
+            [
+              -96.559417,
+              39.1759955
+            ],
+            [
+              -96.5594901,
+              39.1759959
+            ],
+            [
+              -96.5594908,
+              39.1759018
+            ]
+          ]
+        ]
+      },
+      "id": "way/1292955115"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/1341644334",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "capacity": "2",
+        "fee": "yes",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -96.6149102,
+              39.1967435
+            ],
+            [
+              -96.614973,
+              39.1967433
+            ],
+            [
+              -96.6149726,
+              39.196691
+            ],
+            [
+              -96.6149098,
+              39.1966913
+            ],
+            [
+              -96.6149102,
+              39.1967435
+            ]
+          ]
+        ]
+      },
+      "id": "way/1341644334"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/1355085287",
+        "access": "permit",
+        "amenity": "charging_station",
+        "brand": "Chargepoint",
+        "capacity": "2",
+        "name": "Kansas State Memorial Stadium Chargers",
+        "not:operator:wikidata": "Q5176149",
+        "operator": "Kansas State University"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -96.5857501,
+              39.1873867
+            ],
+            [
+              -96.5857503,
+              39.1874509
+            ],
+            [
+              -96.585811,
+              39.1874508
+            ],
+            [
+              -96.5858107,
+              39.1873866
+            ],
+            [
+              -96.5857501,
+              39.1873867
+            ]
+          ]
+        ]
+      },
+      "id": "way/1355085287"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/1389660105",
+        "access": "customers",
+        "amenity": "charging_station",
+        "brand": "Evergy Clean Charge Network",
+        "operator": "Evergy"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -96.6029803,
+              39.1749736
+            ],
+            [
+              -96.6030609,
+              39.1749712
+            ],
+            [
+              -96.6030596,
+              39.1749445
+            ],
+            [
+              -96.602979,
+              39.1749469
+            ],
+            [
+              -96.6029803,
+              39.1749736
+            ]
+          ]
+        ]
+      },
+      "id": "way/1389660105"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5620136930",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "https://www.gmcparking.com/locations-and-rates/midtown/49"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9754634,
+          40.7443976
+        ]
+      },
+      "id": "node/5620136930"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5620136931",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "https://www.gmcparking.com/locations-and-rates/midtown/50/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9803222,
+          40.7439708
+        ]
+      },
+      "id": "node/5620136931"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5620136932",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "https://www.gmcparking.com/locations-and-rates/downtown/59/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.0019239,
+          40.7343178
+        ]
+      },
+      "id": "node/5620136932"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5620136933",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "https://www.gmcparking.com/locations-and-rates/upper-east-side/22/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9572029,
+          40.7778714
+        ]
+      },
+      "id": "node/5620136933"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5620136934",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "https://www.gmcparking.com/locations-and-rates/midtown/40/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9629702,
+          40.7573505
+        ]
+      },
+      "id": "node/5620136934"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5620136935",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "https://www.gmcparking.com/locations-and-rates/upper-east-side/16/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9563608,
+          40.7797068
+        ]
+      },
+      "id": "node/5620136935"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5620136936",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "https://www.gmcparking.com/locations-and-rates/upper-east-side/27/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9542488,
+          40.7732118
+        ]
+      },
+      "id": "node/5620136936"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5620136937",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "https://www.gmcparking.com/locations-and-rates/midtown/42/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9673715,
+          40.7586349
+        ]
+      },
+      "id": "node/5620136937"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5620136938",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "https://www.gmcparking.com/locations-and-rates/midtown/48/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9687333,
+          40.7532128
+        ]
+      },
+      "id": "node/5620136938"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5620136939",
+        "addr:city": "New York",
+        "addr:housenumber": "122",
+        "addr:state": "NY",
+        "addr:street": "West 3rd Street",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "https://www.gmcparking.com/locations-and-rates/downtown/56/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.0007447,
+          40.7304709
+        ]
+      },
+      "id": "node/5620136939"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5621655899",
+        "addr:city": "New York",
+        "addr:housenumber": "75",
+        "addr:state": "NY",
+        "addr:street": "Park Place",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "http://beamcharging.com/beam-locations.html#104"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.0109381,
+          40.7142374
+        ]
+      },
+      "id": "node/5621655899"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5621655900",
+        "addr:city": "New York",
+        "addr:housenumber": "200",
+        "addr:state": "NY",
+        "addr:street": "Chambers Street",
+        "amenity": "charging_station",
+        "brand": "Blink",
+        "brand:wikidata": "Q62065645",
+        "name": "Blink",
+        "operator": "Blink",
+        "operator:wikidata": "Q62065645",
+        "website": "http://beamcharging.com/beam-locations.html#38"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.0123014,
+          40.7167273
+        ]
+      },
+      "id": "node/5621655900"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5621655901",
+        "addr:city": "New York",
+        "addr:housenumber": "59-63",
+        "addr:state": "NY",
+        "addr:street": "Allen Street",
+        "amenity": "charging_station",
+        "brand": "Blink",
+        "brand:wikidata": "Q62065645",
+        "name": "Blink",
+        "operator": "Blink",
+        "operator:wikidata": "Q62065645",
+        "website": "http://beamcharging.com/beam-locations.html#37"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9917815,
+          40.7170911
+        ]
+      },
+      "id": "node/5621655901"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5621655904",
+        "addr:city": "New York",
+        "addr:housenumber": "375",
+        "addr:postcode": "10016",
+        "addr:state": "NY",
+        "addr:street": "West Houston Street",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "http://beamcharging.com/beam-locations.html#28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.0073913,
+          40.7286497
+        ]
+      },
+      "id": "node/5621655904"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5621655905",
+        "addr:city": "New York",
+        "addr:housenumber": "107",
+        "addr:postcode": "10011",
+        "addr:state": "NY",
+        "addr:street": "West 13th Street",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "http://beamcharging.com/beam-locations.html#36"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9978013,
+          40.7370016
+        ]
+      },
+      "id": "node/5621655905"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5621655906",
+        "addr:city": "New York",
+        "addr:housenumber": "180",
+        "addr:postcode": "10011",
+        "addr:state": "NY",
+        "addr:street": "West 20th Street",
+        "amenity": "charging_station",
+        "brand": "Blink",
+        "brand:wikidata": "Q62065645",
+        "name": "Blink",
+        "operator": "Blink",
+        "operator:wikidata": "Q62065645",
+        "website": "http://beamcharging.com/beam-locations.html#43"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9968226,
+          40.7419763
+        ]
+      },
+      "id": "node/5621655906"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5621655907",
+        "addr:city": "New York",
+        "addr:housenumber": "41-47",
+        "addr:postcode": "10010",
+        "addr:state": "NY",
+        "addr:street": "East 21st Street",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "http://beamcharging.com/beam-locations.html#30"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9878966,
+          40.7392802
+        ]
+      },
+      "id": "node/5621655907"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5621655908",
+        "addr:city": "New York",
+        "addr:housenumber": "441",
+        "addr:postcode": "10001",
+        "addr:state": "NY",
+        "addr:street": "9th Avenue",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "http://beamcharging.com/beam-locations.html#103"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9962654,
+          40.7537648
+        ]
+      },
+      "id": "node/5621655908"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5621655909",
+        "addr:city": "New York",
+        "addr:housenumber": "777",
+        "addr:postcode": "10001",
+        "addr:state": "NY",
+        "addr:street": "6th Avenue",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "http://beamcharging.com/beam-locations.html#102"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9913314,
+          40.745148
+        ]
+      },
+      "id": "node/5621655909"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5621655910",
+        "addr:city": "New York",
+        "addr:housenumber": "375",
+        "addr:postcode": "10022",
+        "addr:state": "NY",
+        "addr:street": "Park Avenue",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "http://beamcharging.com/beam-locations.html#101"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9722148,
+          40.7585337
+        ]
+      },
+      "id": "node/5621655910"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5621655911",
+        "addr:city": "New York",
+        "addr:housenumber": "157",
+        "addr:postcode": "10024",
+        "addr:state": "NY",
+        "addr:street": "West 83rd Street",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "http://beamcharging.com/beam-locations.html#17"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9754149,
+          40.7854212
+        ]
+      },
+      "id": "node/5621655911"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5621655912",
+        "addr:city": "New York",
+        "addr:housenumber": "109",
+        "addr:postcode": "10022",
+        "addr:state": "NY",
+        "addr:street": "East 58th Street",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "http://beamcharging.com/beam-locations.html#18"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9697683,
+          40.7619443
+        ]
+      },
+      "id": "node/5621655912"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5621655913",
+        "addr:city": "New York",
+        "addr:housenumber": "10",
+        "addr:postcode": "10019",
+        "addr:state": "NY",
+        "addr:street": "Columbus Circle",
+        "amenity": "charging_station",
+        "brand": "ChargePoint",
+        "brand:wikidata": "Q5176149",
+        "name": "ChargePoint",
+        "operator": "ChargePoint",
+        "operator:wikidata": "Q5176149",
+        "operator:wikipedia": "en:ChargePoint",
+        "website": "http://beamcharging.com/beam-locations.html#20"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9831589,
+          40.7690442
+        ]
+      },
+      "id": "node/5621655913"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/5794578259",
+        "amenity": "charging_station",
+        "capacity": "3",
+        "fee": "yes",
+        "name": "Green Way",
+        "opening_hours": "24/7",
+        "operator": "GreenWay",
+        "operator:wikidata": "Q116450281",
+        "socket:chademo": "1",
+        "socket:type2": "1",
+        "socket:type2_combo": "1",
+        "website": "https://greenwaypolska.pl"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          15.2604,
+          52.7605
+        ]
+      },
+      "id": "node/5794578259"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/6695702471",
+        "access": "customers",
+        "addr:city": "New York",
+        "addr:country": "US",
+        "addr:housenumber": "212",
+        "addr:postcode": "10017",
+        "addr:state": "NY",
+        "addr:street": "East 47th Street",
+        "amenity": "charging_station",
+        "authentication:app": "yes",
+        "bicycle": "no",
+        "brand": "Tesla Supercharger",
+        "brand:en": "Tesla Supercharger",
+        "brand:website": "https://www.tesla.com/supercharger",
+        "brand:wikidata": "Q17089620",
+        "brand:wikipedia": "en:Tesla Supercharger",
+        "bus": "no",
+        "capacity": "4",
+        "ele": "12",
+        "fee": "yes",
+        "frequency": "0",
+        "hgv": "no",
+        "maxstay": "no",
+        "motorcar": "designated",
+        "name": "Tesla Supercharger",
+        "network": "Supercharger",
+        "network:website": "https://www.tesla.com/supercharger",
+        "network:wikidata": "Q17089620",
+        "note": "This Tesla Supercharger was edited or added by the June 2025 import from supercharge.info... if you have any questions, comments, or concerns, please reach out to the US Slack / Forum",
+        "opening_hours": "24/7",
+        "operator": "Tesla, Inc.",
+        "operator:wikidata": "Q478214",
+        "operator:wikipedia": "en:Tesla, Inc.",
+        "payment:app:tesla": "yes",
+        "ref:supercharge_info": "1588",
+        "reservation": "no",
+        "scooter": "no",
+        "socket:nacs": "4",
+        "socket:nacs:output": "72",
+        "source": "https://supercharge.info",
+        "start_date": "2018-04-24",
+        "website": "https://www.tesla.com/findus/location/supercharger/nyeast47thstreetsupercharger"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.97168,
+          40.75336
+        ]
+      },
+      "id": "node/6695702471"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/6695729257",
+        "access": "customers",
+        "addr:city": "Lower Manhattan",
+        "addr:country": "US",
+        "addr:housenumber": "59",
+        "addr:postcode": "95123",
+        "addr:state": "NY",
+        "addr:street": "Allen Street",
+        "amenity": "charging_station",
+        "authentication:app": "yes",
+        "bicycle": "no",
+        "brand": "Tesla Supercharger",
+        "brand:en": "Tesla Supercharger",
+        "brand:website": "https://www.tesla.com/supercharger",
+        "brand:wikidata": "Q17089620",
+        "brand:wikipedia": "en:Tesla Supercharger",
+        "bus": "no",
+        "capacity": "4",
+        "ele": "12",
+        "fee": "yes",
+        "frequency": "0",
+        "hgv": "no",
+        "maxstay": "no",
+        "motorcar": "designated",
+        "name": "Tesla Supercharger",
+        "network": "Supercharger",
+        "network:website": "https://www.tesla.com/supercharger",
+        "network:wikidata": "Q17089620",
+        "note": "This Tesla Supercharger was edited or added by the June 2025 import from supercharge.info... if you have any questions, comments, or concerns, please reach out to the US Slack / Forum",
+        "opening_hours": "24/7",
+        "operator": "Tesla, Inc.",
+        "operator:wikidata": "Q478214",
+        "operator:wikipedia": "en:Tesla, Inc.",
+        "payment:app:tesla": "yes",
+        "ref:supercharge_info": "1683",
+        "reservation": "no",
+        "scooter": "no",
+        "socket:nacs": "4",
+        "socket:nacs:output": "72",
+        "source": "https://supercharge.info",
+        "start_date": "2018-07-25",
+        "website": "https://www.tesla.com/findus/location/supercharger/ny59allenstsupercharger"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.99187,
+          40.71715
+        ]
+      },
+      "id": "node/6695729257"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/6695745785",
+        "access": "customers",
+        "addr:city": "New York",
+        "addr:country": "US",
+        "addr:housenumber": "201",
+        "addr:postcode": "10023-1704",
+        "addr:state": "NY",
+        "addr:street": "West 75th Street",
+        "amenity": "charging_station",
+        "authentication:app": "yes",
+        "bicycle": "no",
+        "brand": "Tesla Supercharger",
+        "brand:en": "Tesla Supercharger",
+        "brand:website": "https://www.tesla.com/supercharger",
+        "brand:wikidata": "Q17089620",
+        "brand:wikipedia": "en:Tesla Supercharger",
+        "bus": "no",
+        "capacity": "4",
+        "ele": "23",
+        "fee": "yes",
+        "frequency": "0",
+        "hgv": "no",
+        "maxstay": "no",
+        "motorcar": "designated",
+        "name": "Tesla Supercharger",
+        "network": "Supercharger",
+        "network:website": "https://www.tesla.com/supercharger",
+        "network:wikidata": "Q17089620",
+        "note": "This Tesla Supercharger was edited or added by the June 2025 import from supercharge.info... if you have any questions, comments, or concerns, please reach out to the US Slack / Forum",
+        "opening_hours": "24/7",
+        "operator": "Tesla, Inc.",
+        "operator:wikidata": "Q478214",
+        "operator:wikipedia": "en:Tesla, Inc.",
+        "payment:app:tesla": "yes",
+        "ref:supercharge_info": "1587",
+        "reservation": "no",
+        "scooter": "no",
+        "socket:nacs": "4",
+        "socket:nacs:output": "72",
+        "source": "https://supercharge.info",
+        "start_date": "2018-04-24",
+        "website": "https://www.tesla.com/findus/location/supercharger/nywest75streetsupercharger"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.98041,
+          40.78098
+        ]
+      },
+      "id": "node/6695745785"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/7881720139",
+        "amenity": "charging_station"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9246464,
+          40.7923245
+        ]
+      },
+      "id": "node/7881720139"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/7881720143",
+        "amenity": "charging_station"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9227522,
+          40.7930006
+        ]
+      },
+      "id": "node/7881720143"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/9678370839",
+        "amenity": "charging_station"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.0037975,
+          40.7101611
+        ]
+      },
+      "id": "node/9678370839"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/9678370840",
+        "amenity": "charging_station"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.003746,
+          40.7101214
+        ]
+      },
+      "id": "node/9678370840"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/9678635414",
+        "access": "private",
+        "amenity": "charging_station",
+        "name": "Bus Charging Station",
+        "operator": "New York City Transit Authority"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9695881,
+          40.7479016
+        ]
+      },
+      "id": "node/9678635414"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/9680486866",
+        "amenity": "charging_station"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9388916,
+          40.8373668
+        ]
+      },
+      "id": "node/9680486866"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/9750239714",
+        "amenity": "charging_station",
+        "name": "plugNYC"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9441005,
+          40.7756859
+        ]
+      },
+      "id": "node/9750239714"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/10612941923",
+        "amenity": "charging_station",
+        "brand": "Blink",
+        "brand:wikidata": "Q62065645",
+        "name": "Blink",
+        "operator": "Blink",
+        "operator:wikidata": "Q62065645"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9939156,
+          40.7591999
+        ]
+      },
+      "id": "node/10612941923"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/10781832314",
+        "access": "customers",
+        "amenity": "charging_station",
+        "brand": "FLO",
+        "brand:wikidata": "Q64971203",
+        "capacity": "2",
+        "fee": "yes",
+        "name": "FLO",
+        "operator": "FLO",
+        "operator:wikidata": "Q64971203"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9756938,
+          40.7863037
+        ]
+      },
+      "id": "node/10781832314"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/11159622327",
+        "amenity": "charging_station"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9777352,
+          40.780405
+        ]
+      },
+      "id": "node/11159622327"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/11261405829",
+        "amenity": "charging_station"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          15.236894,
+          52.7628026
+        ]
+      },
+      "id": "node/11261405829"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/11899378690",
+        "amenity": "charging_station",
+        "capacity": "2",
+        "mapillary": "365243796004378",
+        "operator": "NYC Department of Citywide Administrative Services",
+        "operator:short": "NYC DCAS"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9581438,
+          40.8221641
+        ]
+      },
+      "id": "node/11899378690"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/11899378692",
+        "amenity": "charging_station",
+        "capacity": "2",
+        "mapillary": "365243796004378",
+        "operator": "NYC Department of Citywide Administrative Services",
+        "operator:short": "NYC DCAS"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9581147,
+          40.8221998
+        ]
+      },
+      "id": "node/11899378692"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/11899378693",
+        "amenity": "charging_station",
+        "capacity": "2",
+        "mapillary": "365243796004378",
+        "operator": "NYC Department of Citywide Administrative Services",
+        "operator:short": "NYC DCAS"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9580915,
+          40.8222255
+        ]
+      },
+      "id": "node/11899378693"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/11899378694",
+        "amenity": "charging_station",
+        "capacity": "2",
+        "mapillary": "365243796004378",
+        "operator": "NYC Department of Citywide Administrative Services",
+        "operator:short": "NYC DCAS"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9580688,
+          40.8222508
+        ]
+      },
+      "id": "node/11899378694"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/11899378695",
+        "amenity": "charging_station",
+        "capacity": "2",
+        "mapillary": "365243796004378",
+        "operator": "NYC Department of Citywide Administrative Services",
+        "operator:short": "NYC DCAS"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9580445,
+          40.8222812
+        ]
+      },
+      "id": "node/11899378695"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/11899378696",
+        "amenity": "charging_station",
+        "capacity": "2",
+        "mapillary": "365243796004378",
+        "operator": "NYC Department of Citywide Administrative Services",
+        "operator:short": "NYC DCAS"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9580196,
+          40.822309
+        ]
+      },
+      "id": "node/11899378696"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/12032993877",
+        "amenity": "charging_station",
+        "brand": "PowerDot"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          15.2716988,
+          52.7621256
+        ]
+      },
+      "id": "node/12032993877"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/12262938705",
+        "amenity": "charging_station"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          15.2781872,
+          52.7614271
+        ]
+      },
+      "id": "node/12262938705"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/12262938706",
+        "amenity": "charging_station"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          15.2782194,
+          52.7614507
+        ]
+      },
+      "id": "node/12262938706"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/12262938707",
+        "amenity": "charging_station"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          15.2782516,
+          52.7614742
+        ]
+      },
+      "id": "node/12262938707"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/12944743519",
+        "access": "customers",
+        "addr:city": "New York",
+        "addr:country": "US",
+        "addr:housenumber": "106",
+        "addr:postcode": "10013-4600",
+        "addr:state": "NY",
+        "addr:street": "Mott Street",
+        "amenity": "charging_station",
+        "authentication:app": "yes",
+        "bicycle": "no",
+        "brand": "Tesla Supercharger",
+        "brand:en": "Tesla Supercharger",
+        "brand:website": "https://www.tesla.com/supercharger",
+        "brand:wikidata": "Q17089620",
+        "brand:wikipedia": "en:Tesla Supercharger",
+        "bus": "no",
+        "capacity": "2",
+        "ele": "10",
+        "fee": "yes",
+        "frequency": "0",
+        "hgv": "no",
+        "maxstay": "no",
+        "motorcar": "designated",
+        "network": "Supercharger",
+        "network:website": "https://www.tesla.com/supercharger",
+        "network:wikidata": "Q17089620",
+        "note": "This Tesla Supercharger was edited or added by the June 2025 import from supercharge.info... if you have any questions, comments, or concerns, please reach out to the US Slack / Forum",
+        "opening_hours": "24/7",
+        "operator": "Tesla, Inc.",
+        "operator:wikidata": "Q478214",
+        "operator:wikipedia": "en:Tesla, Inc.",
+        "payment:app:tesla": "yes",
+        "ref:supercharge_info": "1517",
+        "reservation": "no",
+        "scooter": "no",
+        "socket:nacs": "2",
+        "socket:nacs:output": "72",
+        "source": "https://supercharge.info",
+        "start_date": "2018-02-21",
+        "website": "https://www.tesla.com/findus/location/supercharger/newyorkmottstsupercharger"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9973,
+          40.71752
+        ]
+      },
+      "id": "node/12944743519"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/12944744356",
+        "access": "customers",
+        "addr:city": "New York",
+        "addr:country": "US",
+        "addr:housenumber": "250",
+        "addr:postcode": "10281",
+        "addr:state": "NY",
+        "addr:street": "Vesey Street",
+        "amenity": "charging_station",
+        "authentication:app": "yes",
+        "bicycle": "no",
+        "brand": "Tesla Supercharger",
+        "brand:en": "Tesla Supercharger",
+        "brand:website": "https://www.tesla.com/supercharger",
+        "brand:wikidata": "Q17089620",
+        "brand:wikipedia": "en:Tesla Supercharger",
+        "bus": "no",
+        "capacity": "4",
+        "ele": "6",
+        "fee": "yes",
+        "frequency": "0",
+        "hgv": "no",
+        "maxstay": "no",
+        "motorcar": "designated",
+        "network": "Supercharger",
+        "network:website": "https://www.tesla.com/supercharger",
+        "network:wikidata": "Q17089620",
+        "note": "This Tesla Supercharger was edited or added by the June 2025 import from supercharge.info... if you have any questions, comments, or concerns, please reach out to the US Slack / Forum",
+        "opening_hours": "24/7",
+        "operator": "Tesla, Inc.",
+        "operator:wikidata": "Q478214",
+        "operator:wikipedia": "en:Tesla, Inc.",
+        "payment:app:tesla": "yes",
+        "ref:supercharge_info": "2263",
+        "reservation": "no",
+        "scooter": "no",
+        "socket:nacs": "4",
+        "socket:nacs:output": "72",
+        "source": "https://supercharge.info",
+        "start_date": "2020-01-28",
+        "website": "https://www.tesla.com/findus/location/supercharger/lowermanhattansupercharger"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.01584,
+          40.71406
+        ]
+      },
+      "id": "node/12944744356"
+    }
+  ]
+}
