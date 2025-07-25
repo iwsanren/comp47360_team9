@@ -4,6 +4,7 @@
  */
 
 import { NextResponse } from 'next/server';
+import jwt from 'jsonwebtoken';
 import { generateRequestId, logWithContext, extractUserContext } from '@/utils/requestTracker';
 
 /**
@@ -87,4 +88,51 @@ export function sendErrorResponse(requestId, message, status = 500, context = {}
   
   response.headers.set('X-Request-ID', requestId);
   return response;
+}
+
+/**
+ * JWT Authentication Middleware
+ * Features:
+ * - Automatically validates JWT token validity
+ * - Checks if token source is 'Manhattan_My_Way'
+ * - Unified handling of authentication failure error responses
+ * - Attaches decoded user information to req.user
+ */
+export function withAuth(handler) {
+  return async function authHandler(req, res) {
+    const token = req.cookies.get('token')?.value;
+    
+    if (!token) {
+      const requestId = req.headers.get('x-request-id') || generateRequestId();
+      return sendErrorResponse(requestId, 'Missing token', 401);
+    }
+
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      
+      if (decoded.source !== 'Manhattan_My_Way') {
+        const requestId = req.headers.get('x-request-id') || generateRequestId();
+        return sendErrorResponse(requestId, 'Invalid token', 403);
+      }
+      
+      req.user = decoded;
+      return await handler(req, res);
+    } catch (error) {
+      const requestId = req.headers.get('x-request-id') || generateRequestId();
+      return sendErrorResponse(requestId, 'Invalid or expired token', 403, {
+        tokenError: true
+      });
+    }
+  };
+}
+
+/**
+ * Combined Middleware: Authentication + Request Tracking
+ * Features:
+ * - Combines JWT authentication and request tracking functionality
+ * - Suitable for API endpoints that require authentication
+ * - Provides complete request lifecycle management
+ */
+export function withAuthAndTracking(handler) {
+  return withAuth(withRequestTracking(handler));
 }

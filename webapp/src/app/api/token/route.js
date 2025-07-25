@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
+import { withRequestTracking } from "../../../middleware/requestTracker";
 
-export async function POST() {
+async function handler() {
   const token = jwt.sign({ source: 'Manhattan_My_Way' }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
   const res = NextResponse.json({ ok: true });
@@ -13,5 +14,8 @@ export async function POST() {
     path: '/',
   });
 
+  console.log('New JWT token generated for Manhattan_My_Way');
   return res;
 }
+
+export const POST = withRequestTracking(handler, 'API_TOKEN');
