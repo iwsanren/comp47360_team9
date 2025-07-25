@@ -24,6 +24,7 @@ quality_check:
     - feature/request-id-logging
     - feature/https-ddns-setup
     - hotfix/docker-time-sync-fix
+    - feature/api-error-handling-refactor
     - develop
     - main
 
@@ -70,6 +71,7 @@ deploy_staging:
     - feature/request-id-logging
     - feature/https-ddns-setup
     - hotfix/docker-time-sync-fix
+    - feature/api-error-handling-refactor
 
 deploy_production:
   stage: deploy
