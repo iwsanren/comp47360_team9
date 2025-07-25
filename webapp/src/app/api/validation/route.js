@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
+
 import { withAuthAndTracking } from "../../../middleware/requestTracker";
 
 async function handler(req, payload) {
   // Generate new token with extended expiration
-  const newToken = jwt.sign({ source: payload.source }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  const newToken = jwt.sign({ source: 'Manhattan_My_Way' }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
   const res = NextResponse.json({ ok: true });
   res.cookies.set('token', newToken, {

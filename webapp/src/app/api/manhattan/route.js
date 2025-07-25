@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
-import { withAuthAndTracking } from "../../../middleware/requestTracker";
+
 import { ML_API_URL } from "@/constants/url";
+
+import { withAuthAndTracking } from "../../../middleware/requestTracker";
 
 const API_KEY = process.env.OPENWEATHER_API_KEY; // use .env to get api key.
 
-async function handler(req, payload) {
+async function handler(req) {
   const { searchParams } = new URL(req.url);
   const data = searchParams.get("data");
   const timestamp = searchParams.get("timestamp");
