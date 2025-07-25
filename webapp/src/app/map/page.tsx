@@ -103,7 +103,7 @@ const busynessLayerSetting: any = {
     'fill-color': [
       'interpolate',
       ['linear'],
-      ['get', 'busyness'],
+      ['get', 'combined_busyness'],
       // min, color
       1, '#B7E4C7',    
       100, '#95D5B2',   
@@ -263,7 +263,7 @@ export default function Map() {
 
   const navLineGeo = useMemo(() => navigation && decodeToGeoJSON(navigation?.overview_polyline?.points), [navigation])
 
-  // console.log(featuresData.predictedBusyness)
+  console.log(featuresData.busyness)
 
   const allMethodsRouteCoords = useMemo(() => {
     const paths: number[][][][] = []
