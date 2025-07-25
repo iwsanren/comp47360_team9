@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { withRequestTracking, sendErrorResponse } from '@/middleware/requestTracker';
 import { logWithContext, generateRequestId } from '@/utils/requestTracker';
 
@@ -27,7 +28,7 @@ async function contactHandler(req, requestId) {
   return result;
 }
 
-export const POST = withRequestTracking(async (req, res) => {
+export const POST = withRequestTracking(async (req) => {
   const requestId = req.headers.get('x-request-id') || generateRequestId();
   
   try {

@@ -349,8 +349,40 @@ def predict_all():
             subway_zone_preds["PULocationID"] == zone_id, "subway_busyness"
         ].values
         subway_val = round(float(subway_val[0]), 2) if len(subway_val) else 0.0
+
+        # Lookup taxi stats for normalisation.
+        taxi_match = zone_stats[
+            (zone_stats["PULocationID"] == zone_id) &
+            (zone_stats["pickup_hour"] == pickup_hour) &
+            (zone_stats["day_of_week"] == day_of_week)
+        ]
+        if not taxi_match.empty:
+            taxi_min = taxi_match.iloc[0]["min"]
+            taxi_max = taxi_match.iloc[0]["max"]
+            taxi_normalised = (taxi_val - taxi_min) / (taxi_max - taxi_min) if taxi_max > taxi_min else 0.5
+            taxi_normalised = max(0.0, min(1.0, taxi_normalised))
+        else:
+            taxi_normalised = 0.5
+
+        # Lookup subway stats for normalisation.
+        subway_match = subway_stats[
+            (subway_stats["PULocationID"] == zone_id) &
+            (subway_stats["hour"] == pickup_hour) &
+            (subway_stats["day_of_week"] == day_of_week)
+        ]
+        if not subway_match.empty:
+            subway_min = subway_match.iloc[0]["min"]
+            subway_max = subway_match.iloc[0]["max"]
+            subway_normalised = (subway_val - subway_min) / (subway_max - subway_min) if subway_max > subway_min else 0.5
+            subway_normalised = max(0.0, min(1.0, subway_normalised))
+        else:
+            subway_normalised = 0.5
+
         combined_val = float(round(0.7 * subway_val + 0.3 * taxi_val, 2))
         combined_level = classify_combined_busyness(combined_val, zone_id, pickup_hour, day_of_week)
+
+        # Combine normalised values with same weighting.
+        combined_normalised = round(0.7 * subway_normalised + 0.3 * taxi_normalised, 3)
 
         geometry = OrderedDict()
         geom = row.get("geometry", "")
@@ -376,6 +408,7 @@ def predict_all():
                 "subway_busyness": subway_val,
                 "combined_busyness": combined_val,
                 "combined_level": combined_level,
+                "normalised_busyness": combined_normalised
             },
             "geometry": geometry
         })
