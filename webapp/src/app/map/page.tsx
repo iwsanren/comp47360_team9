@@ -103,10 +103,13 @@ const busynessLayerSetting: any = {
     'fill-color': [
       'match',
       ['get', 'combined_level'],
-      'not busy', '#95D5B2',   
-      'normal', '#FAA307', 
-      'busy', '#D00000',
-      '#B7E4C7'
+      'very quiet', '#B7E4C7',   
+      'quiet', '#95D5B2',   
+      'normal', '#FFE066', 
+      'busy', '#F77F00', 
+      'very busy', '#FF4D4D',
+      'extremely busy', '#D00000',
+      '#FFE066'
     ],
     'fill-color-transition': {
       duration: 1000, 

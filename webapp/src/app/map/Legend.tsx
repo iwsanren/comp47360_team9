@@ -1,9 +1,9 @@
 const busyLevelLegend = [
-  // { level: 'Very Low', color: '#B7E4C7' },
+  { level: 'Very Low', color: '#B7E4C7' },
   { level: 'Low', color: '#95D5B2' },
-  // { level: 'Moderate', color: '#FFE066' },
-  { level: 'Moderate', color: '#FAA307' },
-  // { level: 'Very Busy', color: '#F48C06' },
+  { level: 'Moderate', color: '#FFE066' },
+  { level: 'busy', color: '#F77F00' },
+  { level: 'Very Busy', color: '#FF4D4D' },
   { level: 'Extremely Busy', color: '#D00000' },
 ];
 

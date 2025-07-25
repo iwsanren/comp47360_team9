@@ -32,24 +32,22 @@ CORS(app)
 # Setup logging system
 setup_logging()
 
-
 # Weather API key.
 WEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY')
 JWT_SECRET = os.getenv('JWT_SECRET')
 
-# Load models and data
+# Loading models and data.
 model = joblib.load("./xgboost_taxi_model.joblib")
 zones_df = pd.read_csv("./manhattan_taxi_zones.csv")
-
-# Loading filled busyness data.
-zone_stats = pd.read_csv("./zone_hourly_busyness_stats.csv")
-zone_stats["PULocationID"] = zone_stats["PULocationID"].astype(int)
 
 subway_model = joblib.load("./subway_ridership_model_xgboost_final.joblib")
 subway_feature_list = json.load(open("./required_features.json"))
 station_zone_map = pd.read_csv("./station_to_zone_mapping.csv")
-subway_stats = pd.read_csv("./zone_subway_busyness_stats.csv")
 subway_stations = pd.read_csv("./subway_stations.csv")
+
+# Loading combined busyness stats.
+combined_stats = pd.read_csv("./zone_combined_busyness_stats.csv")
+combined_stats["PULocationID"] = combined_stats["PULocationID"].astype(int)
 
 # Feature order required by the model.
 MODEL_FEATURE_ORDER = [
@@ -111,20 +109,33 @@ def prepare_subway_features(timestamp, weather, station_df):
 
 # Function to classify busyness.
 def classify_combined_busyness(pred, zone_id, hour, day):
-    match = subway_stats[
-        (subway_stats["PULocationID"] == zone_id) &
-        (subway_stats["hour"] == hour) &
-        (subway_stats["day_of_week"] == day)
+    match = combined_stats[
+        (combined_stats["PULocationID"] == zone_id) &
+        (combined_stats["hour"] == hour) &
+        (combined_stats["day_of_week"] == day)
     ]
     if match.empty:
         return "normal"
-    p25, p75 = match.iloc[0]["p25"], match.iloc[0]["p75"]
-    if pred < p25:
-        return "not busy"
-    elif pred > p75:
-        return "busy"
-    else:
+
+    # Percentiles for classification.
+    p10 = match.iloc[0]["p10"]
+    p25 = match.iloc[0]["p25"]
+    p50 = match.iloc[0]["p50"]
+    p75 = match.iloc[0]["p75"]
+    p90 = match.iloc[0]["p90"]
+
+    if pred < p10:
+        return "very quiet"
+    elif pred < p25:
+        return "quiet"
+    elif pred < p50:
         return "normal"
+    elif pred < p75:
+        return "busy"
+    elif pred < p90:
+        return "very busy"
+    else:
+        return "extremely busy"
 
 # Root route to provide API info
 @app.route('/', methods=['GET'])
@@ -158,29 +169,18 @@ def health_check():
                 'timestamp': datetime.now().isoformat()
             }), 503
         
-        # Check if required data files exist
-        if zones_df is None or zone_stats is None:
-            log_with_context('error', 'Health check failed: Required data files not loaded')
-            return jsonify({
-                'status': 'unhealthy',
-                'error': 'Required data files not loaded',
-                'timestamp': datetime.now().isoformat()
-            }), 503
-        
         # Basic health check
         health_data = {
             'status': 'healthy',
             'timestamp': datetime.now().isoformat(),
             'model_loaded': True,
             'zones_count': len(zones_df),
-            'stats_count': len(zone_stats),
             'environment': os.getenv('FLASK_ENV', 'development'),
             'weather_api_configured': bool(WEATHER_API_KEY)
         }
         
         log_with_context('info', 'Health check completed successfully', {
             'zones_count': len(zones_df),
-            'stats_count': len(zone_stats)
         })
         
         return jsonify(health_data), 200
@@ -351,38 +351,28 @@ def predict_all():
         subway_val = round(float(subway_val[0]), 2) if len(subway_val) else 0.0
 
         # Lookup taxi stats for normalisation.
-        taxi_match = zone_stats[
-            (zone_stats["PULocationID"] == zone_id) &
-            (zone_stats["pickup_hour"] == pickup_hour) &
-            (zone_stats["day_of_week"] == day_of_week)
-        ]
-        if not taxi_match.empty:
-            taxi_min = taxi_match.iloc[0]["min"]
-            taxi_max = taxi_match.iloc[0]["max"]
-            taxi_normalised = (taxi_val - taxi_min) / (taxi_max - taxi_min) if taxi_max > taxi_min else 0.5
-            taxi_normalised = max(0.0, min(1.0, taxi_normalised))
-        else:
-            taxi_normalised = 0.5
+        # Combining raw value.
+        combined_val = float(round(0.7 * subway_val + 0.3 * taxi_val, 2))
 
-        # Lookup subway stats for normalisation.
-        subway_match = subway_stats[
-            (subway_stats["PULocationID"] == zone_id) &
-            (subway_stats["hour"] == pickup_hour) &
-            (subway_stats["day_of_week"] == day_of_week)
+        # Classification using combined percentiles.
+        combined_level = classify_combined_busyness(combined_val, zone_id, pickup_hour, day_of_week)
+
+        # Normalising using combined stats CSV.
+        combined_match = combined_stats[
+            (combined_stats["PULocationID"] == zone_id) &
+            (combined_stats["hour"] == pickup_hour) &
+            (combined_stats["day_of_week"] == day_of_week)
         ]
-        if not subway_match.empty:
-            subway_min = subway_match.iloc[0]["min"]
-            subway_max = subway_match.iloc[0]["max"]
-            subway_normalised = (subway_val - subway_min) / (subway_max - subway_min) if subway_max > subway_min else 0.5
-            subway_normalised = max(0.0, min(1.0, subway_normalised))
+        if not combined_match.empty:
+            combined_min = combined_match.iloc[0]["min"]
+            combined_max = combined_match.iloc[0]["max"]
+            combined_normalised = (combined_val - combined_min) / (combined_max - combined_min) if combined_max > combined_min else 0.5
+            combined_normalised = max(0.0, min(1.0, combined_normalised))
         else:
-            subway_normalised = 0.5
+            combined_normalised = 0.5
 
         combined_val = float(round(0.7 * subway_val + 0.3 * taxi_val, 2))
         combined_level = classify_combined_busyness(combined_val, zone_id, pickup_hour, day_of_week)
-
-        # Combine normalised values with same weighting.
-        combined_normalised = round(0.7 * subway_normalised + 0.3 * taxi_normalised, 3)
 
         geometry = OrderedDict()
         geom = row.get("geometry", "")
@@ -408,7 +398,7 @@ def predict_all():
                 "subway_busyness": subway_val,
                 "combined_busyness": combined_val,
                 "combined_level": combined_level,
-                "normalised_busyness": combined_normalised
+                "normalised_busyness": round(combined_normalised, 3)
             },
             "geometry": geometry
         })
