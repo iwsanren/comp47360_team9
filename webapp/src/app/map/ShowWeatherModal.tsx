@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
 import Icon from "@/components/Icon";
-import { WEATHER_CONDITION_ICONS } from "@/constants/icons";
 import Heading from "@/components/Heading";
+import { WEATHER_CONDITION_ICONS } from "@/constants/icons";
 
 interface modalProps {
   setShowModal: React.Dispatch<React.SetStateAction<boolean | undefined>>;
@@ -13,7 +13,6 @@ interface modalProps {
 const ShowWeatherModal = ({ setShowModal, current, hourly }: modalProps) => {
     const [manhattanTime, setManhattanTime] = useState<string>("");
     const [isFlipped, setFlipped] = useState<number[]>([]);
-    // console.log(manhattanTime)
     // Time update
       useEffect(() => {
         const updateTime = () => {
