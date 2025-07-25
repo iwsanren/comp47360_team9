@@ -3,8 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BiSolidLeftArrow } from "react-icons/bi";
 import { FaBicycle, FaCar, FaTrain } from "react-icons/fa6";
-import { FaWalking, FaRecycle, FaExclamationCircle, FaArrowAltCircleDown, FaLeaf } from "react-icons/fa";
-import { IoMdClose } from "react-icons/io";
+import { FaWalking, FaRecycle, FaExclamationCircle, FaArrowAltCircleDown } from "react-icons/fa";
 import { IconType } from "react-icons";
 import { Feature, Point, GeoJsonProperties } from 'geojson';
 import polyline from "@mapbox/polyline";
@@ -900,34 +899,6 @@ export default function Map() {
               <DirectionModal data={tool} setOpen={setOpen} setNavigation={setNavigation} navigation={navigation} />
             )}
           </div>
-          
-          <div ref={mapRef} className="relative h-[555px] lg:min-h-[850px] lg:h-[100dvh] font-roboto">
-            <div className="lg:hidden absolute top-2 left-2 z-5">
-              {!isPredictionMode && (
-                <Button
-                  onClick={() => {
-                    setShowFilter(prev => !prev)
-                  }}
-                  className={`${showFilter ? 'text-white bg-green-700' : '!text-green-800 bg-white'} `}
-                >
-                  {showFilter && 'Close '}Filter
-                </Button>
-              )}
-              {showFilter && (
-                <Filter className="mt-2 bg-green-700" setToggles={setToggles} toggles={toggles} mvpFeatures={mvpFeatures} />
-              )}
-            </div>
-          </div>
-          {(featuresData.predictedBusyness || toggles.busyness)&& (
-            <Legend />
-          )}
-          {showModal && (
-            <>
-              <div className="absolute left-0 right-0 top-0 bottom-0 bg-[rgba(0,0,0,0.5)] z-10" />
-              <ShowWeatherModal current={current} hourly={hourly} setShowModal={setShowModal} />
-            </>
-          )}
-
         </div>
         
         <div ref={mapRef} className="relative h-[555px] lg:min-h-[850px] lg:h-[100dvh] font-roboto">
