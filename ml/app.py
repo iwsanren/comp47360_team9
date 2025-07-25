@@ -259,11 +259,6 @@ def predict_all():
         return jsonify({"error": "Failed to fetch weather data"}), 500
     
     weather_data = weather_response.json()
-    weather_main = weather_data["weather"][0]["main"]
-    weather_dict = {
-        f"weather_{w}": int(weather_main == w)
-        for w in ["Rain", "Clouds", "Clear", "Snow", "Mist", "Haze", "Smoke", "Drizzle", "Fog", "Thunderstorm"]
-    }
 
     if time is not None:
         weather_data = next(filter(lambda x: x["dt"] == time, weather_data['list']), None)
@@ -272,7 +267,13 @@ def predict_all():
                 'requested_timestamp': time
             })
             return jsonify({"error": "No weather data for specified time"}), 400
-        
+    
+    weather_main = weather_data["weather"][0]["main"]
+    
+    weather_dict = {
+        f"weather_{w}": int(weather_main == w)
+        for w in ["Rain", "Clouds", "Clear", "Snow", "Mist", "Haze", "Smoke", "Drizzle", "Fog", "Thunderstorm"]
+    }
     temp = weather_data['main']['temp']
     feels_like = weather_data['main']['feels_like']
     humidity = weather_data['main']['humidity']
