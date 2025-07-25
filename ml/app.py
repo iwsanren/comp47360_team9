@@ -198,14 +198,21 @@ def health_check():
 @app.route('/predict-all', methods=['POST'])
 @with_request_tracking
 def predict_all():
-    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    auth_header = request.headers.get('Authorization')
+    
+    if not auth_header or not auth_header.startswith('Bearer '):
+        log_with_context('warn', 'Prediction request missing or invalid authorization header')
+        return {'error': 'Missing or invalid token'}, 401
+    
+    token = auth_header.split(' ')[1]
 
     # Skip auth if DEV_MODE is enabled
     if os.getenv("DEV_MODE", "false").lower() == "true":
         pass
     else:
         try:
-            jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+            decoded = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+            log_with_context('info', 'JWT token validated successfully')
         except jwt.ExpiredSignatureError:
             log_with_context('warn', 'JWT token expired')
             return jsonify({'error': 'Token expired'}), 403
@@ -382,178 +389,6 @@ def predict_all():
         },
         "features": features
     })
-
-    # try:
-    #     log_with_context('info', 'JWT token validated successfully')
-    #     if time is not None:
-    #         weather_data = next(filter(lambda x: x["dt"] == time, weather_data['list']), None)
-    #         if weather_data is None:
-    #             log_with_context('error', 'No weather data found for specified timestamp', {
-    #                 'requested_timestamp': time
-    #             })
-    #             return jsonify({"error": "No weather data for specified time"}), 400
-
-    #     temp = weather_data['main']['temp']
-    #     feels_like = weather_data['main']['feels_like']
-    #     humidity = weather_data['main']['humidity']
-    #     wind_speed = weather_data['wind']['speed']
-    #     weather_main = weather_data['weather'][0]['main']
-
-    #     log_with_context('info', 'Weather data retrieved successfully', {
-    #         'temperature': temp,
-    #         'condition': weather_main,
-    #         'humidity': humidity
-    #     })
-
-    #     # One-hot encoding weather conditions.
-    #     weather_features = [
-    #         'Rain', 'Clouds', 'Clear', 'Snow', 'Mist', 
-    #         'Haze', 'Smoke', 'Drizzle', 'Fog', 'Thunderstorm'
-    #     ]
-    #     weather_dict = {
-    #         f'weather_{w}': int(weather_main == w) 
-    #         for w in weather_features
-    #     }
-
-    #     # Generating predictions for each zone.
-    #     features = []
-    #     prediction_count = 0
-        
-    #     log_with_context('info', f'Starting predictions for {len(zones_df)} zones')
-        
-    #     for _, row in zones_df.iterrows():
-    #         prediction_count += 1
-    #         zone_id = int(row['OBJECTID'])
-           
-    #         input_data = {
-    #             "pickup_hour": pickup_hour,
-    #             "day_of_week": day_of_week,
-    #             "is_weekend": is_weekend,
-    #             "is_holiday": is_holiday,
-    #             "is_peak_hour": is_peak_hour,
-    #             "temp": temp,
-    #             "humidity": humidity,
-    #             "wind_speed": wind_speed,
-    #             "feels_like": feels_like,
-    #             "centroid_lat": row['centroid_lat'],
-    #             "centroid_lon": row['centroid_lon'],
-    #             "PULocationID": zone_id,
-    #             "Shape_Area": row['Shape_Area'],
-    #             "Shape_Leng": row['Shape_Leng'],
-    #         }
-    #         input_data.update(weather_dict)
-
-    #         # Creating a DataFrame in correct order,
-    #         input_df = pd.DataFrame([input_data])[MODEL_FEATURE_ORDER]
-
-    #         try:
-    #             # Predicting and classifying zones.
-    #             pred = model.predict(input_df)[0]
-    #             busyness_level = classify_busyness_zone_hour(
-    #                 pred, zone_id, pickup_hour, day_of_week
-    #             )
-    #              # Calculating normalised busyness with clamping.
-    #             match = zone_stats[
-    #                 (zone_stats["PULocationID"] == zone_id) &
-    #                 (zone_stats["pickup_hour"] == pickup_hour) &
-    #                 (zone_stats["day_of_week"] == day_of_week)
-    #             ]
-    #             if not match.empty:
-    #                 min_val = match.iloc[0]["min"]
-    #                 max_val = match.iloc[0]["max"]
-    #                 if max_val > min_val:
-    #                     normalised_busyness = (pred - min_val) / (max_val - min_val)
-    #                     normalised_busyness = max(0.0, min(1.0, normalised_busyness))  # clamping to [0, 1]
-    #                 else:
-    #                     normalised_busyness = 0.5
-    #             else:
-    #                 normalised_busyness = 0.5
-    #         except Exception as e:
-    #             log_with_context('error', f'Prediction failed for zone {row["OBJECTID"]}', {
-    #                 'zone_id': zone_id,
-    #                 'error': str(e)
-    #             })
-    #             # Use default values to continue processing
-    #             pred = 0.0
-    #             busyness_level = "normal"
-    #             normalised_busyness = 0
-
-    #         geometry = OrderedDict()
-            
-    #         geom = row.get('geometry', '')
-
-    #         if geom.startswith("POLYGON (("):
-    #             # handle POLYGON
-    #             coords_text = geom.replace("POLYGON ((", "").replace("))", "")
-    #             points = coords_text.split(", ")
-    #             coords = []
-    #             for pt in points:
-    #                 lon, lat = pt.split(" ")
-    #                 coords.append([float(lon), float(lat)])
-    #             geometry["type"] = "Polygon"
-    #             geometry["coordinates"] = [coords]
-
-    #         elif geom.startswith("MULTIPOLYGON ((("):
-    #             # handle MULTIPOLYGON
-    #             geo = wkt.loads(geom)
-    #             geometry = mapping(geo)
-            
-    #         # Appending the results.
-    #         # Appending the results.
-    #         features.append({
-    #             "type": "Feature",
-    #             "properties": {
-    #                 "PULocationID": zone_id,
-    #                 "zone": row.get('zone', ''),
-    #                 "borough": row.get('borough', ''),
-    #                 "centroid_lat": row['centroid_lat'],
-    #                 "centroid_lon": row['centroid_lon'],
-    #                 "Shape_Area": row['Shape_Area'],
-    #                 "Shape_Leng": row['Shape_Leng'],
-    #                 "busyness": round(float(pred), 2),
-    #                 "busyness_level": busyness_level,
-    #                 "normalised_busyness": round(float(normalised_busyness), 3)
-    #             },
-    #             "geometry": geometry,
-    #         })
-
-    #     geojson = {
-    #         "type": "FeatureCollection",
-    #         "properties": {
-    #             "timestamp": now.strftime('%Y-%m-%d %H:%M'),
-    #             "weather": weather_main,
-    #             "is_holiday": bool(is_holiday),
-    #         },
-    #         "features": features
-    #     }
-
-    #     log_with_context('info', 'Predictions completed successfully', {
-    #         'zones_processed': prediction_count,
-    #         'features_generated': len(features),
-    #         'weather_condition': weather_main
-    #     })
-
-    #     # print(geojson)
-
-    #     response = Response(
-    #         json.dumps(geojson, ensure_ascii=False),
-    #         mimetype='application/json'
-    #     )
-        
-    #     return response
-
-    # except jwt.ExpiredSignatureError:
-    #     log_with_context('warn', 'JWT token expired')
-    #     return jsonify({'error': 'Token expired'}), 403
-    # except jwt.InvalidTokenError:
-    #     log_with_context('warn', 'Invalid JWT token provided')
-    #     return jsonify({'error': 'Invalid token'}), 403
-    # except Exception as e:
-    #     log_with_context('error', f'Prediction request failed: {str(e)}', {
-    #         'error_type': type(e).__name__,
-    #         'user_context': get_user_context()
-    #     })
-    #     return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -101,16 +101,12 @@ const busynessLayerSetting: any = {
   type: "fill",
   paint: {
     'fill-color': [
-      'interpolate',
-      ['linear'],
-      ['get', 'combined_busyness'],
-      // min, color
-      1, '#B7E4C7',    
-      100, '#95D5B2',   
-      200, '#FFE066', 
-      300, '#FAA307', 
-      400, '#F48C06', 
-      500, '#D00000', 
+      'match',
+      ['get', 'combined_level'],
+      'not busy', '#95D5B2',   
+      'normal', '#FAA307', 
+      'busy', '#D00000',
+      '#B7E4C7'
     ],
     'fill-color-transition': {
       duration: 1000, 
