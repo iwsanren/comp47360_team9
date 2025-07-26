@@ -6,7 +6,7 @@ Provides request tracking functionality for Flask ML API
 import uuid
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import request, g, has_request_context
 from functools import wraps
 import json
@@ -28,7 +28,7 @@ def log_with_context(level, message, context=None):
     request_id = getattr(g, 'request_id', 'unknown')
     
     log_data = {
-        'timestamp': datetime.utcnow().isoformat(),
+        'timestamp': datetime.now(timezone.utc).isoformat(),  # ✅ changed here
         'request_id': request_id,
         'level': level,
         'message': message,
