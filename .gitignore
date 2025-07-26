@@ -1,5 +1,71 @@
-venv/ 
-.coverage 
-__pycache__/ 
-.pytest_cache/ 
-node_modules/ 
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+
+#env
+.env*
+
+# Python
+__pycache__/
+*.py[cod]
+*.ipynb_checkpoints
+.env
+.venv/
+*.pkl
+
+# OSRM build output
+osrm-data/
+*.osrm
+*.osrm.*
+
+# Next.js
+.next/
+out/
+.cache/
+
+# VS Code
+.vscode/
+
+# Logs
+logs
+*.log
+
+# System
+.DS_Store
+Thumbs.db
+
+# test file
+frontend
+mapTest
+webapp/src/app/mapTest
+
+backup/
+CI-CD-FIX-SUMMARY.md
+CONFIGURATION-SUMMARY.md
+DEPLOYMENT-COMPLETE-GUIDE.md
+NGINX-SETUP.md
+SETUP-NEXT-STEPS.md
+
+# Backup route files
+webapp/src/app/api/directions/route_backup.js
+webapp/src/app/api/directions/route_new.js
+
+docs/*
+!docs/git_workflow.md
+!docs/AUTOMATION-GUIDE.md
+!docs/DEPLOYMENT-COMPLETE-GUIDE.md
+!docs/quick-setup-guide.md
+!docs/SCRIPTS-ANALYSIS.md
+!docs/DOCKER-SETUP-GUIDE.md
+
+# *.txt
+
+# ---- Added for Python testing environment ----
+venv/
+.coverage
+__pycache__/
+.pytest_cache/
+node_modules/
