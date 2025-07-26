@@ -62,10 +62,3 @@ docs/*
 !docs/DOCKER-SETUP-GUIDE.md
 
 # *.txt
-
-# ---- Added for Python testing environment ----
-venv/
-.coverage
-__pycache__/
-.pytest_cache/
-node_modules/
