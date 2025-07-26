@@ -1,13 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { max, maxBy, minBy, range, uniq } from 'lodash';
 import { FaLocationArrow } from 'react-icons/fa6';
 import { HiOutlineSwitchVertical, HiLocationMarker } from 'react-icons/hi';
-import { point } from '@turf/helpers';
-import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
-import mapboxgl from "mapbox-gl";
-import { Feature, Point, GeoJsonProperties } from 'geojson';
 
 import Icon from '@/components/Icon';
 import Input from '@/components/Input';
@@ -18,7 +14,6 @@ import calculateTreesNeededPerDay from '@/utils/calculateTreesNeededPerDay';
 import { useMode } from "@/contexts/ModeProvider";
 
 import { Coordinates, TransportMethod } from './page';
-
 
 const userInputs = [
   {
@@ -51,21 +46,17 @@ interface DirectionSectionProps {
   setTool: React.Dispatch<React.SetStateAction<any>>;
   routes: any;
   greenScoreforEachRoute: number[];
-  map: mapboxgl.Map | null;
-  featuresData: any;
-  clickPoints: Feature<Point, GeoJsonProperties>[];
-  toggles: any;
+  isInValid: boolean | undefined;
 }
 
 const DirectionSection = ({
   setClickPoints,
-  clickPoints,
   setStartLocation,
-  startLocation,
   setStartCoords,
-  startCoords,
   setDestCoords,
   destCoords,
+  startLocation,
+  startCoords,
   setDestination,
   destination,
   isLoadingDirection,
@@ -74,190 +65,9 @@ const DirectionSection = ({
   setTool,
   routes,
   greenScoreforEachRoute,
-  map,
-  featuresData,
-  toggles,
+  isInValid,
 }: DirectionSectionProps) => {
   const { mode } = useMode();
-  const [isInValid, setIsInVaildPos] = useState<boolean>();
-
- const handleLocationSelect = async (lng: number, lat: number, index?: number) => {
-  const pt = point([lng, lat]);
-  const isInManhattan = featuresData.busyness.features.some((region: any) =>
-    booleanPointInPolygon(pt, region)
-  );
-
-  if (!isInManhattan) {
-    setIsInVaildPos(true);
-    return false
-  }
-
-  setIsInVaildPos(false);
-
-  setClickPoints((prev) => {
-    const newPoint: Feature<Point, GeoJsonProperties> = {
-      type: "Feature",
-      geometry: {
-        type: "Point",
-        coordinates: [lng, lat],
-      },
-      properties: {
-        icon: (prev.length === 0 || index === 0) ? "start-icon" : "dest-icon",
-      },
-    };
-
-    if (typeof index === 'number') {
-      prev[index] = newPoint
-      return [...prev]
-    }
-
-    return prev.length >= 2 ? [newPoint] : [...prev, newPoint];
-  });
-
-  return true
-};
-
-  // click on map
-  useEffect(() => {
-    if (!map) return;
-    
-    const handleClick = async (e: any) => {
-      const { lng, lat } = e.lngLat;
-      const isValid = await handleLocationSelect(lng, lat);
-
-      if (!isValid) return;
-      
-      try {
-        const response = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?` +
-          new URLSearchParams({
-            access_token: mapboxgl.accessToken!,
-            limit: "1",
-          })
-        );
-        const data = await response.json();
-        const address =
-          data.features && data.features.length > 0
-            ? data.features[0].place_name
-            : `(${lng.toFixed(6)}, ${lat.toFixed(6)})`;
-
-        if (!startCoords) {
-          setStartCoords({ lng, lat });
-          setStartLocation(address);
-        } else if (!destCoords) {
-          setDestCoords({ lng, lat });
-          setDestination(address);
-        }
-      } catch (error) {
-        console.error("Failed to reverse geocode:", error);
-      }
-      
-    };
-
-    if (featuresData.busyness && clickPoints.length != 2 && !toggles.bikes && !toggles.parks && !toggles.evStations) {
-      map.on('click', handleClick);
-    }
-
-    return () => {
-      map.off('click', handleClick);
-    };
-
-  }, [featuresData.busyness, clickPoints, startCoords, destCoords, toggles.bikes, toggles.parks, toggles.evStations, map])
-
-  const handleGeocode = async (index: number, value: string) => {
-    if (index) {
-      setDestination(value)
-    } else {
-      setStartLocation(value)
-    }
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value)}&viewbox=-74.03,40.88,-73.91,40.68&bounded=1&countrycodes=us`, {
-        headers: {
-          'User-Agent': 'Manhattan My Way',
-        },
-      });
-
-      const data = await res.json();
-
-      if (data.length === 0) {
-      } else {
-        const { lon: lng, lat } = data[0];
-        console.log(lng, lat)
-        const isValid = await handleLocationSelect(lng, lat, index)
-        if (isValid) {
-          if (index) {
-            setDestCoords({ lat, lng });
-          } else {
-            setStartCoords({ lat, lng });
-          }
-        }
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  // add start point and dest point icon
-  useEffect(() => {
-    if (!map) return;
-
-    const addClickPoints = () => {
-      if (clickPoints.length === 0) {
-        if (map.getLayer("click-points-layer")) {
-          map.removeLayer("click-points-layer");
-        }
-        if (map.getSource("click-points")) {
-          map.removeSource("click-points");
-        }
-        return
-      }
-      if (!map.getSource("click-points")) {
-        map.addSource("click-points", {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: clickPoints,
-          },
-        });
-
-        map.addLayer({
-          id: "click-points-layer",
-          type: "symbol",
-          source: "click-points",
-          layout: {
-            "icon-image": ["get", "icon"],
-            "icon-size": 0.33,
-            "icon-allow-overlap": true,
-          },
-        });
-
-        map.moveLayer("click-points-layer");
-      } else {
-        const source = map.getSource("click-points") as mapboxgl.GeoJSONSource;;
-        if (source) {
-          source.setData({
-            type: "FeatureCollection",
-            features: clickPoints,
-          });
-        }
-        // prevent layer from being covered
-        if (map.getLayer("click-points-layer")) {
-          map.moveLayer("click-points-layer");
-        }
-      }
-    };
-
-    if (!map?.isStyleLoaded()) {
-      map?.once("style.load", addClickPoints);
-    } else {
-      addClickPoints();
-    }
-
-    return () => {
-      map?.off("load", addClickPoints);
-    };
-  }, [clickPoints, map]);
-
   return (
     <div className="flex flex-col gap-4 lg:gap-3">
 
@@ -275,11 +85,9 @@ const DirectionSection = ({
               </div>
               <Input
                 className="flex-1 lg:w-[330px]"
+                disabled={true}
                 placeholder={userInput.placeholder}
                 value={i ? destination : startLocation}
-                onChange={(e) => {
-                  handleGeocode(i, e.target.value)
-                }}
                 width="full"
               />
             </div>

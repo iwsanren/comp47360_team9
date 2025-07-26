@@ -7,7 +7,6 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   className?: string;
   width?: 'full' | 'auto';
   value?: any;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(({
@@ -16,7 +15,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
   className = '',
   width = 'auto',
   value,
-  onChange,
   ...props
 }, ref) => {
   const widthClasses = {
@@ -44,7 +42,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
       disabled={disabled}
       className={`${baseStyles} ${stateStyles}`}
       value={value}
-      onChange={onChange}
       {...props}
     />
   );
