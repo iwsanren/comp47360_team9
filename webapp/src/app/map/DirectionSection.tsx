@@ -369,7 +369,7 @@ const DirectionSection = ({
                   key={i}
                 >
                   <div className="flex justify-between items-center">
-                    <div className="flex gap-2 lg:gap-[10px] items-center">
+                    <div className="flex gap-[10px] items-center">
                       <Icon icon={icon} className={'inherit'} size="1.5rem" />
                       <p
                         className={`text-sm text-${isActive ? 'white' : 'black'}`}
@@ -406,7 +406,7 @@ const DirectionSection = ({
                       </div>
                     </div>
                   </div>
-                {co2 && <p className='font-bold text-xs lg:text-sm mt-1' style={{ color: isActive ? 'white' : currentColor }}>Generates as much CO2 as {calculateTreesNeededPerDay(max(transitCO2Arr) ?? maxEmissions)} urban trees absorb in a day.</p>}
+                {co2 && <p className='font-bold text-sm text-right mt-1' style={{ color: isActive ? 'white' : currentColor }}>Generates as much CO2 as {calculateTreesNeededPerDay(max(transitCO2Arr) ?? maxEmissions)} urban trees absorb in a day.</p>}
                 </div>
               );
             })}

@@ -85,8 +85,8 @@ export interface TransportMethod {
 const methods: TransportMethod[] = [
   { method: 'walking', icon: FaWalking, iconAlert: FaRecycle, color: '#0fd892', blindColor: '#009E73', mesg: 'Free of emissions' }, 
   { method: 'bicycling', icon: FaBicycle, iconAlert: FaRecycle, color: '#0fd892', blindColor: '#009E73', mesg: 'Fast and clean', info: 'The CO₂ emissions are calculated based on the use of a standard non-electric bicycle.' },
-  { method: 'driving', icon: FaCar, iconAlert: FaExclamationCircle, color: '#ff281b', blindColor: '#D55E00', mesg: 'High emissions', info: 'The CO₂ emissions generated is calculated by using a petrol car.', co2: true },
-  { method: 'transit', icon: FaTrain, iconAlert: FaArrowAltCircleDown, color: '#FFC800', blindColor: '#E69F00', mesg: 'Low emissions', co2: true },
+  { method: 'driving', icon: FaCar, iconAlert: FaExclamationCircle, color: '#ff281b', blindColor: '#D55E00', mesg: 'Highest emissions', info: 'The CO₂ emissions generated is calculated by using a petrol car.', co2: true },
+  { method: 'transit', icon: FaTrain, iconAlert: FaArrowAltCircleDown, color: '#FFC800', blindColor: '#E69F00', mesg: 'A few emissions', co2: true },
 ]
 
 export type MvpFeatures<T extends keyof Toggles> = {
