@@ -36,14 +36,11 @@ export default function Header() {
             {label}
           </Link>
         ))}
-
-        <div className="font-semibold flex items-center gap-2">
-          <Toggle onClick={toggleMode} isActive={mode}>
-            <div className="absolute text-black top-full right-0 translate-y-2 w-[180px] py-1 px-2 text-sm/[21px] bg-white rounded-sm drop-shadow-lg">
-              Switch to {mode ? 'Normal' : 'Color Blind'} Mode
-            </div>
-          </Toggle>
-        </div>
+        <Toggle onClick={toggleMode} isActive={mode}>
+          <div className="absolute font-semibold text-black text-center top-full right-0 translate-y-2 w-[188px] py-1 px-2 text-sm/[1.5] bg-white rounded-sm drop-shadow-lg">
+            Switch to {mode ? 'Normal' : 'Color Blind'} Mode
+          </div>
+        </Toggle>
       </div>
     </nav>
   );
