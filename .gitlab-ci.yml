@@ -21,6 +21,7 @@ quality_check:
     - test -f "docker-compose.yml" && echo "✅ Docker compose config exists"
     - echo "✅ Quality checks completed"
   only:
+    - deploy/debug
     - feature/request-id-logging
     - feature/https-ddns-setup
     - hotfix/docker-time-sync-fix
@@ -72,6 +73,7 @@ deploy_staging:
     - feature/https-ddns-setup
     - hotfix/docker-time-sync-fix
     - feature/api-error-handling-refactor
+    - deploy/debug
 
 deploy_production:
   stage: deploy
