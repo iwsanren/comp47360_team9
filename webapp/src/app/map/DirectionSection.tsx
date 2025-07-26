@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { maxBy, minBy, range, uniq } from 'lodash';
+import { max, maxBy, minBy, range, uniq } from 'lodash';
 import { FaLocationArrow } from 'react-icons/fa6';
 import { HiOutlineSwitchVertical, HiLocationMarker } from 'react-icons/hi';
 
@@ -214,7 +214,7 @@ const DirectionSection = ({
                       </div>
                     </div>
                   </div>
-                {co2 && <p className='font-bold text-sm text-right mt-1' style={{ color: isActive ? 'white' : currentColor }}>Generates as much CO2 as {calculateTreesNeededPerDay(transitCO2Arr ?? maxEmissions)} urban trees absorb in a day.</p>}
+                {co2 && <p className='font-bold text-sm text-right mt-1' style={{ color: isActive ? 'white' : currentColor }}>Generates as much CO2 as {calculateTreesNeededPerDay(max(transitCO2Arr) ?? maxEmissions)} urban trees absorb in a day.</p>}
                 </div>
               );
             })}
