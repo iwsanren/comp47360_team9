@@ -7,8 +7,7 @@ import { FaWalking, FaRecycle, FaExclamationCircle, FaArrowAltCircleDown } from 
 import { IconType } from "react-icons";
 import { Feature, Point, GeoJsonProperties } from 'geojson';
 import polyline from "@mapbox/polyline";
-import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
-import { lineString, point } from '@turf/helpers';
+import { lineString } from '@turf/helpers';
 import booleanIntersects from '@turf/boolean-intersects';
 import mapboxgl from "mapbox-gl";
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -244,7 +243,6 @@ export default function Map() {
   const [isToggleOpen, setIsToggleOpen] = useState<boolean>(true);
   const [startCoords, setStartCoords] = useState<Coordinates | null>(null);
   const [destCoords, setDestCoords] = useState<Coordinates | null>(null);
-  const [isInValid, setIsInVaildPos] = useState<boolean>();
   const [routes, setDirectionData] = useState<any>();
   const [tool, setTool] = useState<any>();
   const [isOpen, setOpen] = useState<boolean>();
@@ -254,14 +252,16 @@ export default function Map() {
     parks,
     evStations,
   })
-  const [isLoadingDirection, setIsLoadingDirection] = useState(false);
   const [isPredictionMode, setPredictionMode] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [timestamp, setTime] = useState(getNextHourInNY());
   const [isLoading, setIsLoading] = useState<boolean>()
+  const [isLoadingPrediction, setIsLoadingPrediction] = useState<boolean>()
   const [isMapLoading, setIsMapLoading] = useState<boolean>(true)
 
   const navLineGeo = useMemo(() => navigation && decodeToGeoJSON(navigation?.overview_polyline?.points), [navigation])
+
+  const isDisabled = useMemo(() => !startCoords || !destCoords || isLoading, [startCoords, destCoords, isLoading])
 
   const allMethodsRouteCoords = useMemo(() => {
     const paths: number[][][][] = []
@@ -313,7 +313,7 @@ export default function Map() {
   )}), [allMethodPassedZones])
 
   const fetchDirection = async () => {
-    setIsLoadingDirection(true);
+    setIsLoading(true);
     try {
       // Using the new API client
       const { data } = await api.post('/api/directions', {
@@ -329,17 +329,9 @@ export default function Map() {
       // Can add user notification logic here
       // toast.error(errorInfo.userMessage);
     } finally {
-      setIsLoadingDirection(false); 
+      setIsLoading(false); 
     }
   };
-
-  // fetch directions data
-  useEffect(() => {
-    if (startCoords && destCoords && !isPredictionMode) {
-      setTool(undefined)
-      fetchDirection()
-    }
-  }, [startCoords, destCoords, isPredictionMode])
 
   // load the map
   useEffect(() => {
@@ -461,146 +453,6 @@ export default function Map() {
     return () => map.remove();
   }, []);
 
-  // click on map
-  useEffect(() => {
-    if (!mapInstanceRef.current) return;
-
-    const map = mapInstanceRef.current;
-    
-    const handleClick = async (e: any) => {
-      const { lng, lat } = e.lngLat;
-      const pt = point([lng, lat]);
-      const isInManhattan = featuresData.busyness.features.some((region: any) =>
-        booleanPointInPolygon(pt, region)
-      );
-
-      if (isInManhattan) {
-        setIsInVaildPos(false);
-        if (!mapboxgl.accessToken) {
-          console.error("Mapbox access token is missing");
-          return;
-        }
-
-        setClickPoints((prev) => {
-          const newPoint: Feature<Point, GeoJsonProperties> = {
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: [lng, lat],
-            },
-            properties: {
-              icon: prev.length === 0 ? "start-icon" : "dest-icon",
-            },
-          };
-
-          if (prev.length >= 2) {
-            return [newPoint];
-          } else {
-            return [...prev, newPoint];
-          }
-        });
-
-        try {
-          const response = await fetch(
-            `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?` +
-              new URLSearchParams({
-                access_token: mapboxgl.accessToken,
-                limit: "1",
-              })
-          );
-          const data = await response.json();
-          const address =
-            data.features && data.features.length > 0
-              ? data.features[0].place_name
-              : `(${lng.toFixed(6)}, ${lat.toFixed(6)})`;
-
-          if (!startCoords) {
-            setStartCoords({ lng, lat });
-            setStartLocation(address);
-          } else if (!destCoords) {
-            setDestCoords({ lng, lat });
-            setDestination(address);
-          }
-        } catch (error) {
-          console.error("Failed to reverse geocode:", error);
-        }
-      } else {
-        setIsInVaildPos(true);
-      }
-    };
-
-    if (featuresData.busyness && clickPoints.length != 2 && !toggles.bikes && !toggles.parks && !toggles.evStations) {
-      map.on('click', handleClick);
-    }
-
-    return () => {
-      map.off('click', handleClick);
-    };
-
-  }, [featuresData.busyness, clickPoints, startCoords, destCoords, toggles.bikes, toggles.parks, toggles.evStations])
-
-  // add start point and dest point icon
-  useEffect(() => {
-    if (!mapInstanceRef.current) return;
-    const map = mapInstanceRef.current;
-
-    const addClickPoints = () => {
-      if (clickPoints.length === 0) {
-        if (map.getLayer("click-points-layer")) {
-          map.removeLayer("click-points-layer");
-        }
-        if (map.getSource("click-points")) {
-          map.removeSource("click-points");
-        }
-        return
-      }
-      if (!map.getSource("click-points")) {
-        map.addSource("click-points", {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: clickPoints,
-          },
-        });
-
-        map.addLayer({
-          id: "click-points-layer",
-          type: "symbol",
-          source: "click-points",
-          layout: {
-            "icon-image": ["get", "icon"],
-            "icon-size": 0.33,
-            "icon-allow-overlap": true,
-          },
-        });
-
-        map.moveLayer("click-points-layer");
-      } else {
-        const source = map.getSource("click-points") as mapboxgl.GeoJSONSource;;
-        if (source) {
-          source.setData({
-            type: "FeatureCollection",
-            features: clickPoints,
-          });
-        }
-        // prevent layer from being covered
-        if (map.getLayer("click-points-layer")) {
-          map.moveLayer("click-points-layer");
-        }
-      }
-    };
-
-    if (!map?.isStyleLoaded()) {
-      map?.once("style.load", addClickPoints);
-    } else {
-      addClickPoints();
-    }
-
-    return () => {
-      map?.off("load", addClickPoints);
-    };
-  }, [clickPoints]);
-
   // handle to show features
   useEffect(() => {
     if (!mapInstanceRef.current) return;
@@ -712,7 +564,7 @@ export default function Map() {
     fetchDirection()
     if (!map) return;
     setFeatureData((prev: any) => ({ ...prev, predictedBusyness: false }));
-    setIsLoading(true);
+    setIsLoadingPrediction(true);
     try {
       const predictedBusyness = await fetchData(`/api/manhattan?timestamp=${timestamp}`);
       setFeatureData((prev: any) => ({ ...prev, predictedBusyness }));
@@ -766,7 +618,7 @@ export default function Map() {
       if (map.getLayer("click-points-layer")) {
         map.moveLayer("click-points-layer");
       }
-      setIsLoading(false);
+      setIsLoadingPrediction(false);
     }
   };
   return (
@@ -837,7 +689,7 @@ export default function Map() {
             <div className="flex justify-between items-center mb-4 ">
               <Heading className="text-green-800" level={2}>{isPredictionMode ? 'Prediction Mode' : 'Get Directions'}</Heading>
               <Toggle
-                isDisabled={isLoading}
+                isDisabled={isLoading || isLoadingPrediction}
                 onClick={() => {
                   clearPredictedBusynessLayer(mapInstanceRef.current)
                   setPredictionMode(prev => !prev)
@@ -877,21 +729,33 @@ export default function Map() {
                 startCoords={startCoords}
                 setDestination={setDestination}
                 destination={destination}
-                isLoadingDirection={isLoadingDirection || isLoading}
+                isLoadingDirection={isLoading || isLoadingPrediction}
                 tool={tool}
                 methods={methods}
                 setTool={setTool}
                 routes={routes}
                 greenScoreforEachRoute={greenScoreforEachRoute}
-                isInValid={isInValid}
+                map={mapInstanceRef.current}
+                featuresData={featuresData}
+                clickPoints={clickPoints}
+                toggles={toggles}
               />
               <div className="flex justify-between">
                 <Button onClick={handleClear}>Clear</Button>
-                {isPredictionMode && !featuresData.predictedBusyness && (
-                  <Button isDisabled={isLoading} onClick={handleShowPrediction}>Get Prediction</Button>
-                )} 
-                {(isPredictionMode ? (tool && featuresData.predictedBusyness && !isLoading) : tool) && (
-                  <Button onClick={() => setOpen(true)}>Show Directions</Button>
+                {isPredictionMode && !featuresData.predictedBusyness && !isLoadingPrediction && (
+                  <Button onClick={handleShowPrediction}>Get Prediction</Button>
+                )}
+                {!isPredictionMode && !routes && (
+                  <Button
+                    isDisabled={isDisabled}
+                    onClick={fetchDirection}
+                  >Show Transit Options</Button>
+                )}
+                {routes && (
+                  <Button
+                    isDisabled={!tool}
+                    onClick={() => setOpen(true)}
+                  >Show Directions</Button>
                 )}
               </div>
             </div>
