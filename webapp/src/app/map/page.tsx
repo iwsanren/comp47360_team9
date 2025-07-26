@@ -80,13 +80,14 @@ export interface TransportMethod {
   blindColor: string;
   mesg: string;
   info?: string;
+  co2?: boolean
 }
 
 const methods: TransportMethod[] = [
   { method: 'walking', icon: FaWalking, iconAlert: FaRecycle, color: '#0fd892', blindColor: '#009E73', mesg: 'Free of emissions' }, 
   { method: 'bicycling', icon: FaBicycle, iconAlert: FaRecycle, color: '#0fd892', blindColor: '#009E73', mesg: 'Fast and clean', info: 'The CO₂ emissions generated is calculated by using a normal bike.' },
-  { method: 'driving', icon: FaCar, iconAlert: FaExclamationCircle, color: '#ff281b', blindColor: '#D55E00', mesg: 'Highest emissions', info: 'The CO₂ emissions generated is calculated by using a petrol car.' },
-  { method: 'transit', icon: FaTrain, iconAlert: FaArrowAltCircleDown, color: '#FFC800', blindColor: '#E69F00', mesg: 'A few emissions' },
+  { method: 'driving', icon: FaCar, iconAlert: FaExclamationCircle, color: '#ff281b', blindColor: '#D55E00', mesg: 'Highest emissions', info: 'The CO₂ emissions generated is calculated by using a petrol car.', co2: true },
+  { method: 'transit', icon: FaTrain, iconAlert: FaArrowAltCircleDown, color: '#FFC800', blindColor: '#E69F00', mesg: 'A few emissions', co2: true },
 ]
 
 export type MvpFeatures<T extends keyof Toggles> = {
@@ -900,7 +901,7 @@ export default function Map() {
           </div>
         </div>
         
-        <div ref={mapRef} className="relative h-[555px] lg:min-h-[850px] lg:h-[100dvh] font-roboto">
+        <div ref={mapRef} className="relative h-[555px] lg:min-h-[950px] lg:h-[100dvh] font-roboto">
           <div className="lg:hidden absolute top-2 left-2 z-5">
             {!isPredictionMode && (
               <Button
