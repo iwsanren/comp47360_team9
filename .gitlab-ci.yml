@@ -27,6 +27,7 @@ quality_check:
     - feature/api-error-handling-refactor
     - develop
     - main
+    - deploy/debug-ml-commit
 
 deploy_staging:
   stage: deploy
@@ -72,6 +73,7 @@ deploy_staging:
     - feature/https-ddns-setup
     - hotfix/docker-time-sync-fix
     - feature/api-error-handling-refactor
+    - deploy/debug-ml-commit
 
 deploy_production:
   stage: deploy
