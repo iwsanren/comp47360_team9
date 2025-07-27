@@ -408,7 +408,7 @@ const DirectionSection = ({
   return (
     <div className="flex flex-col gap-4 lg:gap-3">
       <div className="flex justify-between items-center mb-4 ">
-        <Heading className="text-green-800" level={2}>{isPredictionMode ? 'Prediction Mode' : 'Get Directions'}</Heading>
+        <Heading className="text-green-800" level={2}>{isPredictionMode ? 'Plan a Future Trip' : 'Plan a Trip Now'}</Heading>
         <Toggle
           isDisabled={isLoading || isLoadingPrediction}
           onClick={() => {
@@ -426,7 +426,7 @@ const DirectionSection = ({
           }}
           isActive={isPredictionMode}
         >
-          <div className="absolute top-full right-0 lg:left-[50%] lg:-translate-x-1/2 translate-y-2 w-[180px] py-1 px-2 text-sm/[21px] bg-white rounded-sm drop-shadow-lg">Switch to {isPredictionMode ? 'direction' : 'predict'} model.</div>
+          <div className="absolute text-center top-full right-0 lg:left-[50%] lg:-translate-x-1/2 translate-y-2 w-30 py-1 px-2 text-sm/[21px] bg-white rounded-sm drop-shadow-lg">{isPredictionMode ? 'Plan a trip now' : 'Plan a future trip'}</div>
         </Toggle>
       </div>
       {isPredictionMode && (
@@ -558,7 +558,7 @@ const DirectionSection = ({
                                 Math.round(minTime?.legs?.[0].duration.value / 60),
                                 Math.round(maxTime?.legs?.[0].duration.value / 60)
                               )
-                            : maxTime.duration.text} 
+                            : formatMinutesToDecimalHour(Math.round(maxTime.duration.value / 60))} 
                         </p>
                         <p>
                           (~{paths?.length > 1 ? maxTime?.legs?.[0]?.distance?.text : maxTime?.distance?.text}les)
