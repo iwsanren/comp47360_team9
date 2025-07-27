@@ -41,7 +41,7 @@ const loadImage = [
 
 export interface Toggles {
   parks: boolean;
-  'evStations': boolean;
+  evStations: boolean;
   bikes: boolean;
   busyness: boolean;
   'air-quality': boolean;
@@ -131,7 +131,6 @@ const mvpFeatures: MvpFeatures<keyof Toggles>[] = [
     },
     details: [
       { key: 'name' },
-      { key: 'operator' },
       { key: 'access' },
       { key: 'capacity' },
     ]
@@ -171,7 +170,7 @@ const mvpFeatures: MvpFeatures<keyof Toggles>[] = [
           "interpolate",
           ["linear"],
           ["get", "aqi"],
-          0, 0,
+          1, 0,
           5, 1
         ],
         "heatmap-color": [
@@ -179,7 +178,7 @@ const mvpFeatures: MvpFeatures<keyof Toggles>[] = [
           ["linear"],
           ["heatmap-density"],
           0, "rgba(0, 0, 255, 0)",
-          0.3, "rgb(0, 0, 255)",
+          0.25, "rgb(0, 0, 255)",
           0.5, "rgb(0, 255, 0)",
           0.75, "rgb(255, 255, 0)",
           1, "rgb(255, 0, 0)"
@@ -385,6 +384,13 @@ export default function Map() {
                  .addTo(map);
 
           });
+
+          map.on('idle', () => {
+          const visibility = map.getLayoutProperty(`${feature.key}-layer`, 'visibility');
+          if (visibility === 'none') {
+            popup.remove();
+          }
+        });
         }
       });
 
@@ -597,10 +603,10 @@ export default function Map() {
               <Filter className="mt-2 bg-green-700" setToggles={setToggles} toggles={toggles} mvpFeatures={mvpFeatures} />
             )}
           </div>
+          {(featuresData.predictedBusyness || toggles.busyness || toggles["air-quality"]) && (
+            <Legend toggles={toggles} />
+          )}
         </div>
-        {(featuresData.predictedBusyness || toggles.busyness)&& (
-          <Legend />
-        )}
         {showModal && (
           <>
             <div className="absolute left-0 right-0 top-0 bottom-0 bg-[rgba(0,0,0,0.5)] z-10" />
