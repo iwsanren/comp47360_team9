@@ -44,7 +44,7 @@ const Introduction = ({ setIsMapLoading }: IntroductionProps) => {
               <Text.Bold>Air quality index</Text.Bold>
             </li>
             <li>
-              <Text.Bold>busyness</Text.Bold>
+              <Text.Bold>Busyness</Text.Bold>
             </li>
           </ul>
         </li>

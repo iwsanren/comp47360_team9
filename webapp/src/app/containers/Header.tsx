@@ -38,7 +38,7 @@ export default function Header() {
         ))}
         <Toggle onClick={toggleMode} isActive={mode}>
           <div className="absolute font-semibold text-black text-center top-full right-0 translate-y-2 w-[188px] py-1 px-2 text-sm/[1.5] bg-white rounded-sm drop-shadow-lg">
-            Switch to {mode ? 'Normal' : 'Color Blind'} Mode
+            {mode ? 'Restore Default Colors' : 'Enable Color Accessibility'}
           </div>
         </Toggle>
       </div>

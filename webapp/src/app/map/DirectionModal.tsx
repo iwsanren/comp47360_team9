@@ -177,7 +177,7 @@ const DirectionModal = ({
                   <Text>Route {i + 1}</Text>
                 </div>
                 <p className="text-base/[1.5]">
-                  {legs?.[0]?.distance?.text || 'N/A'} <br />{' '}
+                  {legs?.[0]?.distance?.text + 'les' || 'N/A'} <br />{' '}
                   {legs?.[0]?.duration?.text || 'N/A'}
                 </p>
                 <div>Green score: {greenScore}</div>

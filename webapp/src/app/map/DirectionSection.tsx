@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { max, maxBy, minBy, range, uniq } from 'lodash';
 import { FaLocationArrow } from 'react-icons/fa6';
 import { HiOutlineSwitchVertical, HiLocationMarker } from 'react-icons/hi';
@@ -9,16 +9,35 @@ import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import mapboxgl from "mapbox-gl";
 import { Feature, Point, GeoJsonProperties } from 'geojson';
 
+import Heading from '@/components/Heading';
+import Button from '@/components/Button';
 import Icon from '@/components/Icon';
 import Input from '@/components/Input';
 import Info from '@/components/Info';
+import Toggle from '@/components/Toggle';
 import { co2Emissions, transitEmissions } from '@/utils/formula';
 import formatMinutesToDecimalHour from '@/utils/formatMinutesToDecimalHour';
 import calculateTreesNeededPerDay from '@/utils/calculateTreesNeededPerDay';
+import { api, handleAPIError } from '@/utils/apiClient';
+import getNextHourInNY from '@/utils/getNextHourInNY';
+import fetchData from '@/utils/fetchData';
 import { useMode } from "@/contexts/ModeProvider";
 
-import { Coordinates, TransportMethod } from './page';
+import { Coordinates, Toggles, TransportMethod } from './page';
+import PredictionSection from './PredictionSection';
 
+const key = 'busyness-prediction'
+
+const clearPredictedBusynessLayer = (map: mapboxgl.Map | null) => {
+  if(!map) return
+  if (map.getLayer(`${key}-layer`)) {
+      map.removeLayer(`${key}-layer`);
+      map.removeLayer(`${key}-border-layer`);
+  }
+  if (map.getSource(key)) {
+    map.removeSource(key);
+  }
+}
 
 const userInputs = [
   {
@@ -36,16 +55,6 @@ const userInputs = [
 ]
 
 interface DirectionSectionProps {
-  setClickPoints: React.Dispatch<React.SetStateAction<any[]>>;
-  setStartLocation: React.Dispatch<React.SetStateAction<string>>;
-  setStartCoords: React.Dispatch<React.SetStateAction<Coordinates | null>>;
-  setDestCoords: React.Dispatch<React.SetStateAction<Coordinates | null>>;
-  destCoords: Coordinates | null;
-  startLocation: string;
-  startCoords: Coordinates | null;
-  setDestination: React.Dispatch<React.SetStateAction<string>>;
-  destination: string;
-  isLoadingDirection: boolean | undefined;
   tool: any;
   methods: TransportMethod[];
   setTool: React.Dispatch<React.SetStateAction<any>>;
@@ -53,22 +62,19 @@ interface DirectionSectionProps {
   greenScoreforEachRoute: number[];
   map: mapboxgl.Map | null;
   featuresData: any;
-  clickPoints: Feature<Point, GeoJsonProperties>[];
   toggles: any;
+  isPredictionMode: boolean;
+  busynessLayerSetting: any;
+  setFeatureData: any;
+  setDirectionData: React.Dispatch<React.SetStateAction<any>>;
+  setShowFilter: React.Dispatch<React.SetStateAction<boolean>>;
+  setPredictionMode: React.Dispatch<React.SetStateAction<boolean>>;
+  setNavigation: React.Dispatch<React.SetStateAction<any>>;
+  setToggles: React.Dispatch<React.SetStateAction<Toggles>>;
+  setOpen: React.Dispatch<React.SetStateAction<boolean | undefined>>; 
 }
 
 const DirectionSection = ({
-  setClickPoints,
-  clickPoints,
-  setStartLocation,
-  startLocation,
-  setStartCoords,
-  startCoords,
-  setDestCoords,
-  destCoords,
-  setDestination,
-  destination,
-  isLoadingDirection,
   tool,
   methods,
   setTool,
@@ -77,45 +83,72 @@ const DirectionSection = ({
   map,
   featuresData,
   toggles,
+  isPredictionMode,
+  busynessLayerSetting,
+  setDirectionData,
+  setFeatureData,
+  setShowFilter,
+  setPredictionMode,
+  setNavigation,
+  setToggles,
+  setOpen,
 }: DirectionSectionProps) => {
   const { mode } = useMode();
   const [isInValid, setIsInVaildPos] = useState<boolean>();
+  const [startLocation, setStartLocation] = useState<string>("");
+  const [destination, setDestination] = useState<string>("");
+  const [startCoords, setStartCoords] = useState<Coordinates | null>(null);
+  const [destCoords, setDestCoords] = useState<Coordinates | null>(null);
+  const [clickPoints, setClickPoints] = useState<Feature<Point, GeoJsonProperties>[]>([]);
+  const [timestamp, setTime] = useState(getNextHourInNY());
+  const [isLoading, setIsLoading] = useState<boolean>()
+  const [isLoadingPrediction, setIsLoadingPrediction] = useState<boolean>()
 
- const handleLocationSelect = async (lng: number, lat: number, index?: number) => {
-  const pt = point([lng, lat]);
-  const isInManhattan = featuresData.busyness.features.some((region: any) =>
-    booleanPointInPolygon(pt, region)
-  );
+  const handleLocationSelect = async (lng: number, lat: number, index?: number) => {
+    const pt = point([lng, lat]);
+    const isInManhattan = featuresData.busyness.features.some((region: any) =>
+      booleanPointInPolygon(pt, region)
+    );
 
-  if (!isInManhattan) {
-    setIsInVaildPos(true);
-    return false
-  }
-
-  setIsInVaildPos(false);
-
-  setClickPoints((prev) => {
-    const newPoint: Feature<Point, GeoJsonProperties> = {
-      type: "Feature",
-      geometry: {
-        type: "Point",
-        coordinates: [lng, lat],
-      },
-      properties: {
-        icon: (prev.length === 0 || index === 0) ? "start-icon" : "dest-icon",
-      },
-    };
-
-    if (typeof index === 'number') {
-      prev[index] = newPoint
-      return [...prev]
+    if (!isInManhattan) {
+      setIsInVaildPos(true);
+      return false
     }
 
-    return prev.length >= 2 ? [newPoint] : [...prev, newPoint];
-  });
+    setIsInVaildPos(false);
 
-  return true
-};
+    setClickPoints((prev) => {
+      const newPoint: Feature<Point, GeoJsonProperties> = {
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [lng, lat],
+        },
+        properties: {
+          icon: (prev.length === 0 || index === 0) ? "start-icon" : "dest-icon",
+        },
+      };
+
+      if (typeof index === 'number') {
+        prev[index] = newPoint
+        return [...prev]
+      }
+
+      return prev.length >= 2 ? [newPoint] : [...prev, newPoint];
+    });
+
+    return true
+  };
+
+  useEffect(() => {
+    if (startCoords && destCoords) {
+      if (isPredictionMode) {
+        handleShowPrediction()
+      } else {
+        fetchDirection()
+      }
+    }
+  }, [isPredictionMode, startCoords, destCoords])
 
   // click on map
   useEffect(() => {
@@ -164,36 +197,52 @@ const DirectionSection = ({
 
   }, [featuresData.busyness, clickPoints, startCoords, destCoords, toggles.bikes, toggles.parks, toggles.evStations, map])
 
-  const handleGeocode = async (index: number, value: string) => {
-    if (index) {
-      setDestination(value)
-    } else {
-      setStartLocation(value)
-    }
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value)}&viewbox=-74.03,40.88,-73.91,40.68&bounded=1&countrycodes=us`, {
-        headers: {
-          'User-Agent': 'Manhattan My Way',
-        },
+  const getGeocode = (value: string): Promise<{ lat: number; lon: number; display_name: string } | null> => {
+    return fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value)}&viewbox=-74.03,40.88,-73.91,40.68&bounded=1&countrycodes=us`, {
+      headers: {
+        'User-Agent': 'Manhattan My Way',
+      },
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.length === 0) return null;
+        const { lat, lon, display_name } = data[0];
+        return { lat: parseFloat(lat), lon: parseFloat(lon), display_name };
+      })
+      .catch((err) => {
+        console.error("Geocoding failed:", err);
+        return null;
       });
+  };
 
-      const data = await res.json();
+  const handleGeocode = async () => {
+    try {
+      setIsLoading(true)
+      const [startResult, destResult] = await Promise.all([
+        getGeocode(startLocation),
+        getGeocode(destination),
+      ]);
 
-      if (data.length === 0) {
-      } else {
-        const { lon: lng, lat } = data[0];
-        console.log(lng, lat)
-        const isValid = await handleLocationSelect(lng, lat, index)
-        if (isValid) {
-          if (index) {
-            setDestCoords({ lat, lng });
-          } else {
-            setStartCoords({ lat, lng });
-          }
+      if (startResult && destResult) {
+        const isStartValid = await handleLocationSelect(startResult.lon, startResult.lat, 0);
+
+        if (!isStartValid) return 
+
+        const isDestValid = await handleLocationSelect(destResult.lon, destResult.lat, 1);
+        
+        if (isStartValid && isDestValid) {
+          setStartCoords({ lat: startResult.lat, lng: startResult.lon });
+          setDestCoords({ lat: destResult.lat, lng: destResult.lon });
         }
+        return true
+      } else {
+        setIsInVaildPos(true)
+        return false
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsLoading(false)
     }
   };
 
@@ -258,9 +307,138 @@ const DirectionSection = ({
     };
   }, [clickPoints, map]);
 
+  const isDisabled = useMemo(() => isLoading || isLoadingPrediction, [isLoading, isLoadingPrediction])
+
+  const fetchDirection = async () => {
+    setIsLoading(true);
+    try {
+      // Using the new API client
+      const { data } = await api.post('/api/directions', {
+        origin: startCoords,
+        destination: destCoords,
+        isPredictionMode,
+        timestamp,
+      });
+      setDirectionData(data);
+    } catch (err) {
+      const errorInfo = handleAPIError(err as Error, 'Fetch directions');
+      console.error("Failed to fetch direction", errorInfo);
+      // Can add user notification logic here
+      // toast.error(errorInfo.userMessage);
+    } finally {
+      setIsLoading(false); 
+    }
+  };
+
+  const handleShowPrediction = async () => {
+    if (!map) return;
+    setIsLoadingPrediction(true);
+    fetchDirection()
+    setFeatureData((prev: any) => ({ ...prev, predictedBusyness: false }));
+    try {
+      const predictedBusyness = await fetchData(`/api/manhattan?timestamp=${timestamp}`);
+      setFeatureData((prev: any) => ({ ...prev, predictedBusyness }));
+
+      const source = map.getSource(key);
+      const layerId = `${key}-layer`;
+
+      if (predictedBusyness && source && 'setData' in source) {
+        // If the source exists, update its data
+        source.setData(predictedBusyness);
+      } else {
+        // If source doesn't exist, add it
+        if (!source) {
+          map.addSource(key, {
+            type: "geojson",
+            data: predictedBusyness,
+          });
+        }
+
+        // If layer already exists, remove it to avoid duplication
+        if (map.getLayer(layerId)) {
+          map.removeLayer(layerId);
+        }
+
+        if (map.getLayer(`${key}-border-layer`)) {
+          map.removeLayer(layerId);
+        }
+
+        // Add the layer but keep it hidden while loading
+        map.addLayer({
+          id: layerId,
+          source: key,
+          ...busynessLayerSetting,
+        });
+
+        map.addLayer({
+          id: `${key}-border-layer`,
+          type: 'line',
+          source: key,
+          paint: {
+            'line-color': 'black',
+            'line-width': 1.5
+          },
+        });
+      }
+      // Show the layer after data is loaded
+    } catch (err) {
+      console.error("Prediction load failed:", err);
+    } finally {
+      // Always turn off loading state
+      if (map.getLayer("click-points-layer")) {
+        map.moveLayer("click-points-layer");
+      }
+      setIsLoadingPrediction(false);
+    }
+  };
+
+  const handleClear = () => {
+    setStartLocation("");
+    setDestination("");
+    setStartCoords(null);
+    setDestCoords(null);
+    setDirectionData(null);
+    setClickPoints([])
+    setTool('')
+    setNavigation(undefined)
+    setFeatureData((prev: any) => ({ ...prev, predictedBusyness: false}))
+    clearPredictedBusynessLayer(map)
+  };
+
   return (
     <div className="flex flex-col gap-4 lg:gap-3">
+      <div className="flex justify-between items-center mb-4 ">
+        <Heading className="text-green-800" level={2}>{isPredictionMode ? 'Prediction Mode' : 'Get Directions'}</Heading>
+        <Toggle
+          isDisabled={isLoading || isLoadingPrediction}
+          onClick={() => {
+            clearPredictedBusynessLayer(map)
+            setPredictionMode(prev => !prev)
+            handleClear()
+            setShowFilter(false)
+            setToggles((prev: any) => {
+              const newToggles = Object.fromEntries(
+                Object.keys(prev).map(key => [key, false])
+              ) as unknown as Toggles;
 
+              return newToggles;
+            });
+          }}
+          isActive={isPredictionMode}
+        >
+          <div className="absolute top-full right-0 lg:left-[50%] lg:-translate-x-1/2 translate-y-2 w-[180px] py-1 px-2 text-sm/[21px] bg-white rounded-sm drop-shadow-lg">Switch to {isPredictionMode ? 'direction' : 'predict'} model.</div>
+        </Toggle>
+      </div>
+      {isPredictionMode && (
+        <PredictionSection
+          setTime={setTime}
+          timestamp={timestamp}
+          layerName={key}
+          map={map}
+          busynessLayerSetting={busynessLayerSetting}
+          setFeatureData={setFeatureData}
+        />
+      )}
       <div className="flex gap-3 items-center pr-[6px] lg:pr-4">
         <div className="relative flex-1 flex flex-col gap-3">
           <div className="flex flex-col gap-1 absolute top-[50%] left-2 lg:left-[14px] -translate-y-1/2">
@@ -278,7 +456,11 @@ const DirectionSection = ({
                 placeholder={userInput.placeholder}
                 value={i ? destination : startLocation}
                 onChange={(e) => {
-                  handleGeocode(i, e.target.value)
+                  if (i) {
+                    setDestination(e.target.value)
+                  } else {
+                    setStartLocation(e.target.value)
+                  }
                 }}
                 width="full"
               />
@@ -289,7 +471,7 @@ const DirectionSection = ({
               Invalid position, the position is only available in Manhattan
             </div>
           )}
-          {routes && !tool && !isLoadingDirection && (
+          {routes && !tool && !isLoading && !isLoadingPrediction && (
             <p>Please select your preferred mode of transportation.</p>
           )}
         </div>
@@ -319,9 +501,7 @@ const DirectionSection = ({
           />
         </div>
       </div>
-      {startCoords &&
-        destCoords &&
-        (isLoadingDirection ? (
+      {(isLoading || isLoadingPrediction) ? (
           <div className="py-3">Loading...</div>
         ) : (
           <div className="flex flex-col gap-3">
@@ -330,7 +510,7 @@ const DirectionSection = ({
               const maxTime =
                 paths?.length > 1
                   ? maxBy(paths, (n: any) => n.legs?.[0].duration.value)
-                  : paths?.[0]?.legs?.[0].duration.text;
+                  : paths?.[0]?.legs?.[0];
               const minTime =
                 paths?.length > 1 &&
                 minBy(paths, (n: any) => n.legs?.[0].duration.value);
@@ -371,16 +551,19 @@ const DirectionSection = ({
                   <div className="flex justify-between items-center">
                     <div className="flex gap-2 lg:gap-[10px] items-center">
                       <Icon icon={icon} className={'inherit'} size="1.5rem" />
-                      <p
-                        className={`text-sm text-${isActive ? 'white' : 'black'}`}
-                      >
-                        {paths?.length > 1
-                          ? formatMinutesToDecimalHour(
-                              Math.floor(minTime?.legs?.[0].duration.value / 60),
-                              Math.floor(maxTime?.legs?.[0].duration.value / 60)
-                            )
-                          : maxTime}
-                      </p>
+                      <div className={`flex flex-col lg:flex-row lg:gap-1 text-sm text-${isActive ? 'white' : 'black'}`}>
+                        <p>
+                          {paths?.length > 1
+                            ? formatMinutesToDecimalHour(
+                                Math.round(minTime?.legs?.[0].duration.value / 60),
+                                Math.round(maxTime?.legs?.[0].duration.value / 60)
+                              )
+                            : maxTime.duration.text} 
+                        </p>
+                        <p>
+                          (~{paths?.length > 1 ? maxTime?.legs?.[0]?.distance?.text : maxTime?.distance?.text}les)
+                        </p>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2 w-[8.875rem]">
                       <Icon icon={iconAlert} className={'inherit'} size="1.25rem" />
@@ -411,7 +594,29 @@ const DirectionSection = ({
               );
             })}
           </div>
-        ))}
+        )
+      }
+      <div className="flex justify-between">
+        <Button onClick={handleClear}>Clear</Button>
+        {isPredictionMode && !featuresData.predictedBusyness && !isLoading && !isLoadingPrediction && (
+          <Button
+            isDisabled={isLoading || isLoadingPrediction}
+            onClick={handleGeocode}
+          >Get Prediction</Button>
+        )}
+        {!isPredictionMode && !routes && (
+          <Button
+            isDisabled={isDisabled}
+            onClick={handleGeocode}
+          >Show Transit Options</Button>
+        )}
+        {routes && (
+          <Button
+            isDisabled={!tool}
+            onClick={() => setOpen(true)}
+          >Show Directions</Button>
+        )}
+      </div>
     </div>
   );
 };

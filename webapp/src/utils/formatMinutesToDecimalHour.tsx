@@ -1,5 +1,5 @@
 // Converts durations to human readable format.
-const formatMinutesToHourMin = (minMins: number, maxMins: number): string => {
+const formatMinutesToDecimalHour = (minMins: number, maxMins: number): string => {
   const toHM = (mins: number) => {
     const h = Math.floor(mins / 60);
     const m = mins % 60;
@@ -7,9 +7,9 @@ const formatMinutesToHourMin = (minMins: number, maxMins: number): string => {
   };
 
   const format = ({ h, m }: { h: number; m: number }) => {
-    if (h && m) return `${h}h ${m}min`;
+    if (h && m) return `${h}h ${m} min`;
     if (h) return `${h}h`;
-    return `${m}min`;
+    return `${m} min`;
   };
 
   if (minMins === maxMins) {
@@ -21,10 +21,10 @@ const formatMinutesToHourMin = (minMins: number, maxMins: number): string => {
 
   if (min.h === max.h) {
     const hourPart = min.h > 0 ? `${min.h}h ` : '';
-    return `${hourPart}${min.m} - ${max.m}min`;
+    return `${hourPart}${min.m} - ${max.m} min`;
   }
 
   return `${format(min)} - ${format(max)}`;
 };
 
-export default formatMinutesToHourMin;
+export default formatMinutesToDecimalHour;

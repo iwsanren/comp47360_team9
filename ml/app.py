@@ -17,7 +17,7 @@ import jwt
 import numpy as np
 
 # Import request tracking utilities
-from ml.utils.request_tracker import (
+from utils.request_tracker import (
     with_request_tracking,
     log_with_context,
     setup_logging,
