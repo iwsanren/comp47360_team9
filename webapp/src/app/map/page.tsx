@@ -82,15 +82,15 @@ const busynessLayerSetting: any = {
   type: "fill",
   paint: {
     'fill-color': [
-      'match',
-      ['get', 'combined_level'],
-      'very quiet', '#B7E4C7',   
-      'quiet', '#95D5B2',   
-      'normal', '#FFE066', 
-      'busy', '#F77F00', 
-      'very busy', '#FF4D4D',
-      'extremely busy', '#D00000',
-      '#FFE066'
+      'interpolate',
+      ['linear'],
+      ['get', 'combined_score'],
+      0, '#B7E4C7',   
+      1, '#95D5B2',   
+      2, '#FFE066', 
+      3, '#F77F00', 
+      4, '#FF4D4D',
+      5, '#D00000',
     ],
     'fill-color-transition': {
       duration: 1000, 
@@ -259,10 +259,10 @@ export default function Map() {
         const { aqiSum, busySum } = (zones || []).reduce(
           (acc: any, zone: any) => {
             const aqi = +zone?.properties?.aqi || 1;
-            const busy = +zone?.properties?.normalised_busyness || 0;
+            const busy = +zone?.properties?.combined_score || 0;
 
             acc.aqiSum += (aqi - 1) / 4; // AQI: 1~5 → 0~1
-            acc.busySum += busy;         // Busyness: 0~1
+            acc.busySum += busy / 5; // Busyness: 0~5 → 0~1
             return acc;
           },
           { aqiSum: 0, busySum: 0 }
@@ -270,7 +270,6 @@ export default function Map() {
         const count = zones?.length;
         const aqi_normalised = aqiSum / count;
         const busy_normalised = busySum / count;
-
         const pollutionScore =
           aqi_normalised * 0.15 +
           busy_normalised * 0.35;

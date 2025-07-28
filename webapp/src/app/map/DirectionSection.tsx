@@ -15,13 +15,13 @@ import Icon from '@/components/Icon';
 import Input from '@/components/Input';
 import Info from '@/components/Info';
 import Toggle from '@/components/Toggle';
-import { co2Emissions, transitEmissions } from '@/utils/formula';
 import formatMinutesToDecimalHour from '@/utils/formatMinutesToDecimalHour';
 import calculateTreesNeededPerDay from '@/utils/calculateTreesNeededPerDay';
-import { api, handleAPIError } from '@/utils/apiClient';
 import getNextHourInNY from '@/utils/getNextHourInNY';
 import fetchData from '@/utils/fetchData';
+import { co2Emissions, transitEmissions } from '@/utils/formula';
 import { useMode } from "@/contexts/ModeProvider";
+import { api, handleAPIError } from '@/utils/apiClient';
 
 import { Coordinates, Toggles, TransportMethod } from './page';
 import PredictionSection from './PredictionSection';
@@ -410,7 +410,7 @@ const DirectionSection = ({
       <div className="flex justify-between items-center mb-4 ">
         <Heading className="text-green-800" level={2}>{isPredictionMode ? 'Plan a Future Trip' : 'Plan a Trip Now'}</Heading>
         <Toggle
-          isDisabled={isLoading || isLoadingPrediction}
+          isDisabled={isDisabled}
           onClick={() => {
             clearPredictedBusynessLayer(map)
             setPredictionMode(prev => !prev)
@@ -471,7 +471,7 @@ const DirectionSection = ({
               Invalid position, the position is only available in Manhattan
             </div>
           )}
-          {routes && !tool && !isLoading && !isLoadingPrediction && (
+          {routes && !tool && !isDisabled && (
             <p>Please select your preferred mode of transportation.</p>
           )}
         </div>
@@ -501,7 +501,7 @@ const DirectionSection = ({
           />
         </div>
       </div>
-      {(isLoading || isLoadingPrediction) ? (
+      {isDisabled ? (
           <div className="py-3">Loading...</div>
         ) : (
           <div className="flex flex-col gap-3">
@@ -598,9 +598,8 @@ const DirectionSection = ({
       }
       <div className="flex justify-between">
         <Button onClick={handleClear}>Clear</Button>
-        {isPredictionMode && !featuresData.predictedBusyness && !isLoading && !isLoadingPrediction && (
+        {isPredictionMode && !featuresData.predictedBusyness && !isDisabled && (
           <Button
-            isDisabled={isLoading || isLoadingPrediction}
             onClick={handleGeocode}
           >Get Prediction</Button>
         )}
@@ -610,7 +609,7 @@ const DirectionSection = ({
             onClick={handleGeocode}
           >Show Transit Options</Button>
         )}
-        {routes && (
+        {routes && !isDisabled && (
           <Button
             isDisabled={!tool}
             onClick={() => setOpen(true)}
