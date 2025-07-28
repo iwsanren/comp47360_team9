@@ -306,11 +306,12 @@ def predict_all():
     # Current time and date features.
     time = int(request.args.get("timestamp")) if request.args.get("timestamp") else None
     if time:
-        ts = datetime.fromtimestamp(time, tz=timezone.utc)
+        dt = datetime.fromtimestamp(time, tz=timezone.utc)
+        ts = dt.astimezone(ZoneInfo("America/New_York"))
     else:
         ts = datetime.now(ZoneInfo("America/New_York"))
     
-    weather = fetch_weather(ts)
+    weather = fetch_weather(time)
 
     subway_level_df = pd.DataFrame()
     taxi_level_df = pd.DataFrame()
