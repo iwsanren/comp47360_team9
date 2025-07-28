@@ -16,7 +16,6 @@ from collections import OrderedDict
 from shapely import wkt
 from shapely.geometry import mapping
 from pathlib import Path
-from collections import OrderedDict
 from zoneinfo import ZoneInfo
 
 # Import request tracking utilities
@@ -27,15 +26,18 @@ from utils.request_tracker import (
     get_user_context
 )
 
-load_dotenv(override=True) # Load environment variables from .env file
+load_dotenv(override=True)  # Load environment variables from .env file
 
+# ----------------------------------------
+# Flask app setup
+# ----------------------------------------
 app = Flask(__name__)
 CORS(app)
 
 # Setup logging system
 setup_logging()
 
-# load API key.
+# Load API key.
 WEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY')
 JWT_SECRET = os.getenv('JWT_SECRET')
 
@@ -46,36 +48,35 @@ BASE_DIR = Path(__file__).resolve().parent
 MODELS_DIR = BASE_DIR
 
 # ----------------------------------------
-# Flask app setup
+# Underprediction Correction Constants
 # ----------------------------------------
-app = Flask(__name__)
+HIGH_THRESHOLD = 200       # Defines what is considered a very busy zone (taxi specific).
+CORRECTION_FACTOR = 1.412  # How much to scale underpredicted values (again taxi specific).
 
 # ----------------------------------------
 # Load models and metadata
 # ----------------------------------------
-# Loading models and data.
-
 try:
-    subway_model = joblib.load(MODELS_DIR / "subway_ridership_model_xgboost_final.joblib") #
+    subway_model = joblib.load(MODELS_DIR / "subway_ridership_model_xgboost_final.joblib")
 except Exception as e:
     print("Subway model load failed:", e)
     subway_model = None
 
 try:
-    taxi_model = joblib.load(MODELS_DIR / "xgboost_taxi_model.joblib") #
+    taxi_model = joblib.load(MODELS_DIR / "xgboost_taxi_model.joblib")
 except Exception as e:
     print("Taxi model load failed:", e)
     taxi_model = None
 
-with open(MODELS_DIR / "required_features.json") as f: #
+with open(MODELS_DIR / "required_features.json") as f:
     subway_features = json.load(f)
 
 # Load static inputs
-station_meta = pd.read_csv(BASE_DIR / "subway_stations.csv") #
-station_to_zone = pd.read_csv(BASE_DIR / "station_to_zone_mapping.csv") #
-subway_busyness = pd.read_csv(BASE_DIR / "zone_subway_busyness_stats.csv") #
-taxi_busyness = pd.read_csv(BASE_DIR / "zone_hourly_busyness_stats.csv") #
-zones_df = pd.read_csv(BASE_DIR / "manhattan_taxi_zones.csv") #
+station_meta = pd.read_csv(BASE_DIR / "subway_stations.csv")
+station_to_zone = pd.read_csv(BASE_DIR / "station_to_zone_mapping.csv")
+subway_busyness = pd.read_csv(BASE_DIR / "zone_subway_busyness_stats.csv")
+taxi_busyness = pd.read_csv(BASE_DIR / "zone_hourly_busyness_stats.csv")
+zones_df = pd.read_csv(BASE_DIR / "manhattan_taxi_zones.csv")
 
 # ----------------------------------------
 # Scoring logic
@@ -104,7 +105,6 @@ def classify_level(val, p10, p25, p50, p75, p90):
 # Weather fetcher
 # ----------------------------------------
 def fetch_weather(time):
-    # Fetching current weather.
     WEATHER_URL = (
         f"http://api.openweathermap.org/data/2.5/{'weather' if time is None else 'forecast/hourly'}?"
         f"lat=40.728333&lon=-73.994167&appid={WEATHER_API_KEY}&units=metric"
@@ -124,11 +124,7 @@ def fetch_weather(time):
         }
     except Exception as e:
         print("Weather API error:", e)
-        return {
-            "temp": 15, "feels_like": 15,
-            "humidity": 60, "wind_speed": 3,
-            "weather_main": "Clear"
-        }
+        return {"temp": 15, "feels_like": 15, "humidity": 60, "wind_speed": 3, "weather_main": "Clear"}
 
 # ----------------------------------------
 # Subway feature generation
@@ -189,10 +185,7 @@ def create_taxi_features(pulocation_ids, ts, weather):
     is_peak_hour = int(hour in [7, 8, 16, 17, 18])
     weather_main = weather["weather_main"]
 
-    weather_cols = [
-        "Rain", "Clouds", "Clear", "Snow", "Mist", 
-        "Haze", "Smoke", "Drizzle", "Fog", "Thunderstorm"
-    ]
+    weather_cols = ["Rain", "Clouds", "Clear", "Snow", "Mist", "Haze", "Smoke", "Drizzle", "Fog", "Thunderstorm"]
     for w in weather_cols:
         df[f"weather_{w}"] = int(weather_main == w)
 
@@ -214,7 +207,9 @@ def create_taxi_features(pulocation_ids, ts, weather):
 
     return df[order]
 
-# Root route to provide API info
+# ----------------------------------------
+# Root and health endpoints
+# ----------------------------------------
 @app.route('/', methods=['GET'])
 @with_request_tracking
 def root():
@@ -229,24 +224,11 @@ def root():
         "status": "running"
     })
 
-# Health check endpoint
 @app.route('/health', methods=['GET'])
 @with_request_tracking
 def health_check():
-    """Health check endpoint for monitoring and load balancing."""
     try:
         log_with_context('info', 'Health check requested')
-        
-        # Check if model is loaded
-        # if model is None:
-        #     log_with_context('error', 'Health check failed: Model not loaded')
-        #     return jsonify({
-        #         'status': 'unhealthy',
-        #         'error': 'Model not loaded',
-        #         'timestamp': datetime.now().isoformat()
-        #     }), 503
-        
-        # Basic health check
         health_data = {
             'status': 'healthy',
             'timestamp': datetime.now().isoformat(),
@@ -255,62 +237,35 @@ def health_check():
             'environment': os.getenv('FLASK_ENV', 'development'),
             'weather_api_configured': bool(WEATHER_API_KEY)
         }
-        
-        log_with_context('info', 'Health check completed successfully', {
-            'zones_count': len(zones_df),
-        })
-        
+        log_with_context('info', 'Health check completed successfully', {'zones_count': len(zones_df)})
         return jsonify(health_data), 200
-        
     except Exception as e:
-        log_with_context('error', f'Health check failed with exception: {str(e)}', {
-            'error_type': type(e).__name__
-        })
-        return jsonify({
-            'status': 'unhealthy',
-            'error': str(e),
-            'timestamp': datetime.now().isoformat()
-        }), 500
+        log_with_context('error', f'Health check failed with exception: {str(e)}', {'error_type': type(e).__name__})
+        return jsonify({'status': 'unhealthy','error': str(e),'timestamp': datetime.now().isoformat()}), 500
 
+# ----------------------------------------
+# Prediction endpoint
+# ----------------------------------------
 @app.route('/predict-all', methods=['POST'])
 @with_request_tracking
 def predict_all():
     auth_header = request.headers.get('Authorization')
-    
     if not auth_header or not auth_header.startswith('Bearer '):
-        log_with_context('warn', 'Prediction request missing or invalid authorization header')
         return {'error': 'Missing or invalid token'}, 401
-    
-    token = auth_header.split(' ')[1]
 
-    # Skip auth if DEV_MODE is enabled
-    if os.getenv("DEV_MODE", "false").lower() == "true":
-        pass
-    else:
+    token = auth_header.split(' ')[1]
+    if os.getenv("DEV_MODE", "false").lower() != "true":
         try:
-            decoded = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
-            log_with_context('info', 'JWT token validated successfully')
+            jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
-            log_with_context('warn', 'JWT token expired')
             return jsonify({'error': 'Token expired'}), 403
         except jwt.InvalidTokenError:
-            log_with_context('warn', 'Invalid JWT token provided')
             return jsonify({'error': 'Invalid token'}), 403
         except Exception as e:
-            log_with_context('error', f'Prediction request failed: {str(e)}', {
-                'error_type': type(e).__name__,
-                'user_context': get_user_context()
-            })
             return jsonify({"error": str(e)}), 500
-        
-    # Current time and date features.
+
     time = int(request.args.get("timestamp")) if request.args.get("timestamp") else None
-    if time:
-        dt = datetime.fromtimestamp(time, tz=timezone.utc)
-        ts = dt.astimezone(ZoneInfo("America/New_York"))
-    else:
-        ts = datetime.now(ZoneInfo("America/New_York"))
-    
+    ts = datetime.fromtimestamp(time, tz=timezone.utc).astimezone(ZoneInfo("America/New_York")) if time else datetime.now(ZoneInfo("America/New_York"))
     weather = fetch_weather(time)
 
     subway_level_df = pd.DataFrame()
@@ -324,16 +279,10 @@ def predict_all():
         subway_zone["hour"] = ts.hour
         subway_zone["day_of_week"] = ts.weekday()
 
-        subway_zone = subway_zone.merge(
-            subway_busyness, on=["PULocationID", "hour", "day_of_week"], how="left"
-        )
-        subway_zone["subway_level"] = subway_zone.apply(
-            lambda r: classify_level(r["predicted"], r["p10"], r["p25"], r["p50"], r["p75"], r["p90"]),
-            axis=1
-        )
+        subway_zone = subway_zone.merge(subway_busyness, on=["PULocationID", "hour", "day_of_week"], how="left")
+        subway_zone["subway_level"] = subway_zone.apply(lambda r: classify_level(r["predicted"], r["p10"], r["p25"], r["p50"], r["p75"], r["p90"]), axis=1)
         subway_zone["subway_score"] = subway_zone["subway_level"].map(LEVEL_TO_SCORE)
         subway_level_df = subway_zone[["PULocationID", "subway_level", "subway_score"]]
-
     except Exception as e:
         print("Subway model failed:", e)
 
@@ -344,19 +293,20 @@ def predict_all():
         taxi_df["day_of_week"] = ts.weekday()
 
         taxi_df = taxi_df.merge(taxi_busyness, on=["PULocationID", "hour", "day_of_week"], how="left")
-        taxi_df["taxi_level"] = taxi_df.apply(
-            lambda r: classify_level(r["predicted"], r["p10"], r["p25"], r["p50"], r["p75"], r["p90"]),
-            axis=1
-        )
+
+        taxi_df.loc[
+            (taxi_df["predicted"] < HIGH_THRESHOLD) &
+            (taxi_df["p75"] > HIGH_THRESHOLD),
+            "predicted"
+        ] *= CORRECTION_FACTOR
+
+        taxi_df["taxi_level"] = taxi_df.apply(lambda r: classify_level(r["predicted"], r["p10"], r["p25"], r["p50"], r["p75"], r["p90"]), axis=1)
         taxi_df["taxi_score"] = taxi_df["taxi_level"].map(LEVEL_TO_SCORE)
         taxi_level_df = taxi_df[["PULocationID", "taxi_level", "taxi_score", "centroid_lat", "centroid_lon", "geometry"]]
-
     except Exception as e:
         print("Taxi model failed:", e)
 
     result = pd.merge(taxi_level_df, subway_level_df, on="PULocationID", how="outer")
-
-    # Fallbacks
     result["taxi_score"] = result["taxi_score"].fillna(np.nan)
     result["subway_score"] = result["subway_score"].fillna(np.nan)
 
@@ -366,10 +316,9 @@ def predict_all():
             r["subway_score"] if np.isnan(r["taxi_score"]) and not np.isnan(r["subway_score"]) else
             0.7 * r["subway_score"] + 0.3 * r["taxi_score"] if not np.isnan(r["subway_score"]) and not np.isnan(r["taxi_score"]) else
             2
-        ),
-        axis=1
+        ), axis=1
     )
-    
+
     result["combined_level"] = result["combined_score"].round().astype(int).map(SCORE_TO_LEVEL)
     result["subway_level"] = result["subway_level"].fillna("No Data")
     result["taxi_level"] = result["taxi_level"].fillna("No Data")
@@ -384,24 +333,14 @@ def predict_all():
             geometry["type"] = "Polygon"
             geometry["coordinates"] = [coords]
         elif geom.startswith("MULTIPOLYGON (("):
-            geometry = mapping(wkt.loads(geom)) 
-        props = {
-            k: (None if pd.isna(v) else v)
-            for k, v in row.drop("geometry").items()
-        }
-        feature = {
-            "type": "Feature",
-            "properties": props,
-            "geometry": geometry
-        }
+            geometry = mapping(wkt.loads(geom))
+        props = {k: (None if pd.isna(v) else v) for k, v in row.drop("geometry").items()}
+        feature = {"type": "Feature", "properties": props, "geometry": geometry}
         features.append(feature)
 
     return jsonify({
         "type": "FeatureCollection",
-        "properties": {
-            "timestamp": ts,
-            "weather": weather,
-        },
+        "properties": {"timestamp": ts, "weather": weather},
         "features": features
     })
 
