@@ -1,0 +1,66 @@
+{
+  "analysis_timestamp": "2025-07-28T19:41:43.230880",
+  "dataset_info": {
+    "total_records": 1052709,
+    "unique_stations": 121,
+    "date_range": {
+      "start": "2024-01-01T00:00:00",
+      "end": "2024-12-31T23:00:00"
+    },
+    "temporal_coverage_days": 366,
+    "temporal_coverage_percentage": 99.05583946448012
+  },
+  "quality_scores": {
+    "DST Handling": 100,
+    "Temporal Coverage": 99.05583946448012,
+    "Data Validity": 99.89997235703314,
+    "Overall Score": 99.65193727383776
+  },
+  "quality_details": {
+    "dst_handling": {
+      "spring_correct": true,
+      "fall_correct": true,
+      "overall_correct": true
+    },
+    "temporal_completeness": {
+      "perfect_stations": 33,
+      "stations_missing_data": 88,
+      "worst_missing_hours": "827"
+    },
+    "validity": {
+      "issues": {
+        "negative_ridership": "0",
+        "zero_ridership": "0",
+        "extreme_high": "1053",
+        "invalid_coordinates": "0"
+      },
+      "total_issues": "1053",
+      "validity_score": 99.89997235703314
+    },
+    "distribution": {
+      "ridership_stats": {
+        "count": 1052709.0,
+        "mean": 643.55,
+        "std": 1138.36,
+        "min": 1.0,
+        "25%": 70.0,
+        "50%": 284.0,
+        "75%": 721.0,
+        "max": 21479.0
+      },
+      "station_count": 121,
+      "busiest_station_total": 45946688.0,
+      "quietest_station_total": 522269.0
+    }
+  },
+  "data_issues": {
+    "stations_missing_data": 88,
+    "total_missing_records": 10034,
+    "validity_issues": "1053"
+  },
+  "recommendations": [
+    "EXCELLENT: Dataset ready for advanced modeling",
+    "DST handling is correct",
+    "88 stations have minor missing data (99.1% coverage)"
+  ]
+}
