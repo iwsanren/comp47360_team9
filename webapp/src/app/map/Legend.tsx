@@ -6,7 +6,7 @@ const busyLevelLegend = {
     { level: 'Very Low', color: '#B7E4C7' },
     { level: 'Low', color: '#95D5B2' },
     { level: 'Moderate', color: '#FFE066' },
-    { level: 'busy', color: '#F77F00' },
+    { level: 'Busy', color: '#F77F00' },
     { level: 'Very Busy', color: '#FF4D4D' },
     { level: 'Extremely Busy', color: '#D00000' },
   ]
@@ -15,11 +15,11 @@ const busyLevelLegend = {
 const aqiLegend = {
   label: 'Air quality',
   legends: [
-    { level: 'very well', color: '#CCCCFF' },
-    { level: 'good', color: '#0000FF' },
+    { level: 'Very Good', color: '#CCCCFF' },
+    { level: 'Good', color: '#0000FF' },
     { level: 'Moderate', color: '#00FF00' },
-    { level: 'poor', color: '#FFFF00' },
-    { level: 'Very poor', color: '#FF0000' },
+    { level: 'Poor', color: '#FFFF00' },
+    { level: 'Very Poor', color: '#FF0000' },
   ]
 };
 
