@@ -18,8 +18,8 @@ const aqiLegend = {
     { level: 'very well', color: '#CCCCFF' },
     { level: 'good', color: '#0000FF' },
     { level: 'Moderate', color: '#00FF00' },
-    { level: 'bad', color: '#FFFF00' },
-    { level: 'Very worse', color: '#FF0000' },
+    { level: 'poor', color: '#FFFF00' },
+    { level: 'Very poor', color: '#FF0000' },
   ]
 };
 
