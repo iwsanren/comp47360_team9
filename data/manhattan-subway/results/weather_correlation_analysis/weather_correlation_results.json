@@ -1,0 +1,154 @@
+{
+  "dataset_info": {
+    "total_records": 1052709,
+    "unique_stations": 121,
+    "available_weather_features": [
+      "temp",
+      "feels_like",
+      "dew_point",
+      "humidity",
+      "wind_speed",
+      "pressure",
+      "visibility",
+      "rain_1h",
+      "snow_1h",
+      "weather_main",
+      "weather_description",
+      "clouds_all"
+    ],
+    "missing_weather_features": [],
+    "temporal_context": {
+      "rush_hours": [
+        8,
+        17
+      ],
+      "weekend_factor": 0.6262581326808653,
+      "cbd_advantage": 2.5241489828010777
+    }
+  },
+  "correlations": {
+    "temp": {
+      "pearson_r": 0.07191769078972893,
+      "pearson_p": 0.0,
+      "spearman_r": 0.12127918644796326,
+      "spearman_p": 0.0,
+      "sample_size": 1052709
+    },
+    "feels_like": {
+      "pearson_r": 0.06550953273101529,
+      "pearson_p": 0.0,
+      "spearman_r": 0.1102453704206808,
+      "spearman_p": 0.0,
+      "sample_size": 1052709
+    },
+    "dew_point": {
+      "pearson_r": 0.0027305237102205884,
+      "pearson_p": 0.005085568928445456,
+      "spearman_r": 0.007137607828154235,
+      "spearman_p": 2.4179281717996125e-13,
+      "sample_size": 1052709
+    },
+    "humidity": {
+      "pearson_r": -0.1320138880142445,
+      "pearson_p": 0.0,
+      "spearman_r": -0.21939709987655703,
+      "spearman_p": 0.0,
+      "sample_size": 1052709
+    },
+    "wind_speed": {
+      "pearson_r": 0.0828298006834457,
+      "pearson_p": 0.0,
+      "spearman_r": 0.15480909726185674,
+      "spearman_p": 0.0,
+      "sample_size": 1052709
+    },
+    "pressure": {
+      "pearson_r": -0.008511882405438076,
+      "pearson_p": 2.4696301567360896e-18,
+      "spearman_r": -0.0073586244721859425,
+      "spearman_p": 4.347228670896864e-14,
+      "sample_size": 1052709
+    },
+    "visibility": {
+      "pearson_r": 0.015461274056886805,
+      "pearson_p": 1.4907458865363518e-56,
+      "spearman_r": 0.03399301222434809,
+      "spearman_p": 4.638590893192382e-266,
+      "sample_size": 1050304
+    },
+    "rain_1h": {
+      "pearson_r": 0.021396134894156968,
+      "pearson_p": 6.0119953615186466e-18,
+      "spearman_r": -0.022439139991217123,
+      "spearman_p": 1.3880530932540654e-19,
+      "sample_size": 162739
+    },
+    "snow_1h": {
+      "pearson_r": -0.1277194648673389,
+      "pearson_p": 4.1604781605640346e-26,
+      "spearman_r": -0.2940694462836723,
+      "spearman_p": 1.3195846088189169e-135,
+      "sample_size": 6794
+    }
+  },
+  "temperature_effects": {
+    "optimal_category": "hot",
+    "worst_category": "freezing",
+    "comfort_factor": 2.4078341013824884,
+    "category_averages": {
+      "freezing": 434.0,
+      "cold": 597.0,
+      "cool": 640.0,
+      "warm": 704.0,
+      "hot": 1045.0
+    }
+  },
+  "precipitation_effects": {
+    "rain": {
+      "rain_factor": 0.9875968992248062,
+      "deterrent_pct": 1.2403100775193798
+    },
+    "snow": {
+      "snow_factor": 0.6821705426356589,
+      "deterrent_pct": 31.782945736434108
+    }
+  },
+  "temporal_interactions": {
+    "rain_sensitivity": {
+      "rush_hour_factor": 0.9956921932304148,
+      "non_rush_factor": 0.9874955247195587,
+      "weekend_factor": 0.9897864618579654,
+      "weekday_factor": 1.0064706820020322
+    }
+  },
+  "weather_feature_recommendations": {
+    "critical_weather_features": [
+      "has_snow",
+      "temp_category",
+      "is_freezing"
+    ],
+    "high_importance_features": [
+      "has_rain",
+      "humidity",
+      "is_hot",
+      "feels_like"
+    ],
+    "interaction_features": [
+      "rain_weekend",
+      "snow_weekend",
+      "rain_rush_hour",
+      "temp_season_adj"
+    ],
+    "advanced_features": [
+      "weather_severity_index",
+      "precipitation_intensity",
+      "temperature_comfort_score",
+      "visibility_impact"
+    ]
+  },
+  "analysis_metadata": {
+    "analysis_date": "2025-07-28T19:50:45.244071",
+    "dataset_size": 1052709,
+    "weather_features_analyzed": 12
+  }
+}
