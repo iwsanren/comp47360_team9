@@ -1,0 +1,129 @@
+{
+  "creation_date": "2025-07-28T19:54:31.273774",
+  "source_dataset": "..\\data\\processed\\integration\\weather_ridership_integrated_2024.parquet",
+  "total_features": 24,
+  "features_by_category": {
+    "temporal_raw": [
+      "hour",
+      "day_of_week",
+      "month"
+    ],
+    "temporal_cyclical": [
+      "hour_sin",
+      "hour_cos",
+      "dow_sin",
+      "dow_cos",
+      "month_sin",
+      "month_cos"
+    ],
+    "temporal_derived": [
+      "is_rush_hour",
+      "is_weekend",
+      "is_holiday"
+    ],
+    "weather": [
+      "temp",
+      "has_snow",
+      "has_rain",
+      "temp_category",
+      "is_freezing",
+      "is_hot",
+      "humidity",
+      "wind_speed",
+      "feels_like"
+    ],
+    "location": [
+      "is_cbd",
+      "latitude",
+      "longitude"
+    ]
+  },
+  "dataset_info": {
+    "shape": [
+      1052709,
+      28
+    ],
+    "date_range": [
+      "2024-01-01T00:00:00",
+      "2024-12-31T23:00:00"
+    ],
+    "stations": 121
+  },
+  "identifier_columns": [
+    "station_complex_id",
+    "station_complex",
+    "transit_timestamp",
+    "latitude",
+    "longitude"
+  ],
+  "validated_patterns": {
+    "rush_hours": [
+      8,
+      17
+    ],
+    "weekend_factor": 0.63,
+    "holiday_factor": 0.66,
+    "cbd_advantage": 2.52,
+    "snow_deterrent_pct": 31.8,
+    "rain_deterrent_pct": 1.2,
+    "temp_comfort_factor": 2.41
+  },
+  "validation_results": {
+    "rush_hour": {
+      "expected": 2.36,
+      "observed": 2.35,
+      "valid": true
+    },
+    "weekend": {
+      "expected": 0.63,
+      "observed": 0.63,
+      "valid": true
+    },
+    "snow": {
+      "expected": 0.68,
+      "observed": 0.68,
+      "valid": true
+    },
+    "temperature": {
+      "expected": 2.41,
+      "observed": 2.4,
+      "valid": true
+    },
+    "cbd": {
+      "expected": 2.52,
+      "observed": 2.52,
+      "valid": true
+    }
+  },
+  "feature_list": [
+    "hour",
+    "day_of_week",
+    "month",
+    "hour_sin",
+    "hour_cos",
+    "dow_sin",
+    "dow_cos",
+    "month_sin",
+    "month_cos",
+    "is_rush_hour",
+    "is_weekend",
+    "is_holiday",
+    "temp",
+    "has_snow",
+    "has_rain",
+    "temp_category",
+    "is_freezing",
+    "is_hot",
+    "humidity",
+    "wind_speed",
+    "feels_like",
+    "is_cbd",
+    "latitude",
+    "longitude"
+  ],
+  "new_features_added": [
+    "is_freezing - Binary indicator for severe cold impact",
+    "is_hot - Binary indicator for optimal temperature conditions",
+    "temp - Raw temperature preserved for fine-grained modeling"
+  ]
+}
