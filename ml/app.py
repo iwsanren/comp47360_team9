@@ -22,8 +22,7 @@ from zoneinfo import ZoneInfo
 from utils.request_tracker import (
     with_request_tracking,
     log_with_context,
-    setup_logging,
-    get_user_context
+    setup_logging
 )
 
 load_dotenv(override=True)  # Load environment variables from .env file

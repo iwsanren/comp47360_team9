@@ -94,17 +94,6 @@ def with_request_tracking(f):
     
     return decorated_function
 
-def get_user_context():
-    """Get user request context information"""
-    return {
-        'user_agent': request.headers.get('User-Agent'),
-        'remote_addr': request.remote_addr,
-        'method': request.method,
-        'url': request.url,
-        'args': dict(request.args),
-        'request_id': getattr(g, 'request_id', 'unknown')
-    }
-
 # Configure log format
 class RequestTrackingFormatter(logging.Formatter):
     """Custom log formatter with request tracking information"""
