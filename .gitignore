@@ -4,7 +4,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 dist/
-.env
+
+#env
+.env*
 
 # Python
 __pycache__/
@@ -34,3 +36,37 @@ logs
 # System
 .DS_Store
 Thumbs.db
+
+# test file
+frontend
+mapTest
+webapp/src/app/mapTest
+
+backup/
+CI-CD-FIX-SUMMARY.md
+CONFIGURATION-SUMMARY.md
+DEPLOYMENT-COMPLETE-GUIDE.md
+NGINX-SETUP.md
+SETUP-NEXT-STEPS.md
+
+# Backup route files
+webapp/src/app/api/directions/route_backup.js
+webapp/src/app/api/directions/route_new.js
+
+docs/*
+!docs/git_workflow.md
+!docs/AUTOMATION-GUIDE.md
+!docs/DEPLOYMENT-COMPLETE-GUIDE.md
+!docs/quick-setup-guide.md
+!docs/SCRIPTS-ANALYSIS.md
+!docs/DOCKER-SETUP-GUIDE.md
+
+# *.txt
+
+# ---- Added for Python testing environment ----
+venv/
+.coverage
+__pycache__/
+.pytest_cache/
+node_modules/
+ML_new

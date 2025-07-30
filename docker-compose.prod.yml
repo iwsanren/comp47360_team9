@@ -1,0 +1,37 @@
+services:
+  # Next.js Web Application
+  webapp:
+    image: ${WEBAPP_IMAGE:-comp47360_team9-webapp}
+    build:
+      context: ./webapp
+      args:
+        - NEXT_PUBLIC_MAPBOX_API_KEY=${NEXT_PUBLIC_MAPBOX_API_KEY}
+        - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+        - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+    ports:
+      - "${WEBAPP_PORT:-3030}:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - NEXT_TELEMETRY_DISABLED=1
+      - NEXT_PUBLIC_MAPBOX_API_KEY=${NEXT_PUBLIC_MAPBOX_API_KEY}
+      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+    env_file:
+      - .env
+    depends_on:
+      - ml-api
+
+  # ML Prediction Service
+  ml-api:
+    image: ${ML_API_IMAGE:-comp47360_team9-ml-api}
+    build:
+      context: ./ml
+    ports:
+      - "${ML_API_PORT:-5000}:5000"
+    environment:
+      - FLASK_ENV=${FLASK_ENV:-production}
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+    volumes:
+      - ./ml:/app:ro  # Read-only mount for production security
