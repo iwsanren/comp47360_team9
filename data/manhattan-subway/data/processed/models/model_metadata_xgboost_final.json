@@ -1,0 +1,115 @@
+{
+  "model_name": "XGBoost_Optimized_Final",
+  "creation_date": "2025-07-28T20:53:04.815833",
+  "model_file": "subway_ridership_model_xgboost_final.joblib",
+  "loading_instructions": "Use joblib.load() to load the model",
+  "performance": {
+    "test_rmse": 403.6579229372316,
+    "test_r2": 0.8835927248001099,
+    "train_r2": 0.9268262982368469,
+    "rmse_gap_pct": 24.336094684900413,
+    "r2_gap": 0.04323357343673706,
+    "cv_rmse_mean": 318.7202941894531,
+    "cv_rmse_std": 31.094146960102773,
+    "training_time_sec": 40.199872,
+    "trees_used": 1000
+  },
+  "cv_scores": [
+    335.3573913574219,
+    302.4921569824219,
+    310.85369873046875,
+    276.5993957519531,
+    368.298828125
+  ],
+  "hyperparameters": {
+    "n_estimators": 1000,
+    "max_depth": 4,
+    "reg_alpha": 0.3,
+    "reg_lambda": 0.3,
+    "min_child_weight": 8,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "learning_rate": 0.05,
+    "random_state": 42,
+    "verbosity": 0,
+    "n_jobs": -1
+  },
+  "features": [
+    "latitude",
+    "longitude",
+    "hour",
+    "day_of_week",
+    "month",
+    "hour_sin",
+    "hour_cos",
+    "dow_sin",
+    "dow_cos",
+    "month_sin",
+    "month_cos",
+    "is_rush_hour",
+    "is_weekend",
+    "is_holiday",
+    "temp",
+    "has_snow",
+    "has_rain",
+    "temp_category",
+    "is_freezing",
+    "is_hot",
+    "humidity",
+    "wind_speed",
+    "feels_like",
+    "is_cbd"
+  ],
+  "business_validation": {
+    "rush_hour_factor": 2.3168222904205322,
+    "weekend_factor": 0.641593337059021,
+    "cbd_factor": 2.4030284881591797,
+    "status": {
+      "rush_hour_valid": true,
+      "weekend_valid": true,
+      "cbd_valid": true
+    }
+  },
+  "feature_importance_top10": [
+    {
+      "feature": "is_cbd",
+      "importance": 0.20834055542945862
+    },
+    {
+      "feature": "latitude",
+      "importance": 0.14392037689685822
+    },
+    {
+      "feature": "hour_sin",
+      "importance": 0.11165901273488998
+    },
+    {
+      "feature": "hour_cos",
+      "importance": 0.0960809662938118
+    },
+    {
+      "feature": "is_weekend",
+      "importance": 0.09460120648145676
+    },
+    {
+      "feature": "hour",
+      "importance": 0.08132901787757874
+    },
+    {
+      "feature": "is_rush_hour",
+      "importance": 0.07075583934783936
+    },
+    {
+      "feature": "longitude",
+      "importance": 0.05978848785161972
+    },
+    {
+      "feature": "day_of_week",
+      "importance": 0.05371118709445
+    },
+    {
+      "feature": "dow_sin",
+      "importance": 0.047184061259031296
+    }
+  ]
+}

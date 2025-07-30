@@ -2,6 +2,27 @@
 
 This is a full-stack web application designed to help New Yorkers make smarter, greener, and less crowded mobility decisions.
 
+## 🚀 Quick Start with Automation
+
+For the complete project setup with automatic code quality and maintenance:
+
+```bash
+# One-time setup (includes git hooks and dependencies)
+npm run setup
+
+# Daily development
+git add .
+git commit -m "feat: your changes"  # Automatic code formatting and checks
+
+# When you need to clean up Docker cache
+npm run cleanup
+
+# Start the project
+docker-compose up -d
+```
+
+📖 **For detailed automation features, see [AUTOMATION-GUIDE.md](AUTOMATION-GUIDE.md)**
+
 ## Team Members
 
 | Name               | Role                |
@@ -14,21 +35,146 @@ This is a full-stack web application designed to help New Yorkers make smarter, 
 
 ## Tech Stack
 
-- **Frontend**: Next.js (React framework), Leaflet / Mapbox
-- **Backend**: Node.js
+- **Frontend**: Next.js (React framework), Leaflet / Mapbox, TypeScript
+- **Backend API**: Next.js API Routes, Node.js
 - **Machine Learning**: scikit-learn, XGBoost (Python microservice)
 - **Routing Engine**: OSRM
-- **Deployment**: Render
+- **Deployment**: Docker + GitLab CI/CD on Linux server
+- **Infrastructure**: Docker Compose, nginx
+
+# ML API Integration Guide
+
+This document explains how to call the ML API in different environments.
+
+## Development Environment
+
+### ➤ **Option 1. Running Flask app directly**
+
+If you are running the Flask app directly on your local machine, fetch the API using: http://127.0.0.1:5000/predict-all
+
+### ➤ **Option 2. Running the entire project with Docker**
+
+If you are running the project via `docker`, fetch the API using: http://localhost:5001/predict-all
+
+> 💡 **Note:**  
+> Make sure the container’s port is mapped to your local `5001` port. Adjust accordingly
+
+---
+
+## 🌐 Production Environment
+
+In production, always fetch: /api/ml/predict-all
+
+This endpoint is **proxied by Nginx or the Next.js API route to the ML server**. You do not need to call the ML server directly.
+
+## Project Structure
+
+```
+comp47360_team9/
+├── README.md                    # Project overview and setup instructions
+├── package.json                 # Root package.json for project metadata
+├── docker-compose.yml           # Development Docker configuration
+├── docker-compose.prod.yml      # Production Docker configuration
+├── nginx.conf                   # Nginx configuration for production
+├── .gitignore                  # Git ignore rules
+
+# Frontend Application
+├── webapp/                     # Next.js application
+│   ├── src/
+│   │   ├── app/                # Next.js App Router
+│   │   │   ├── layout.tsx      # Root layout component
+│   │   │   ├── page.tsx        # Home page
+│   │   │   ├── globals.css     # Global styles
+│   │   │   ├── api/            # API route handlers
+│   │   │   │   ├── airquality/ # Air quality data endpoint
+│   │   │   │   ├── bikes/      # Bike sharing data endpoint
+│   │   │   │   ├── busyness/   # ML busyness prediction endpoint
+│   │   │   │   ├── contact/    # Contact form endpoint
+│   │   │   │   ├── directions/ # Routing directions endpoint
+│   │   │   │   ├── EV-charging/ # EV charging stations endpoint
+│   │   │   │   ├── parks/      # Parks data endpoint
+│   │   │   │   └── weather/    # Weather data endpoint
+│   │   │   ├── contact/        # Contact page
+│   │   │   ├── map/            # Interactive map page
+│   │   │   └── containers/     # Page-level container components
+│   │   ├── components/         # Reusable UI components
+│   │   ├── hooks/              # Custom React hooks
+│   │   ├── utils/              # Utility functions
+│   │   ├── assets/             # Images and static assets
+│   │   ├── constants/          # App constants and icons
+│   │   └── routing.json        # Routing configuration
+│   ├── public/                 # Static files served by Next.js
+│   │   ├── data/              # JSON data files for zones and maps
+│   │   └── *.svg, *.ico       # Icons and favicons
+│   ├── Dockerfile             # Docker configuration for webapp
+│   ├── package.json           # Frontend dependencies
+│   ├── next.config.ts         # Next.js configuration
+│   ├── tailwind.config.js     # Tailwind CSS configuration
+│   ├── postcss.config.mjs     # PostCSS configuration
+│   ├── eslint.config.mjs      # ESLint configuration
+│   └── tsconfig.json          # TypeScript configuration
+
+# Machine Learning Service
+├── ml/                         # Python Flask ML API service
+│   ├── app.py                 # Flask API server with prediction endpoints
+│   ├── requirements.txt       # Python dependencies
+│   ├── Dockerfile            # Docker configuration for ML service
+│   ├── xgboost_taxi_model.joblib      # Trained XGBoost model
+│   ├── manhattan_taxi_zones.csv       # NYC taxi zone reference data
+│   ├── zone_hourly_busyness_stats.csv # Busyness statistics
+│   └── zone_hourly_summary.csv        # Zone summary data
+
+# Deployment & Operations
+├── scripts/                    # Deployment and utility scripts
+│   ├── setup-server.sh       # Server initialization script
+│   ├── test-config.sh        # Configuration testing
+│   ├── manual-deploy.sh      # Manual deployment script
+│   ├── restart-project.sh    # Project restart utility
+│   ├── diagnose-containers.sh # Container debugging
+│   ├── fix-deployment.sh     # Deployment troubleshooting
+│   ├── test-ml-api.sh        # ML API testing
+│   ├── setup-nginx.sh       # Nginx setup script
+│   ├── configure-firewall.sh # Firewall configuration
+│   └── *.bat                 # Windows batch scripts
+├── nginx/                     # Nginx configuration files
+│   └── nginx.conf            # Nginx server block configuration
+
+# Documentation (only git_workflow.md is tracked)
+└── docs/
+    └── git_workflow.md        # Git branching strategy documentation
+
+# Note: The following directories/files are ignored by git:
+# - node_modules/, .next/, dist/, out/ (build outputs)
+# - .env files (environment variables)
+# - osrm-data/ (OSRM routing data)
+# - backup/ (backup configurations)
+# - Most files in docs/ except git_workflow.md
+# - __pycache__/, *.py[cod] (Python cache files)
+# - .vscode/ (VS Code settings)
+```
 
 ## How to Run the Project
+### Local Development
+#### Quick Start with Docker
+```bash
+docker-compose down
+docker-compose up --build
+```
 
-Frontend (Next.js + Leaflet/Mapbox)
-TODO: Add setup instructions (e.g., npm install, npm run dev)
+### Production Deployment
+The project uses GitLab CI/CD for automated deployment to a Linux server.
+#### Deployment URLs
+- **Webapp**: http://137.43.49.26 
+- **Flask**: http://137.43.49.26/api/ml/ and http://137.43.49.26/api/ml/predict-all
 
-Backend (Node.js + API)
-TODO: Add backend setup and run instructions (e.g., npm run start, API endpoints)
 
-ML Microservice (Python)
+## Features
+
+- **Interactive Map**: Leaflet/Mapbox integration for NYC navigation
+- **Route Planning**: Multi-modal transportation options
+- **Real-time Data**: Weather, air quality, bike availability
+- **ML Predictions**: Crowd density and busyness forecasting
+- **Responsive Design**: Mobile-first approach
 TODO: Add instructions for setting up Python service (e.g., Flask, FastAPI)
 
 OSRM Routing Engine
@@ -44,46 +190,3 @@ We use a simple Git branching strategy based on `main`, `develop`, and `feature/
 - `hotfix/*`: For urgent fixes (from `main`, merged into `main` and `develop`).
 
 See `docs/git_workflow.md` for full explanation and diagram.
-
-## Project Structure
-```
-comp47360_team9/
-├── .next/                  # [ignored] Next.js build output
-├── node_modules/           # [ignored] Node.js dependencies
-├── osrm-data/              # [ignored] OSRM-generated routing files
-├── .env                    # [ignored] Environment variables (API keys, secrets)
-├── .gitignore              # Git ignore rules
-├── README.md               # Project overview and instructions
-
-# App Frontend (Next.js + Leaflet/Mapbox)
-├── public/                 # Static assets (e.g. favicon, icons)
-├── pages/                  # Next.js page routes (index.js, about.js etc.)
-├── components/             # Reusable UI components
-├── styles/                 # CSS modules or global styles
-
-# Node.js Backend
-├── api/                    # Custom backend logic (if using API routes or server)
-│   ├── index.js
-│   └── route.js
-
-# Python ML Microservice
-├── ml/                     # Lightweight Python-based microservice (Flask/FastAPI)
-│   ├── model.pkl           # Trained model
-│   ├── predictor.py        # Inference script or API
-│   └── requirements.txt    # Python dependencies
-
-# OSRM
-├── osrm/                   # OSRM setup scripts or Docker config
-│   └── run_osrm.sh
-
-# Documentation
-├── docs/                   # Collaboration docs and team process
-│   ├── git_workflow.md
-│   └── architecture.md
-
-# Deployment
-├── render.yaml             # Render deployment config (optional)
-└── Dockerfile              # for full containerized deployment
-```
-
-
