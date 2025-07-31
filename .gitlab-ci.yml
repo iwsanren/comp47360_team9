@@ -25,7 +25,7 @@ quality_check:
     - develop
     - main
 
-deploy_staging:
+deploy_app:
   stage: deploy
   tags:
     - shell
