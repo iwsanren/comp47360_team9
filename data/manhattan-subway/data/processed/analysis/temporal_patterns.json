@@ -1,0 +1,62 @@
+{
+  "analysis_metadata": {
+    "analysis_date": "2025-07-28T19:49:02.906685",
+    "source_dataset": "C:\\Users\\neasa\\manhattan-subway\\data\\processed\\integration\\weather_ridership_integrated_2024.parquet",
+    "analysis_type": "temporal_pattern_analysis"
+  },
+  "key_patterns": {
+    "rush_hours": [
+      8,
+      17
+    ],
+    "rush_factor": 2.3608625576174243,
+    "weekend_factor": 0.6262581326808653,
+    "holiday_factor": 0.6563952677616289,
+    "cbd_advantage": 2.5241489828010777,
+    "seasonal_range": 0.23199999999999987
+  },
+  "monthly_factors": {
+    "January": 0.896,
+    "February": 0.956,
+    "March": 0.984,
+    "April": 1.012,
+    "May": 1.037,
+    "June": 0.976,
+    "July": 0.948,
+    "August": 0.922,
+    "September": 1.044,
+    "October": 1.128,
+    "November": 1.053,
+    "December": 1.043
+  },
+  "feature_priorities": {
+    "critical_features": [
+      "hour_sin",
+      "hour_cos",
+      "is_weekend",
+      "is_rush_hour",
+      "is_cbd"
+    ],
+    "high_importance_features": [
+      "day_of_week_sin",
+      "day_of_week_cos",
+      "is_holiday",
+      "seasonal_factor",
+      "weekday_rush"
+    ],
+    "medium_importance_features": [
+      "month_sin",
+      "month_cos",
+      "is_fall_peak",
+      "is_summer_low",
+      "holiday_severity",
+      "cbd_evening_rush"
+    ],
+    "advanced_interaction_features": [
+      "weekend_late_night",
+      "cbd_late_night",
+      "hour_weekend_ratio",
+      "cbd_hour_multiplier"
+    ]
+  }
+}

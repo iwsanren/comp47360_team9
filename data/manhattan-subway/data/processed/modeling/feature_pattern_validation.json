@@ -1,0 +1,27 @@
+{
+  "rush_hour": {
+    "expected": 2.36,
+    "observed": 2.35,
+    "valid": true
+  },
+  "weekend": {
+    "expected": 0.63,
+    "observed": 0.63,
+    "valid": true
+  },
+  "snow": {
+    "expected": 0.68,
+    "observed": 0.68,
+    "valid": true
+  },
+  "temperature": {
+    "expected": 2.41,
+    "observed": 2.4,
+    "valid": true
+  },
+  "cbd": {
+    "expected": 2.52,
+    "observed": 2.52,
+    "valid": true
+  }
+}
