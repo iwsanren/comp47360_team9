@@ -6,7 +6,6 @@ stages:
   - quality-check
   - deploy
 
-# code quality check
 quality_check:
   stage: quality-check
   tags:
