@@ -6,20 +6,19 @@ stages:
   - quality-check
   - deploy
 
-# code quality check
 quality_check:
   stage: quality-check
   tags:
     - shell
   script:
-    - echo "🔍 Running quality checks..."
-    - echo "🧹 Cleaning Docker cache..."
+    - echo "Running quality checks..."
+    - echo "Cleaning Docker cache..."
     - docker system prune -af || true
-    - echo "📁 Validating project structure..."
-    - test -f "webapp/package.json" && echo "✅ Frontend package.json exists"
-    - test -f "ml/requirements.txt" && echo "✅ ML requirements.txt exists"
-    - test -f "docker-compose.yml" && echo "✅ Docker compose config exists"
-    - echo "✅ Quality checks completed"
+    - echo "Validating project structure..."
+    - test -f "webapp/package.json" && echo "Frontend package.json exists"
+    - test -f "ml/requirements.txt" && echo "ML requirements.txt exists"
+    - test -f "docker-compose.yml" && echo "Docker compose config exists"
+    - echo "Quality checks completed"
   only:
     - feature/delete-user-context
     - develop
@@ -29,17 +28,28 @@ deploy_app:
   stage: deploy
   tags:
     - shell
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+      - job_execution_timeout
   before_script:
     - docker --version
     - docker-compose --version
   script:
     - echo "Building and deploying to staging..."
-    - echo "Cleaning Docker cache before build..."
-    - docker system prune -af || true
-    - echo "Docker cache cleaned successfully"
+    - echo "Checking disk space..."
+    - df -h /
+    - echo "Cleaning up before deployment..."
+    - docker system prune -af || echo "Docker cleanup failed"
+    - docker image prune -af || echo "Docker image cleanup failed"
+    - docker volume prune -f || echo "Docker volume cleanup failed"
+    - rm -rf /tmp/team9-deploy || echo "No previous deployment to clean"
     - echo "Setting up deployment directory..."
     - mkdir -p /tmp/team9-deploy/staging
-    - rsync -av --exclude='.git' --exclude='.gitlab' --exclude='node_modules' ./ /tmp/team9-deploy/staging/
+    - echo "Syncing project files..."
+    - rsync -av --exclude=.git --exclude=.gitlab --exclude=node_modules --exclude=data --exclude=backup --exclude="*.log" --exclude=.DS_Store --exclude=Thumbs.db ./ /tmp/team9-deploy/staging/
     - cd /tmp/team9-deploy/staging
     - echo "Creating .env file..."
     - echo "OPENWEATHER_API_KEY=$OPENWEATHER_API_KEY" > .env
@@ -50,7 +60,7 @@ deploy_app:
     - echo "FLASK_ENV=production" >> .env
     - echo "Stopping existing containers..."
     - docker-compose down || true
-    - echo "Building containers with request tracking..."
+    - echo "Building containers..."
     - docker-compose build --no-cache
     - echo "Starting containers..."
     - docker-compose up -d
@@ -60,6 +70,10 @@ deploy_app:
     - docker-compose logs --tail=30
     - echo "Staging deployment completed!"
     - echo "Access at http://137.43.49.26:3030"
+    - echo "Cleaning up deployment files..."
+    - rm -rf /tmp/team9-deploy
+    - echo "Final disk space:"
+    - df -h /
   environment:
     name: staging
     url: http://137.43.49.26:3030
