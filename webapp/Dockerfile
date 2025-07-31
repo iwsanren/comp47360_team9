@@ -7,8 +7,12 @@ WORKDIR /app
 # Copy package files first for better caching
 COPY package.json package-lock.json* ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies with retry and timeout settings
+RUN npm config set registry https://registry.npmjs.org/ && \
+    npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm install --no-audit --no-fund
 
 # Copy the rest of the code
 COPY . .
