@@ -11,14 +11,14 @@ quality_check:
   tags:
     - shell
   script:
-    - echo "🔍 Running quality checks..."
-    - echo "🧹 Cleaning Docker cache..."
+    - echo "Running quality checks..."
+    - echo "Cleaning Docker cache..."
     - docker system prune -af || true
-    - echo "📁 Validating project structure..."
-    - test -f "webapp/package.json" && echo "✅ Frontend package.json exists"
-    - test -f "ml/requirements.txt" && echo "✅ ML requirements.txt exists"
-    - test -f "docker-compose.yml" && echo "✅ Docker compose config exists"
-    - echo "✅ Quality checks completed"
+    - echo "Validating project structure..."
+    - test -f "webapp/package.json" && echo "Frontend package.json exists"
+    - test -f "ml/requirements.txt" && echo "ML requirements.txt exists"
+    - test -f "docker-compose.yml" && echo "Docker compose config exists"
+    - echo "Quality checks completed"
   only:
     - feature/delete-user-context
     - develop
@@ -33,20 +33,20 @@ deploy_app:
     - docker-compose --version
   script:
     - echo "Building and deploying to staging..."
-    - echo "📊 Checking disk space..."
+    - echo "Checking disk space..."
     - df -h /
     - AVAILABLE_SPACE=$(df / | awk 'NR==2 {print $4}')
     - echo "Available space: ${AVAILABLE_SPACE}KB"
-    - echo "🧹 Cleaning up before deployment..."
+    - echo "Cleaning up before deployment..."
     - sudo docker system prune -af || echo "Docker cleanup failed"
     - sudo docker image prune -af || echo "Docker image cleanup failed"
     - sudo docker volume prune -f || echo "Docker volume cleanup failed"
     - sudo rm -rf /tmp/team9-deploy || echo "No previous deployment to clean"
-    - echo "📊 Disk space after cleanup:"
+    - echo "Disk space after cleanup:"
     - df -h /
-    - echo "📁 Setting up deployment directory..."
+    - echo "Setting up deployment directory..."
     - mkdir -p /tmp/team9-deploy/staging
-    - echo "📋 Syncing project files (excluding data folder)..."
+    - echo "Syncing project files (excluding data folder)..."
     - rsync -av --exclude='.git' --exclude='.gitlab' --exclude='node_modules' --exclude='data/' --exclude='backup' --exclude='*.log' --exclude='.DS_Store' --exclude='Thumbs.db' ./ /tmp/team9-deploy/staging/
     - cd /tmp/team9-deploy/staging
     - echo "Creating .env file..."
@@ -68,7 +68,7 @@ deploy_app:
     - sudo docker-compose logs --tail=30
     - echo "Staging deployment completed!"
     - echo "Access at http://137.43.49.26:3030"
-    - echo "🧹 Cleaning up deployment files..."
+    - echo "Cleaning up deployment files..."
     - sudo rm -rf /tmp/team9-deploy
     - echo "Final disk space:"
     - df -h /
