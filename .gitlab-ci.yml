@@ -28,6 +28,12 @@ deploy_app:
   stage: deploy
   tags:
     - shell
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+      - job_execution_timeout
   before_script:
     - docker --version
     - docker-compose --version
