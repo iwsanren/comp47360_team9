@@ -1,6 +1,6 @@
-import { round } from 'lodash';
+import round from 'lodash/round';
 
-const meterToMiles = (value: number) => value * 0.000621372;
+export const meterToMiles = (value: number) => value * 0.000621372;
 
 export const co2Emissions = (value: number) => {
   // generates 0.125 kg per mile
@@ -14,9 +14,9 @@ export function getTransitTypeCO2Emissions(type: string, value: number) {
     case 'SUBWAY':
       return round(meterToMiles(value) * 0.049, 1);
     case 'RAIL':
-      return round(meterToMiles(value) * 0.161, 1);
+      return round(meterToMiles(value) * 0.077, 1);
     case 'GONDOLA_LIFT':
-      return round(meterToMiles(value) * 0.048, 1);
+      return round(meterToMiles(value) * 0.039, 1);
     // case "FERRY":
     //   return "";
     // case "CABLE_CAR":
@@ -49,6 +49,8 @@ export const transitEmissions = (routes: any) => {
               step?.transit_details?.line?.vehicle?.type,
               step?.distance?.value
             );
+        } else if (step?.travel_mode == 'DRIVING') {
+          value = value + co2Emissions(step?.distance?.value);
         }
         return round(value, 1);
       },
