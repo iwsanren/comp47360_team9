@@ -35,19 +35,15 @@ deploy_app:
     - echo "Building and deploying to staging..."
     - echo "Checking disk space..."
     - df -h /
-    - AVAILABLE_SPACE=$(df / | awk 'NR==2 {print $4}')
-    - echo "Available space: ${AVAILABLE_SPACE}KB"
     - echo "Cleaning up before deployment..."
     - sudo docker system prune -af || echo "Docker cleanup failed"
     - sudo docker image prune -af || echo "Docker image cleanup failed"
     - sudo docker volume prune -f || echo "Docker volume cleanup failed"
     - sudo rm -rf /tmp/team9-deploy || echo "No previous deployment to clean"
-    - echo "Disk space after cleanup:"
-    - df -h /
     - echo "Setting up deployment directory..."
     - mkdir -p /tmp/team9-deploy/staging
-    - echo "Syncing project files (excluding data folder)..."
-    - rsync -av --exclude='.git' --exclude='.gitlab' --exclude='node_modules' --exclude='data/' --exclude='backup' --exclude='*.log' --exclude='.DS_Store' --exclude='Thumbs.db' ./ /tmp/team9-deploy/staging/
+    - echo "Syncing project files..."
+    - rsync -av --exclude=.git --exclude=.gitlab --exclude=node_modules --exclude=data --exclude=backup --exclude="*.log" --exclude=.DS_Store --exclude=Thumbs.db ./ /tmp/team9-deploy/staging/
     - cd /tmp/team9-deploy/staging
     - echo "Creating .env file..."
     - echo "OPENWEATHER_API_KEY=$OPENWEATHER_API_KEY" > .env
