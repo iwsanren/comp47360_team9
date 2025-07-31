@@ -36,10 +36,10 @@ deploy_app:
     - echo "Checking disk space..."
     - df -h /
     - echo "Cleaning up before deployment..."
-    - sudo docker system prune -af || echo "Docker cleanup failed"
-    - sudo docker image prune -af || echo "Docker image cleanup failed"
-    - sudo docker volume prune -f || echo "Docker volume cleanup failed"
-    - sudo rm -rf /tmp/team9-deploy || echo "No previous deployment to clean"
+    - docker system prune -af || echo "Docker cleanup failed"
+    - docker image prune -af || echo "Docker image cleanup failed"
+    - docker volume prune -f || echo "Docker volume cleanup failed"
+    - rm -rf /tmp/team9-deploy || echo "No previous deployment to clean"
     - echo "Setting up deployment directory..."
     - mkdir -p /tmp/team9-deploy/staging
     - echo "Syncing project files..."
@@ -53,19 +53,19 @@ deploy_app:
     - echo "NODE_ENV=development" >> .env
     - echo "FLASK_ENV=production" >> .env
     - echo "Stopping existing containers..."
-    - sudo docker-compose down || true
+    - docker-compose down || true
     - echo "Building containers..."
-    - sudo docker-compose build --no-cache
+    - docker-compose build --no-cache
     - echo "Starting containers..."
-    - sudo docker-compose up -d
+    - docker-compose up -d
     - echo "Container status:"
-    - sudo docker-compose ps
+    - docker-compose ps
     - echo "Recent logs:"
-    - sudo docker-compose logs --tail=30
+    - docker-compose logs --tail=30
     - echo "Staging deployment completed!"
     - echo "Access at http://137.43.49.26:3030"
     - echo "Cleaning up deployment files..."
-    - sudo rm -rf /tmp/team9-deploy
+    - rm -rf /tmp/team9-deploy
     - echo "Final disk space:"
     - df -h /
   environment:
