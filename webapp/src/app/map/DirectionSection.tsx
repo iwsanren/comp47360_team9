@@ -107,8 +107,6 @@ const DirectionSection = ({
   const [isLoading, setIsLoading] = useState<boolean>();
   const [isLoadingPrediction, setIsLoadingPrediction] = useState<boolean>();
 
-  console.log(routes);
-
   const handleLocationSelect = async (
     lng: number,
     lat: number,
