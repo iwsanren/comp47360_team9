@@ -121,8 +121,8 @@ docker-compose*.yml
 # Large data files (these should not be in the container)
 data/
 *.parquet
-*.csv
-*.joblib
+# *.csv  # Commented out - needed for ML API
+# *.joblib  # Commented out - needed for ML API
 *.pkl
 *.pickle
 
