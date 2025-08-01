@@ -12,7 +12,7 @@ const busyLevelLegend = {
   ]
 };
 
-const aqiLegend = {
+const aqiLegend = { 
   label: 'Air quality',
   legends: [
     { level: 'Very Good', color: '#CCCCFF' },
@@ -22,7 +22,6 @@ const aqiLegend = {
     { level: 'Very Poor', color: '#FF0000' },
   ]
 };
-
 
 const Legend = ({ toggles }: any) => {
     const legends = useMemo(() => {

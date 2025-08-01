@@ -83,7 +83,7 @@ const DirectionModal = ({
           score +
             Math.min(
               1,
-              co2Emissions(data.paths[i].legs[0].distance.value) / 5
+              co2Emissions(data.paths[i].legs[0].distance.value) / 5 // set the maximum emission to 5kg
             ) *
               0.5
         );
