@@ -13,7 +13,7 @@ async function handler() {
   const res = NextResponse.json({ ok: true });
   res.cookies.set('token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV == 'production',
+    secure: false,
     sameSite: 'strict',
     maxAge: 3600,
     path: '/',
