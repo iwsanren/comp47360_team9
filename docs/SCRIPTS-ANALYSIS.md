@@ -3,13 +3,13 @@
 ## 🎯 Cleanup Results & Overview
 
 **Before:** 28 scripts (messy, redundant, confusing structure)
-**After:** 6 core scripts + 3 organized subdirectories (21 total files)
+**After:** 9 core scripts + 3 organized subdirectories (22 total files)
 
 This document provides a comprehensive analysis of the scripts directory cleanup and reorganization. The project now has a clean, logical structure that separates active daily-use scripts from setup utilities and archived components.
 
 ## 📊 Detailed File Structure & Descriptions
 
-### ✅ **Core Active Scripts (6 files)**
+### ✅ **Core Active Scripts (9 files)**
 
 These are the primary scripts used for daily development and maintenance operations:
 
@@ -20,7 +20,10 @@ scripts/
 ├── start-project.sh            # 🚀 Enhanced project startup ⭐
 ├── scheduled-maintenance.sh    # 📅 Production scheduling ⭐
 ├── diagnose-project.sh         # 🔍 Combined diagnostics ⭐
-└── test-ml-api.sh              # 🧪 ML API testing suite ⭐
+├── test-ml-api.sh              # 🧪 ML API testing suite ⭐
+├── test-complete-system.sh     # 🧪 Complete system testing ⭐
+├── test-request-tracking.sh    # 📊 Request tracking validation ⭐
+└── cleanup-scripts.sh          # 🧹 Script cleanup utilities ⭐
 ```
 
 #### **Detailed File Descriptions:**
@@ -97,6 +100,37 @@ scripts/
 - **Usage:** `./scripts/test-ml-api.sh` or `npm run test-api`
 - **When to use:** After ML model updates, API deployment validation
 
+**7. `test-complete-system.sh` 🧪**
+- **Purpose:** Complete system integration testing
+- **Features:**
+  - End-to-end system validation
+  - All service integration testing
+  - Performance and load testing
+  - Cross-component communication verification
+  - System reliability assessment
+- **Usage:** `./scripts/test-complete-system.sh`
+- **When to use:** Before major deployments, system health verification
+
+**8. `test-request-tracking.sh` 📊**
+- **Purpose:** Request tracking system validation
+- **Features:**
+  - Request tracking functionality testing
+  - Performance monitoring validation
+  - Analytics data collection verification
+  - Tracking accuracy assessment
+- **Usage:** `./scripts/test-request-tracking.sh`
+- **When to use:** After tracking system updates, performance monitoring
+
+**9. `cleanup-scripts.sh` 🧹**
+- **Purpose:** Script cleanup and maintenance utilities
+- **Features:**
+  - Script file organization
+  - Redundant script removal
+  - Permission standardization
+  - Script validation and testing
+- **Usage:** `./scripts/cleanup-scripts.sh`
+- **When to use:** Script maintenance, cleanup operations
+
 ### 🛠️ **Setup Directory (5 files)**
 
 One-time setup scripts for initial system configuration:
@@ -105,8 +139,8 @@ One-time setup scripts for initial system configuration:
 ├── setup/                     # Initial system setup utilities
 │   ├── setup-server.sh        # 🖥️  Complete server initialization
 │   ├── setup-nginx.sh         # 🌐 Nginx web server configuration
+│   ├── setup-https-acme-simple.sh # 🔒 HTTPS setup with acme.sh
 │   ├── configure-firewall.sh  # 🔒 Security firewall setup
-│   ├── setup-ssh-keys.sh      # 🔑 SSH key generation and configuration
 │   └── install-gitlab-runner-linux.sh # 🏃 GitLab CI/CD runner installation
 ```
 
@@ -134,7 +168,17 @@ One-time setup scripts for initial system configuration:
 - **Usage:** `./scripts/setup/setup-nginx.sh`
 - **When to use:** Production deployment, web server setup
 
-**3. `configure-firewall.sh` 🔒**
+**3. `setup-https-acme-simple.sh` 🔒**
+- **Purpose:** HTTPS setup using acme.sh for SSL certificates
+- **Operations:**
+  - acme.sh installation and configuration
+  - SSL certificate generation
+  - Automatic renewal setup
+  - Web server integration
+- **Usage:** `./scripts/setup/setup-https-acme-simple.sh`
+- **When to use:** HTTPS certificate setup, SSL configuration
+
+**4. `configure-firewall.sh` 🔒**
 - **Purpose:** System security firewall configuration
 - **Operations:**
   - UFW firewall setup
@@ -144,16 +188,6 @@ One-time setup scripts for initial system configuration:
   - DDoS protection setup
 - **Usage:** `./scripts/setup/configure-firewall.sh`
 - **When to use:** Production server security hardening
-
-**4. `setup-ssh-keys.sh` 🔑**
-- **Purpose:** SSH key generation and configuration
-- **Operations:**
-  - SSH key pair generation
-  - Key deployment to authorized_keys
-  - SSH agent configuration
-  - Security permissions setup
-- **Usage:** `./scripts/setup/setup-ssh-keys.sh`
-- **When to use:** Secure server access setup, CI/CD key configuration
 
 **5. `install-gitlab-runner-linux.sh` 🏃**
 - **Purpose:** GitLab CI/CD runner installation and configuration
@@ -165,7 +199,7 @@ One-time setup scripts for initial system configuration:
 - **Usage:** `./scripts/setup/install-gitlab-runner-linux.sh`
 - **When to use:** CI/CD pipeline setup, automated deployment configuration
 
-### 🪟 **Windows Directory (5 files)**
+### 🪟 **Windows Directory (4 files)**
 
 Windows-specific scripts for cross-platform compatibility:
 
@@ -173,7 +207,6 @@ Windows-specific scripts for cross-platform compatibility:
 ├── windows/                   # Windows-specific utilities
 │   ├── diagnose-gitlab-runner.bat    # 🔍 GitLab Runner diagnostics
 │   ├── install-gitlab-runner.bat     # 🏃 GitLab Runner installation
-│   ├── setup-ssh-keys.bat           # 🔑 SSH keys for Windows
 │   ├── switch-to-simple-cicd.bat    # 🔄 Simplified CI/CD setup
 │   └── test-docker-setup.bat        # 🐳 Docker validation for Windows
 ```
@@ -198,15 +231,7 @@ Windows-specific scripts for cross-platform compatibility:
   - Registration with GitLab
 - **Usage:** `scripts\windows\install-gitlab-runner.bat`
 
-**3. `setup-ssh-keys.bat` 🔑**
-- **Purpose:** SSH key setup for Windows environments
-- **Operations:**
-  - SSH key generation
-  - OpenSSH configuration
-  - Key deployment
-- **Usage:** `scripts\windows\setup-ssh-keys.bat`
-
-**4. `switch-to-simple-cicd.bat` 🔄**
+**3. `switch-to-simple-cicd.bat` 🔄**
 - **Purpose:** Simplified CI/CD configuration for Windows
 - **Operations:**
   - Basic pipeline setup
@@ -214,7 +239,7 @@ Windows-specific scripts for cross-platform compatibility:
   - Simplified deployment
 - **Usage:** `scripts\windows\switch-to-simple-cicd.bat`
 
-**5. `test-docker-setup.bat` 🐳**
+**4. `test-docker-setup.bat` 🐳**
 - **Purpose:** Docker installation validation on Windows
 - **Operations:**
   - Docker Desktop verification
@@ -265,8 +290,8 @@ npm run start             # Enhanced project startup with validation
 
 ### **1. Dramatically Reduced Complexity**
 - **Before:** 28 scattered scripts with unclear purposes
-- **After:** 6 focused core scripts with clear responsibilities
-- **Impact:** 78% reduction in active script count, easier maintenance
+- **After:** 9 focused core scripts with clear responsibilities
+- **Impact:** 68% reduction in active script count, easier maintenance
 
 ### **2. Superior Organization**
 - **Core Scripts:** Daily development and maintenance operations
@@ -308,6 +333,4 @@ npm run start             # Enhanced project startup with validation
 4. **Better Maintenance:** Automated and scheduled operations
 5. **Historical Preservation:** Archive maintains institutional knowledge
 
-## 🎉 Migration Status: COMPLETED
 
-The scripts directory transformation is fully complete and operational. All functionality has been preserved while significantly improving organization, documentation, and usability. The new structure supports both development and production environments with comprehensive tooling for maintenance, diagnostics, and automation.
