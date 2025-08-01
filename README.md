@@ -2,6 +2,10 @@
 
 This is a full-stack web application designed to help New Yorkers make smarter, greener, and less crowded mobility decisions.
 
+## 🌐 Live Application
+
+**Visit our application:** [https://lunaroutes.duckdns.org/](https://lunaroutes.duckdns.org/)
+
 ## Team Members
 
 | Name               | Role                |
