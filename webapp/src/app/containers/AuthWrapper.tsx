@@ -4,17 +4,10 @@ import { useEffect, useState } from 'react';
 
 const validateToken = async (setReady: any) => {
   try {
-    const res = await fetch('/api/validation', {
+    await fetch('/api/validation', {
       method: 'POST',
       credentials: 'include',
     });
-    if (!res.ok) {
-      console.warn('Token invalid or missing, requesting new token...');
-      await fetch('/api/token', {
-        method: 'POST',
-        credentials: 'include',
-      });
-    }
     setReady(true);
   } catch (err) {
     console.error('Failed to validate token:', err);
