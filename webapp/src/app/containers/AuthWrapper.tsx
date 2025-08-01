@@ -4,10 +4,17 @@ import { useEffect, useState } from 'react';
 
 const validateToken = async (setReady: any) => {
   try {
-    await fetch('/api/validation', {
+    const res = await fetch('/api/validation', {
       method: 'POST',
       credentials: 'include',
     });
+    if (!res.ok) {
+      console.warn('Token invalid or missing, requesting new token...');
+      await fetch('/api/token', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    }
     setReady(true);
   } catch (err) {
     console.error('Failed to validate token:', err);
@@ -27,9 +34,7 @@ const AuthWrapper = ({
     validateToken(setReady);
 
     // Then repeat the validation request every 50 minutes
-    const interval = setInterval(() => {
-      validateToken(setReady);
-    }, 50 * 60 * 1000); // 50 minutes
+    const interval = setInterval(() => validateToken(setReady), 50 * 60 * 1000); // 50 minutes
 
     // Clear the interval when the component unmounts
     return () => {

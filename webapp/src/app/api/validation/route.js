@@ -1,26 +1,29 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 
-import { withRequestTracking } from '../../../middleware/requestTracker';
+import { withAuthAndTracking } from '../../../middleware/requestTracker';
 
-async function handler() {
-  const token = jwt.sign(
+async function handler(req, payload) {
+  // Generate new token with extended expiration
+  const newToken = jwt.sign(
     { source: 'Manhattan_My_Way' },
     process.env.JWT_SECRET,
     { expiresIn: '1h' }
   );
 
   const res = NextResponse.json({ ok: true });
-  res.cookies.set('token', token, {
+  res.cookies.set('token', newToken, {
     httpOnly: true,
-    secure: false,
+    secure: process.env.NODE_ENV == 'production',
     sameSite: 'strict',
     maxAge: 3600,
     path: '/',
   });
 
-  console.log('New JWT token generated for Manhattan_My_Way');
+  console.log(
+    `Token validation and refresh successful for source: ${payload.source}`
+  );
   return res;
 }
 
-export const POST = withRequestTracking(handler, 'API_TOKEN');
+export const POST = withAuthAndTracking(handler, 'API_VALIDATION');
