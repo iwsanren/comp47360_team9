@@ -1,7 +1,6 @@
-# Importing.
 import pandas as pd
 import numpy as np
-from ml.app import prepare_subway_features, classify_combined_busyness
+from ml.app import create_subway_features, classify_level
 
 # Test: prepare_subway_features handles a normal clear-weather case.
 def test_prepare_subway_features_basic():
@@ -12,14 +11,13 @@ def test_prepare_subway_features_basic():
         "wind_speed": 5,
         "weather_main": "Clear"
     }
-    station_df = pd.DataFrame([{"station_complex_id": 1}])
 
-    df = prepare_subway_features(pd.Timestamp("2025-07-25 08:00:00"), weather, station_df)
+    df = create_subway_features(pd.Timestamp("2025-07-25 08:00:00"), weather)
 
     assert "hour" in df.columns
     assert "is_weekend" in df.columns
     assert "has_rain" in df.columns
-    assert df.loc[0, "temp_category"] == "mild"
+    assert df.loc[0, "temp_category"] == 2  # mild → numeric code 2
 
 # Test: prepare_subway_features handles snow and freezing conditions.
 def test_prepare_subway_features_extremes():
@@ -30,13 +28,12 @@ def test_prepare_subway_features_extremes():
         "wind_speed": 20,
         "weather_main": "Snow"
     }
-    station_df = pd.DataFrame([{"station_complex_id": 1}])
 
-    df = prepare_subway_features(pd.Timestamp("2025-12-25 07:00:00"), weather, station_df)
+    df = create_subway_features(pd.Timestamp("2025-12-25 07:00:00"), weather)
 
     assert df.loc[0, "has_snow"] == 1
     assert df.loc[0, "is_freezing"] == 1
-    assert df.loc[0, "temp_category"] == "freezing"
+    assert df.loc[0, "temp_category"] == 0  # freezing → numeric code 0
 
 # Test: prepare_subway_features handles NaN temperature correctly.
 def test_prepare_subway_features_nan_temp():
@@ -47,48 +44,30 @@ def test_prepare_subway_features_nan_temp():
         "wind_speed": 5,
         "weather_main": "Mist"
     }
-    station_df = pd.DataFrame([{"station_complex_id": 1}])
 
-    df = prepare_subway_features(pd.Timestamp("2025-07-25 12:00:00"), weather, station_df)
+    df = create_subway_features(pd.Timestamp("2025-07-25 12:00:00"), weather)
 
-    assert pd.isna(df.loc[0, "temp_category"])
+    # Instead of expecting NaN (the function maps to int), check the column exists and has a numeric value
+    assert "temp_category" in df.columns
+    assert isinstance(df.loc[0, "temp_category"], (int, np.integer))
 
 # Test: classify_combined_busyness returns correct labels for values below/above thresholds.
 def test_classify_combined_busyness_labels():
-    from ml import app as ml_app_module
-    ml_app_module.combined_stats = pd.DataFrame([{
-        "PULocationID": 1,
-        "hour": 8,
-        "day_of_week": 2,
-        "p10": 10, "p25": 20, "p50": 30, "p75": 40, "p90": 50
-    }])
-
-    assert classify_combined_busyness(5, 1, 8, 2) == "very quiet"
-    assert classify_combined_busyness(25, 1, 8, 2) == "normal"
-    assert classify_combined_busyness(60, 1, 8, 2) == "extremely busy"
+    assert classify_level(5, 10, 20, 30, 40, 50) == "Very Quiet"
+    assert classify_level(25, 10, 20, 30, 40, 50) == "Moderate"
+    assert classify_level(60, 10, 20, 30, 40, 50) == "Extremely Busy"
 
 # Test: classify_combined_busyness handles exact threshold edges correctly.
 def test_classify_combined_busyness_threshold_edges():
-    from ml import app as ml_app_module
-    ml_app_module.combined_stats = pd.DataFrame([{
-        "PULocationID": 1,
-        "hour": 10,
-        "day_of_week": 1,
-        "p10": 10, "p25": 20, "p50": 30, "p75": 40, "p90": 50
-    }])
-
-    assert classify_combined_busyness(10, 1, 10, 1) == "quiet"
-    assert classify_combined_busyness(20, 1, 10, 1) == "normal"
-    assert classify_combined_busyness(30, 1, 10, 1) == "busy"
-    assert classify_combined_busyness(40, 1, 10, 1) == "very busy"
-    assert classify_combined_busyness(50, 1, 10, 1) == "extremely busy"
+    assert classify_level(10, 10, 20, 30, 40, 50) == "Quiet"
+    assert classify_level(20, 10, 20, 30, 40, 50) == "Moderate"
+    assert classify_level(30, 10, 20, 30, 40, 50) == "Busy"
+    assert classify_level(40, 10, 20, 30, 40, 50) == "Very Busy"
+    assert classify_level(50, 10, 20, 30, 40, 50) == "Extremely Busy"
 
 # Test: classify_combined_busyness falls back to "normal" when no matching stats found.
 def test_classify_combined_busyness_fallback():
-    from ml import app as ml_app_module
-    ml_app_module.combined_stats = pd.DataFrame(columns=["PULocationID", "hour", "day_of_week"])
-
-    assert classify_combined_busyness(100, 999, 10, 5) == "normal"
+    assert classify_level(100, 10, 20, 30, 40, 50) == "Extremely Busy"
 
 # Test: prepare_subway_features handles an empty station DataFrame.
 def test_prepare_subway_features_empty_station_df():
@@ -99,13 +78,12 @@ def test_prepare_subway_features_empty_station_df():
         "wind_speed": 5,
         "weather_main": "Clear"
     }
-    empty_df = pd.DataFrame(columns=["station_complex_id"])
 
-    df = prepare_subway_features(pd.Timestamp("2025-07-25 15:00:00"), weather, empty_df)
+    df = create_subway_features(pd.Timestamp("2025-07-25 15:00:00"), weather)
 
     assert isinstance(df, pd.DataFrame)
     assert set(["hour", "day_of_week", "month", "is_weekend"]).issubset(df.columns)
-    assert df.empty
+    # remove df.empty check – it always returns rows from station_meta
 
 # Test: prepare_subway_features classifies very hot temperature as "hot".
 def test_prepare_subway_features_hot_temp():
@@ -116,8 +94,7 @@ def test_prepare_subway_features_hot_temp():
         "wind_speed": 3,
         "weather_main": "Clear"
     }
-    station_df = pd.DataFrame([{"station_complex_id": 1}])
 
-    df = prepare_subway_features(pd.Timestamp("2025-07-25 14:00:00"), weather, station_df)
+    df = create_subway_features(pd.Timestamp("2025-07-25 14:00:00"), weather)
 
-    assert df.loc[0, "temp_category"] == "hot"
+    assert df.loc[0, "temp_category"] == 4  # hot → numeric code 4
