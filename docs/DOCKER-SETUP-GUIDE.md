@@ -96,6 +96,7 @@ GOOGLE_MAPS_API_KEY=your_google_maps_key
 NEXT_PUBLIC_MAPBOX_API_KEY=your_mapbox_key
 NODE_ENV=development
 FLASK_ENV=development
+JWT_SECRET=your_jwt_secret_key
 ```
 
 ### 3. Build and Start Services
@@ -122,7 +123,7 @@ docker ps -a
 
 # Check container logs
 docker-compose logs webapp    # Frontend logs
-docker-compose logs ml        # ML API logs
+docker-compose logs ml-api    # ML API logs
 docker-compose logs -f        # Follow all logs
 
 # Stop services
@@ -130,7 +131,7 @@ docker-compose down
 
 # Restart specific service
 docker-compose restart webapp
-docker-compose restart ml
+docker-compose restart ml-api
 ```
 
 ### Development Workflow
@@ -173,7 +174,7 @@ docker inspect <container_name>
 
 # Access container shell
 docker-compose exec webapp bash     # Access webapp container
-docker-compose exec ml bash         # Access ML container
+docker-compose exec ml-api bash         # Access ML container
 
 # Check container health
 docker-compose ps
@@ -182,8 +183,8 @@ docker-compose ps
 ## 🌐 Service URLs
 
 ### Development Environment
-- **Frontend**: http://localhost:3000
-- **ML API**: http://localhost:5001
+- **Frontend**: http://localhost:3030
+- **ML API**: http://localhost:5000
 - **ML API Endpoints**:
   - Health check: http://localhost:5001/
   - Predictions: http://localhost:5001/predict-all
@@ -277,10 +278,6 @@ bash scripts/test-ml-api.sh
 ```
 
 ## 🔄 Production Deployment
-
-For production deployment, see:
-- `docs/DEPLOYMENT-COMPLETE-GUIDE.md` - Complete deployment guide
-- `docs/quick-setup-guide.md` - GitLab CI/CD setup
 
 ### Quick Production Commands
 ```bash

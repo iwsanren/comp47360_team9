@@ -106,8 +106,7 @@ comp47360_team9/
 │   │   │   │   ├── EV-charging/ # EV charging stations endpoint
 │   │   │   │   ├── manhattan/   # Manhattan data endpoint (includes busyness)
 │   │   │   │   ├── parks/       # Parks data endpoint
-│   │   │   │   ├── token/       # Token validation endpoint
-│   │   │   │   ├── validation/  # Data validation endpoint
+│   │   │   │   ├── validation/  # Token generation and validation endpoint
 │   │   │   │   └── weather/     # Weather data endpoint
 │   │   │   ├── contact/         # Contact page
 │   │   │   ├── map/             # Interactive map page
