@@ -20,7 +20,6 @@ quality_check:
     - test -f "docker-compose.yml" && echo "Docker compose config exists"
     - echo "Quality checks completed"
   only:
-    - feature/delete-user-context
     - develop
     - main
 
@@ -78,6 +77,4 @@ deploy_app:
     name: staging
     url: http://137.43.49.26:3030
   only:
-    - develop
-    - feature/delete-user-context
     - main

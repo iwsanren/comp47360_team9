@@ -146,12 +146,10 @@ scripts/
 │   ├── setup-server.sh
 │   ├── setup-nginx.sh
 │   ├── configure-firewall.sh
-│   ├── setup-ssh-keys.sh
 │   └── install-gitlab-runner-linux.sh
 ├── windows/                   # Windows-specific scripts
 │   ├── diagnose-gitlab-runner.bat
 │   ├── install-gitlab-runner.bat
-│   ├── setup-ssh-keys.bat
 │   ├── switch-to-simple-cicd.bat
 │   └── test-docker-setup.bat
 └── archive/                   # Archived/obsolete scripts
