@@ -26,26 +26,24 @@ joblib.load = fake_load
 # Mock pandas.read_csv to supply controlled test data.
 def fake_read_csv(path, *args, **kwargs):
     import pandas as real_pd
-    if "manhattan_taxi_zones.csv" in path:
+    if "manhattan_taxi_zones.csv" in str(path):
         return real_pd.DataFrame([{
             "OBJECTID": 1, "centroid_lat": 40.7, "centroid_lon": -74.0,
             "Shape_Area": 100.0, "Shape_Leng": 10.0,
             "geometry": "POLYGON ((-74.0 40.7, -74.0 40.71, -73.99 40.71, -73.99 40.7, -74.0 40.7))",
             "zone": "Test Zone", "borough": "Test Borough"
         }])
-    elif "zone_combined_busyness_stats.csv" in path:
+    elif "zone_combined_busyness_stats.csv" in str(path):
         return real_pd.DataFrame([{
             "PULocationID": 1, "hour": 12, "day_of_week": 3,
             "p10": 10, "p25": 20, "p50": 30, "p75": 40, "p90": 50,
             "min": 0, "max": 100
         }])
-    elif "station_to_zone_mapping.csv" in path:
+    elif "station_to_zone_mapping.csv" in str(path):
         return real_pd.DataFrame([{"station_complex_id": 1, "PULocationID": 1}])
-    elif "subway_stations.csv" in path:
+    elif "subway_stations.csv" in str(path):
         return real_pd.DataFrame([{"station_complex_id": 1, "name": "Mock Station"}])
     return real_pd.DataFrame()
-
-pd.read_csv = fake_read_csv
 
 # Mock open() so required_features.json returns fake content.
 _real_open = builtins.open
@@ -87,3 +85,36 @@ def test_auth_client_fixture(auth_client):
     """Smoke test to ensure auth_client runs fully and resets DEV_MODE."""
     response = auth_client.get("/")
     assert response.status_code in (200, 401, 500)
+
+@pytest.fixture(autouse=True)
+def patch_predict_all_dependencies(monkeypatch):
+    monkeypatch.setattr(
+        "ml.app.create_taxi_features",
+        lambda *a, **kw: pd.DataFrame([{
+            "PULocationID": 1,
+            "centroid_lat": 40.7,
+            "centroid_lon": -74.0,
+            "feature": 10
+        }])
+    )
+
+    monkeypatch.setattr(
+        "ml.app.create_subway_features",
+        lambda *a, **kw: pd.DataFrame([{
+            "PULocationID": 1,
+            "feature": 5
+        }])
+    )
+
+    monkeypatch.setattr(
+        "ml.app.requests.get",
+        lambda url: type("R", (), {
+            "status_code": 200,
+            "raise_for_status": lambda self=None: None,
+            "json": lambda self=None: {
+                "weather": [{"main": "Clear"}],
+                "main": {"temp": 20, "feels_like": 20, "humidity": 50},
+                "wind": {"speed": 5}
+            }
+        })()
+    )
